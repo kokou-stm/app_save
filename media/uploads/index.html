@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Video call </title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+    <!-- Inclusion du SDK depuis le CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@latest/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
+   
+   <style>
+
+@import url("https://fonts.googleapis.com/css2?family=Redressed&family=Merriweather:wght@300;400;700&display=swap");
+@import url("https://font.googleapis.com/css?family=Poppins:200, 300,400,500,600,7ù00,800,900&display=swap");
+.redressed{
+font-family:"Redressed", serif;
+
+  }
+
+.merriweather{
+font-family:"Merriweather", serif; 
+}
+        video {
+          min-width: 300px;
+          min-height: 300px;
+          max-width: 100%;
+          margin: 0 auto;
+        }
+  
+          .chat-form {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: 0.4em;
+              background-color: #2b2b2b;
+              border-radius: 3em;
+              border: solid 1px #ffffff;
+          }
+  
+          .chat-input {
+              border: none;
+              background: transparent;
+              color: #ffffff;
+              padding: 0.4em 0.5em;
+              outline: none;
+              
+              border-radius: 3em;
+          }
+  
+          .chat-input::placeholder {
+              color: #cccccc;
+          }
+  
+          .chat-input:focus {
+              box-shadow: none;
+          }
+  
+          .chat-submit {
+              background: transparent;
+              border: none;
+              color: #ffffff;
+              margin-left: 1.2em;
+              cursor: pointer;
+          }
+      </style>
+</head>
+<body class="redressed" style="background: linear-gradient(rgba(0,0,0, 0.5), rgba(0,0,0, 0.5)); ">
+
+    <div class="container mt-3" style="">
+        <div class="row">
+          <div class="col">
+        <div class="card  h-100 text-center text-light" style="background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)); border: solid rgb(167, 152, 152) 1px;">
+            <div class="card-header">
+              <div class="row">
+             <div class="col"></div>
+              <div class="col">
+                Video Call
+              <button  id="handpopup" class="btn btn-danger mx-2" type="button" style="visibility: hidden; border-radius: 4em; font-size: 1em;" > 
+                <i  class="fas fa-hand-point-up"></i> kokou
+             </button>
+            </div>
+             <div class="col">
+              <p id="timecounter">00:00</p> 
+             </div>
+            </div>
+            </div>
+            
+            <video width="400" class="mb-4 " id="vid" style="" controls  >
+              <source src=""  type="video/mp4">
+                
+              Your browser does not support HTML5 video.
+            </video>
+
+            <div class="card-body ">
+
+             
+           
+              <button id="startButton" class="btn btn-outline-light " style="border-radius: 3em;">Start Recognition</button>
+              <button id="stopButton"  class="btn btn-outline-light " style="border-radius: 3em;" disabled>Stop Recognition</button>
+             
+            </div>
+            <div class="card-footer text-light">
+              <div id="output"></div>
+            </div>
+         </div>
+        </div>
+        <div class="col-md-3 " id="chatarea" style="display: none;">
+          <div class="card h-100 text-center text-light" style="background: linear-gradient(rgba(0,0,0, 0.5), rgba(0,0,0, 0.5)); ">
+            <div class="card-header ">
+              Chat
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">All messages there</h5>
+              <div class="container h-100 mb-2">
+                <textarea class=" bg-light form-control" style="min-height: 100%  ;"></textarea>
+              </div>
+             
+
+            </div>
+            <div class="card-footer text-body-secondary">
+              <form class="chat-form mx-2 d-flex" role="search">
+                <input class="form-control chat-input me-2" type="search" placeholder="Chat" aria-label="Search">
+                <button class="chat-submit" type="submit">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </form>
+            </div>
+          </div>
+        </div>
+        </div>
+    
+
+         <div class="row mt-5">
+         <nav class="navbar navbar-expand-lg bg-transparent " style="background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)); border: solid rgb(167, 152, 152) 1px; border-radius: 2em;">
+            <div class="container-fluid">
+           
+                <button  class=" navbar-brand  btn btn-outline-primary mx-2" type="button" style="border-radius: 4em; font-size: 1em;" > 
+                  <i class="fas fa-k"><strong>K</strong> 
+                 </button>
+              
+
+                </i></a>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav  mb-2 mb-lg-0">
+                  <li class="nav-item">
+                    <a class="nav-link active text-light" aria-current="page" href="#" id="">00:00</a>
+                  </li>
+               
+                  <li class="nav-item dropdow ">
+                    <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      Langues
+                    </a>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#">Action</a></li>
+                      <li><a class="dropdown-item" href="#">Another action</a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
+                  </li>
+                 
+                </ul>
+                <ul class="navbar-nav mx-auto">
+                <li class="nav-item">
+                    <button  id="but" class="btn btn-outline-light mx-2" type="button" style="border-radius: 4em; font-size: 1em;" > 
+                            <i  id="cameraIcon" class="fas fa-video"></i> 
+                     </button>
+                  </li>
+                  <li class="nav-item">
+                    <a  id="microphonebut" href="#" class="btn btn-outline-light mx-2" type="button" style="border-radius: 4em; font-size: 1em;" > 
+                            <i id="microphoneicon" class="fas fa-microphone"></i> 
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <button id="handButton" class="btn btn-outline-light mx-2" type="button" style="border-radius: 4em; font-size: 1em;" > 
+                        <i id="handIcon" class="fas fa-hand-sparkles"></i>
+                     </button>
+                  </li>
+                  
+                  <li class="nav-item">
+                    <button id="screenShareButton" class="btn btn-outline-light mx-2" type="button" style="border-radius: 4em; font-size: 1em;" > 
+                        <i id="screenShareIcon" class="fas fa-desktop"></i>
+                     </button>
+                  </li>
+               
+                  <li class="nav-item">
+                    <button class="btn btn-danger mx-2" type="button" style="border-radius: 4em; font-size: 1em;" > 
+                        <i class="fas fa-phone"></i>
+                     </button>
+                  </li>
+
+                 
+
+                </ul>
+
+                <ul class="navbar-nav ">
+                 
+                  <li class="nav-item">
+                    <button class="btn btn-outline-light mx-2" type="button" style="border-radius: 4em; font-size: 1em;" > 
+                      <i class="fas fa-user"></i>
+                     </button>
+                  </li>
+                   
+  
+                    <li class="nav-item">
+                      <button id="chatbutton" class="btn btn-outline-light mx-2" type="button" style="border-radius: 4em; font-size: 1em;" > 
+                        <i id="chaticon" class="fas fa-comment"></i>
+                       </button>
+                    </li>
+
+                    <li class="nav-item">
+                      <button class="btn btn-outline-light mx-2" type="button" style="border-radius: 4em; font-size: 1em;" > 
+                        <i class="fas fa-info-circle"></i>
+                       </button>
+                    </li>
+  
+                  </ul>
+               
+              </div>
+            </div>
+          </nav>
+        </div>
+        </div>
+
+
+    
+
+
+
+<script> 
+
+async   function synthesizeSpeech(text) {
+const speechConfig1 = SpeechSDK.SpeechConfig.fromSubscription("2479e231dd5a4662af2c0a9b2396ab07", "eastus");
+const audioConfig1 = SpeechSDK.AudioConfig.fromDefaultSpeakerOutput();
+speechConfig1.speechSynthesisVoiceName = "en-US-DavisNeural"; 
+
+const speechSynthesizer = new SpeechSDK.SpeechSynthesizer(speechConfig1, audioConfig1);
+//text =  translateText(text);
+console.log(text)
+speechSynthesizer.speakTextAsync(
+    text,
+    result => {
+        if (result) {
+            speechSynthesizer.close();
+            return result.audioData;
+        }
+    },
+    error => {
+        console.log(error);
+        speechSynthesizer.close();
+    }
+);
+}
+
+async function translateText(textToTranslate) {
+    const trans_subscriptionKey = '8ace88d628a74f2c89a8329512f9a27e';
+    const trans_endpoint = 'https://api.cognitive.microsofttranslator.com';
+    const trans_location = 'westeurope'; // Par exemple 'westeurope'
+
+    const url = `${trans_endpoint}/translate?api-version=3.0&from=fr&to=en`;
+
+    const requestBody = [{
+        'text': textToTranslate
+    }];
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Ocp-Apim-Subscription-Key': trans_subscriptionKey,
+                'Ocp-Apim-Subscription-Region': trans_location,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        const data = await response.json();
+        const translatedText = data[0].translations[0].text;
+        return translatedText;
+    } catch (error) {
+        console.error('Error:', error);
+        return null;
+    }
+}
+
+
+
+
+
+        let recognizer;
+
+        document.getElementById('startButton').addEventListener('click', async function () {
+            const speechConfig = SpeechSDK.SpeechConfig.fromSubscription("2479e231dd5a4662af2c0a9b2396ab07", "eastus");
+            speechConfig.speechRecognitionLanguage = "fr-FR";  // Configuration de la langue en français
+
+            const audioConfig = SpeechSDK.AudioConfig.fromDefaultMicrophoneInput();
+            recognizer = new SpeechSDK.SpeechRecognizer(speechConfig, audioConfig);
+
+            recognizer.recognizing = (s, e) => {
+                document.getElementById('output').innerText = `Recognizing: ${e.result.text}`;
+            };
+
+            recognizer.recognized = async (s, e) => {
+                if (e.result.reason === SpeechSDK.ResultReason.RecognizedSpeech) {
+                    const translatedText = await  translateText(e.result.text);
+                    document.getElementById('output').innerText = `Recognized: ${translatedText}`;
+                    await synthesizeSpeech(translatedText)
+                } else if (e.result.reason === SpeechSDK.ResultReason.NoMatch) {
+                    document.getElementById('output').innerText = "No speech could be recognized.";
+                }
+            };
+
+            recognizer.startContinuousRecognitionAsync(
+                () => {
+                    document.getElementById('startButton').disabled = true;
+                    document.getElementById('stopButton').disabled = false;
+                },
+                err => {
+                    console.error(err);
+                }
+            );
+        });
+
+        document.getElementById('stopButton').addEventListener('click', function () {
+            recognizer.stopContinuousRecognitionAsync(
+                () => {
+                    document.getElementById('startButton').disabled = false;
+                    document.getElementById('stopButton').disabled = true;
+                },
+                err => {
+                    console.error(err);
+                }
+            );
+        });
+    </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        let but = document.getElementById("but");
+        let video = document.getElementById("vid");
+        let mediaDevices = navigator.mediaDevices;
+        let stream;
+        let isCameraOn = false;
+        video.muted = true;
+
+        but.addEventListener("click", () => {
+            if (isCameraOn) {
+                // Stop all video tracks
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                document.getElementById("cameraIcon").className = "fas fa-video";
+            } else {
+                // Accessing the user camera and video
+                mediaDevices
+                    .getUserMedia({
+                        video: true,
+                        audio: false,
+                    })
+                    .then((str) => {
+                        stream = str;
+                        // Changing the source of video to current stream
+                        video.srcObject = stream;
+                        video.addEventListener("loadedmetadata", () => {
+                            video.play();
+                        });
+                        document.getElementById("cameraIcon").className = "fas fa-video-slash";
+                    })
+                    .catch(alert);
+            }
+            isCameraOn = !isCameraOn;
+        });
+    });
+</script>
+
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+      let microphonebut = document.getElementById("microphonebut");
+      let microphoneicon = document.getElementById("microphoneicon");
+    
+      microphonebut.addEventListener("click", () => {
+          
+        if (microphoneicon.classList.contains("fa-microphone")) {
+          microphoneicon.classList.remove("fa-microphone");
+          microphoneicon.classList.add("fa-microphone-slash");
+         
+                } else {
+                  microphoneicon.classList.remove("fa-microphone-slash");
+                    microphoneicon.classList.add("fa-microphone");
+                }
+      });
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+      let chatbutton = document.getElementById("chatbutton");
+      let chaticon = document.getElementById("chaticon");
+    
+      chatbutton.addEventListener("click", () => {
+          
+        if (chaticon.classList.contains("fa-comment")) {
+          chaticon.classList.remove("fa-comment");
+          chaticon.classList.add("fa-comments");
+          document.getElementById("chatarea").style.display='block';
+         
+                } else {
+                  chaticon.classList.remove("fa-comments");
+                  chaticon.classList.add("fa-comment");
+                  document.getElementById("chatarea").style.display='none';
+                }
+      });
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+      const handButton = document.getElementById("handButton");
+      const handIcon = document.getElementById("handIcon");
+
+      handButton.addEventListener("click", () => {
+          if (document.getElementById("handpopup").style.visibility == "hidden") {
+            document.getElementById("handpopup").style.visibility = "visible";
+            handIcon.classList.remove("fa-hand-sparkles");
+            handIcon.classList.add("fa-hand-peace");
+             
+          } else {
+            document.getElementById("handpopup").style.visibility = "hidden";
+            handIcon.classList.remove("fa-hand-peace");
+            handIcon.classList.add("fa-hand-sparkles");
+          }
+      });
+  });
+
+
+
+
+  document.addEventListener("DOMContentLoaded", () => {
+            const screenShareButton = document.getElementById("screenShareButton");
+            const screenShareIcon = document.getElementById("screenShareIcon");
+
+            screenShareButton.addEventListener("click", () => {
+                if (screenShareIcon.classList.contains("fa-desktop")) {
+                    screenShareIcon.classList.remove("fa-desktop");
+                    screenShareIcon.classList.add("fa-times");
+                } else {
+                    screenShareIcon.classList.remove("fa-times");
+                    screenShareIcon.classList.add("fa-desktop");
+                }
+            });
+        });
+</script>
+
+
+
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+      const timeDisplay = document.getElementById("timecounter");
+      const startTime = Date.now();
+
+      function updateElapsedTime() {
+          const currentTime = Date.now();
+          const distance = currentTime - startTime;
+          const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+  // Display the result in the element with id="demo"
+ // document.getElementById("timecounter").innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+ document.getElementById("timecounter").innerHTML =  hours + "h " + minutes + "m " + seconds + "s ";
+
+          
+      }
+
+      setInterval(updateElapsedTime, 1000);
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
+

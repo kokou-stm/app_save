@@ -1,0 +1,559 @@
+
+
+
+<!doctype html>
+{% load static %}
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="TemplateMo">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+
+    <title>ChiefQuiz</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+
+
+
+    <!-- Additional CSS Files -->
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-edu-meeting.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/owl.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/lightbox.css' %}">
+<!--
+
+
+
+https://templatemo.com/tm-569-edu-meeting
+
+-->
+</head>
+
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Redressed&family=Merriweather:wght@300;400;700&display=swap");
+    .redressed {
+        font-family: "Redressed", serif;
+    }
+    .merriweather {
+        font-family: "Merriweather", serif;
+    }
+</style>
+
+
+<body>
+
+   
+ <!-- Sub Header -->
+ <div class="sub-header">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-sm-8">
+        <div class="left-content pt-2">
+          <h6 class="redressed text-light">Apprenez la cuisine <em>Autrement</em> grace à l'intelligence Artificielle</h6>
+        </div>
+      </div>
+      <div class="col-lg-4 col-sm-4">
+        <div class="right-icons">
+          <ul>
+            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+            <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+            <li><a href="#"><i class="fa fa-behance"></i></a></li>
+            <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+ <!-- ***** Header Area Start ***** -->
+ <header class="header-area header-sticky">
+  <div class="container">
+      <div class="row">
+          <div class="col-12">
+              <nav class="main-nav">
+                  <!-- ***** Logo Start ***** -->
+                  <a href="{% url 'index' %}" class="logo merriweather">
+                     ChiefQuiz
+                  </a>
+                  <!-- ***** Logo End ***** -->
+                  <!-- ***** Menu Start ***** -->
+                  <ul class="nav merriweather">
+                      <li class="scroll-to-section"><a href="{% url 'index' %}" class="active">Accueil</a></li>
+                      <li><a href="{% url 'lescours' %}" class="merriweather">Cours</a></li>
+                      <li class="scroll-to-section"><a href="#apply">A propos</a></li>
+                     
+                      <li class="scroll-to-section1"><a href="{% url 'faquestion' %}">FAQ</a></li> 
+                      <li class="scroll-to-section"><a href="#contact">Contactez-nous</a></li> 
+                      <li class="has-sub">
+                        <a href="javascript:void(0)">Compte</a>
+                        <ul class="sub-menu">
+                          <li><p class="bg-dark text-light text-center" >{{user.last_name}}</p></li>
+                          {% if  is_staff %}
+                          {% else %}
+                          <li class="bg-transparent">
+                            <div class="progress mx-2 my-2 " style="width: 100%;">
+                              <div class="progress-bar redressed" role="progressbar" style="width: {{ progress_percentage }}%;" 
+                                   aria-valuenow="{{ progress_percentage }}%" aria-valuemin="0" aria-valuemax="100">
+                                {{ progress_percentage }}%
+                              </div>
+                            </div>
+                            
+                          </li>
+                          {% endif %}
+                            <li><a  href="#mescours">Mes Cours</a></li>
+                            
+                            <li><a href="{% url 'home' %}">Edit Profile </a></li>
+                            
+                            <li><a href="{% url 'logout' %}">Deconnexion</a></li>
+                         
+                          </ul>
+                    </li>
+
+
+                     
+
+
+                  </ul>        
+                  <a class='menu-trigger'>
+                      <span>Menu</span>
+                  </a>
+                  <!-- ***** Menu End ***** -->
+              </nav>
+          </div>
+      </div>
+  </div>
+</header>
+<!-- ***** Header Area End ***** -->
+
+  <section class="heading-page header-text" id="top">
+    <div class="container redressed">
+      <div class="row">
+        <div class="col-lg-6">
+          
+          <div class="card text-center bg-transparent text-light" style="border: solid 1px white;">
+            <div class="card-header ">
+              Ajouter un Quiz au cours
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">Details sur le cours</h5>
+              <!-- Content here -->
+        
+              <!--form action="{% url 'quiz' %}"></form-->
+            
+            <form method="POST" id="quizForm" > 
+                {% csrf_token %}
+
+                <!-- Quiz Title Input -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">@</span>
+                    <input type="text" class="form-control" name="quiz_title" placeholder="Quiz title" aria-describedby="basic-addon1" required>
+                </div>
+
+                <!-- Quiz Description Input -->
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">@</span>
+                    <input type="text" class="form-control" name="quiz_description" placeholder="Description"  aria-describedby="basic-addon1" required>
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">@</span>
+                    <input type="text" class="form-control" name="tone" placeholder="Niveau" aria-describedby="basic-addon1" required>
+                </div>
+
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">@</span>
+                    <input type="number" class="form-control" name="number" placeholder="Nombre de question" aria-describedby="basic-addon1" required>
+                </div>
+
+
+                <!-- Select Course from Available Courses -->
+                <div class="input-group mb-3">
+                    
+                    <select class="form-select" name="course_id" aria-label="Default select example" required>
+                        <option value="" selected disabled>Choose a course</option>
+                        {% for course in courses %}
+                            <option value="{{ course.id }}">{{ course.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                
+                  
+                <div class="btn-group me-2"  role="group" aria-label="Second group" style="display: block;">
+                              
+                  <a class="btn btn-outline-primary me-3 text-light" href="{% url 'index' %}" ><strong> <-Retour</strong></a>
+                  <button type="submit" class="btn btn-light">Generate</button>
+                  </div>
+                  
+                  
+            </form>
+            <div class="text-center" id="spinner_group" style="display: none">
+              <div class="spinner-container">
+                <div class="spinner-grow spinner1" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow spinner2" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow spinner3" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+              
+              
+             
+            </div>     
+         
+            </div>
+
+            <div class="card-footer text-body-secondary">
+              
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="meetings-page" id="meetings">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="filters">
+                <ul>
+                  <li data-filter="*"  class="active">All Meetings</li>
+                  <li data-filter=".soon">Soon</li>
+                  <li data-filter=".imp">Important</li>
+                  <li data-filter=".att">Attractive</li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-lg-12">
+              <div class="row grid">
+                <div class="col-lg-4 templatemo-item-col all soon">
+                  <div class="meeting-item">
+                    <div class="thumb">
+                      <div class="price">
+                        <span>$14.00</span>
+                      </div>
+                      <a href="meeting-details.html"><img src="assets/images/meeting-01.jpg" alt=""></a>
+                    </div>
+                    <div class="down-content">
+                      <div class="date">
+                        <h6>Nov <span>12</span></h6>
+                      </div>
+                      <a href="meeting-details.html"><h4>New Lecturers Meeting</h4></a>
+                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-4 templatemo-item-col all imp">
+                  <div class="meeting-item">
+                    <div class="thumb">
+                      <div class="price">
+                        <span>$22.00</span>
+                      </div>
+                      <a href="meeting-details.html"><img src="assets/images/meeting-02.jpg" alt=""></a>
+                    </div>
+                    <div class="down-content">
+                      <div class="date">
+                        <h6>Nov <span>14</span></h6>
+                      </div>
+                      <a href="meeting-details.html"><h4>Online Teaching Techniques</h4></a>
+                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-4 templatemo-item-col all soon">
+                  <div class="meeting-item">
+                    <div class="thumb">
+                      <div class="price">
+                        <span>$24.00</span>
+                      </div>
+                      <a href="meeting-details.html"><img src="assets/images/meeting-03.jpg" alt=""></a>
+                    </div>
+                    <div class="down-content">
+                      <div class="date">
+                        <h6>Nov <span>16</span></h6>
+                      </div>
+                      <a href="meeting-details.html"><h4>Network Teaching Concept</h4></a>
+                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-4 templatemo-item-col all att">
+                  <div class="meeting-item">
+                    <div class="thumb">
+                      <div class="price">
+                        <span>$32.00</span>
+                      </div>
+                      <a href="meeting-details.html"><img src="assets/images/meeting-04.jpg" alt=""></a>
+                    </div>
+                    <div class="down-content">
+                      <div class="date">
+                        <h6>Nov <span>18</span></h6>
+                      </div>
+                      <a href="meeting-details.html"><h4>Online Teaching Tools</h4></a>
+                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-4 templatemo-item-col all att">
+                  <div class="meeting-item">
+                    <div class="thumb">
+                      <div class="price">
+                        <span>$34.00</span>
+                      </div>
+                      <a href="meeting-details.html"><img src="assets/images/meeting-02.jpg" alt=""></a>
+                    </div>
+                    <div class="down-content">
+                      <div class="date">
+                        <h6>Nov <span>22</span></h6>
+                      </div>
+                      <a href="meeting-details.html"><h4>New Teaching Techniques</h4></a>
+                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-4 templatemo-item-col all imp">
+                  <div class="meeting-item">
+                    <div class="thumb">
+                      <div class="price">
+                        <span>$45.00</span>
+                      </div>
+                      <a href="meeting-details.html"><img src="assets/images/meeting-03.jpg" alt=""></a>
+                    </div>
+                    <div class="down-content">
+                      <div class="date">
+                        <h6>Nov <span>24</span></h6>
+                      </div>
+                      <a href="meeting-details.html"><h4>Technology Conference</h4></a>
+                      <p>TemplateMo is the best website<br>when it comes to Free CSS.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-4 templatemo-item-col all imp att">
+                  <div class="meeting-item">
+                    <div class="thumb">
+                      <div class="price">
+                        <span>$52.00</span>
+                      </div>
+                      <a href="meeting-details.html"><img src="assets/images/meeting-01.jpg" alt=""></a>
+                    </div>
+                    <div class="down-content">
+                      <div class="date">
+                        <h6>Nov <span>27</span></h6>
+                      </div>
+                      <a href="meeting-details.html"><h4>Online Teaching Techniques</h4></a>
+                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-4 templatemo-item-col all soon imp">
+                  <div class="meeting-item">
+                    <div class="thumb">
+                      <div class="price">
+                        <span>$64.00</span>
+                      </div>
+                      <a href="meeting-details.html"><img src="assets/images/meeting-02.jpg" alt=""></a>
+                    </div>
+                    <div class="down-content">
+                      <div class="date">
+                        <h6>Nov <span>28</span></h6>
+                      </div>
+                      <a href="meeting-details.html"><h4>Instant Lecture Design</h4></a>
+                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-4 templatemo-item-col all att soon">
+                  <div class="meeting-item">
+                    <div class="thumb">
+                      <div class="price">
+                        <span>$74.00</span>
+                      </div>
+                      <a href="meeting-details.html"><img src="assets/images/meeting-03.jpg" alt=""></a>
+                    </div>
+                    <div class="down-content">
+                      <div class="date">
+                        <h6>Nov <span>30</span></h6>
+                      </div>
+                      <a href="meeting-details.html"><h4>Online Social Networking</h4></a>
+                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-12">
+              <div class="pagination">
+                <ul>
+                  <li><a href="#">1</a></li>
+                  <li class="active"><a href="#">2</a></li>
+                  <li><a href="#">3</a></li>
+                  <li><a href="#"><i class="fa fa-angle-right"></i></a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <p>Copyright © 2022 Edu Meeting Co., Ltd. All Rights Reserved. 
+          <br>
+          Design: <a href="https://templatemo.com" target="_parent" title="free css templates">TemplateMo</a>
+          <br>
+          Distibuted By: <a href="https://themewagon.com" target="_blank" title="Build Better UI, Faster">ThemeWagon</a>
+        </p>
+    </div>
+  </section>
+
+  <!-- Scripts -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+  crossorigin="anonymous">
+  </script>
+
+    <script src="{% static 'assets/js/isotope.min.js' %}"></script>
+    
+    <script src="{% static 'assets/js/owl-carousel.js' %}"></script>
+    <script src="{% static 'assets/js/lightbox.js' %}"></script>
+
+    <script src="{% static 'assets/js/tabs.js' %}"></script>
+
+    <script src="{% static 'assets/js/video.js' %}"></script>
+
+    <script src="{% static 'assets/js/slick-slider.js' %}"></script>
+    <script src="{% static 'assets/js/custom.js' %}"></script>
+
+
+    <script>
+        //according to loftblog tut
+        $('.nav li:first').addClass('active');
+
+        var showSection = function showSection(section, isAnimate) {
+          var
+          direction = section.replace(/#/, ''),
+          reqSection = $('.section').filter('[data-section="' + direction + '"]'),
+          reqSectionPos = reqSection.offset().top - 0;
+
+          if (isAnimate) {
+            $('body, html').animate({
+              scrollTop: reqSectionPos },
+            800);
+          } else {
+            $('body, html').scrollTop(reqSectionPos);
+          }
+
+        };
+
+        var checkSection = function checkSection() {
+          $('.section').each(function () {
+            var
+            $this = $(this),
+            topEdge = $this.offset().top - 80,
+            bottomEdge = topEdge + $this.height(),
+            wScroll = $(window).scrollTop();
+            if (topEdge < wScroll && bottomEdge > wScroll) {
+              var
+              currentId = $this.data('section'),
+              reqLink = $('a').filter('[href*=\\#' + currentId + ']');
+              reqLink.closest('li').addClass('active').
+              siblings().removeClass('active');
+            }
+          });
+        };
+
+        $('.main-menu, .responsive-menu, .scroll-to-section').on('click', 'a', function (e) {
+          e.preventDefault();
+          showSection($(this).attr('href'), true);
+        });
+
+        $(window).scroll(function () {
+          checkSection();
+        });
+    </script>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const quizForm = document.getElementById('quizForm');
+    
+    quizForm.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Empêche le rechargement de la page
+
+
+        const spinner_group = document.getElementById("spinner_group");
+       
+        // Collecte les données du formulaire
+        const formData = new FormData(quizForm);
+       
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Envoie les données via fetch
+        try {
+          quizForm.style.display = "none";
+          spinner_group.style.display = "block";
+
+            const response = await fetch("{% url 'quiz' %}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                },
+                body: formData,
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.redirect_url) {
+                  console.log("Lien: ", result.redirect_url)
+                    // Redirige vers la page d'affichage du quiz
+                    window.location.href = result.redirect_url;
+                } else {
+                    console.error("Erreur lors de la génération du quiz.");
+                }
+            } else {
+                console.error("Erreur lors de la requête : ", response.status);
+                quizForm.style.display = "block";
+                spinner_group.style.display = "none";
+
+            }
+        } catch (error) {
+            console.error("Erreur réseau ou serveur : ", error);
+            quizForm.style.display = "block";
+            spinner_group.style.display = "none";
+        }
+    });
+});
+
+</script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script defer>
+        {% autoescape off %}
+        {% for ms in messages %}
+            swal('{{ms|safe}}');
+        {% endfor %}
+        {% endautoescape %}
+    </script>
+    
+</body>
+
+</body>
+</html>
+
+

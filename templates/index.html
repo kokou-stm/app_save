@@ -1,0 +1,1091 @@
+
+
+
+<!doctype html>
+{% load static %}
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="TemplateMo">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+
+    <title>ChiefQuiz</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+
+
+
+    <!-- Additional CSS Files -->
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/templatemo-edu-meeting.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/owl.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/lightbox.css' %}">
+<!--
+
+
+
+https://templatemo.com/tm-569-edu-meeting
+
+-->
+</head>
+
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Redressed&family=Merriweather:wght@300;400;700&display=swap");
+    .redressed {
+        font-family: "Redressed", serif;
+    }
+    .merriweather {
+        font-family: "Merriweather", serif;
+    }
+</style>
+<style>
+  #chatbot-button {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      font-size: 24px;
+      cursor: pointer;
+  }
+
+  #chatbot-modal {
+      z-index: 1050;
+  }
+
+  #chat-messages {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 10px;
+      background-color: #f9f9f9;
+  }
+
+  .chat-message {
+      margin-bottom: 10px;
+  }
+
+  .chat-message.user {
+      text-align: right;
+      color: blue;
+  }
+
+  .chat-message.ia {
+      text-align: left;
+      /*color: rgb(23, 31, 23);*/
+  }
+</style>
+
+
+<body>
+
+
+ <!-- Sub Header -->
+ <div class="sub-header">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-sm-8">
+        <div class="left-content pt-2">
+          <h6 class="redressed text-light">Apprenez la cuisine <em>Autrement</em> grace à l'intelligence Artificielle</h6>
+        </div>
+      </div>
+      <div class="col-lg-4 col-sm-4">
+        <div class="right-icons">
+          <ul>
+            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+            <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+            <li><a href="#"><i class="fa fa-behance"></i></a></li>
+            <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+ <!-- ***** Header Area Start ***** -->
+ <header class="header-area header-sticky">
+  <div class="container">
+      <div class="row">
+          <div class="col-12">
+              <nav class="main-nav">
+                  <!-- ***** Logo Start ***** -->
+                  <a href="{% url 'index' %}" class="logo merriweather">
+                     ChefQuiz
+                  </a>
+                  <!-- ***** Logo End ***** -->
+                  <!-- ***** Menu Start ***** -->
+                  <ul class="nav merriweather">
+                      <li class="scroll-to-section"><a href="{% url 'index' %}" class="active">Accueil</a></li>
+                      <li><a href="{% url 'lescours' %}" class="merriweather">Cours</a></li>
+                      <li class="scroll-to-section"><a href="#apply">A propos</a></li>
+                     
+                      <li class="scroll-to-section1"><a href="{% url 'faquestion' %}">FAQ</a></li> 
+                      <li class="scroll-to-section"><a href="#contact">Contactez-nous</a></li> 
+                      <li class="has-sub">
+                        <a href="javascript:void(0)">Compte</a>
+                        <ul class="sub-menu">
+                          <li><p class="bg-dark text-light text-center" >{{user.last_name}}</p></li>
+                          {% if  is_staff %}
+                          {% else %}
+                          <li class="bg-transparent text-center"> <p class="text-light">{{ progress_percentage }}%</p> 
+                            <div class="progress mx-2 my-2 " style="width: 100%;">
+                              <div class="progress-bar redressed text-muted" role="progressbar" style="width: {{ progress_percentage }}%;" 
+                                   aria-valuenow="{{ progress_percentage }}%" aria-valuemin="0" aria-valuemax="100">
+                                {{ progress_percentage }}%
+                              </div>
+                            </div>
+                            
+                          </li>
+                          {% endif %}
+                            <li><a  href="#mescours">Mes Cours</a></li>
+                            
+                            <li><a href="{% url 'profile' %}">Edit Profile </a></li>
+                            
+                            <li><a href="{% url 'logout' %}">Deconnexion</a></li>
+                         
+                          </ul>
+                    </li>
+
+
+                     
+
+
+                  </ul>        
+                  <a class='menu-trigger'>
+                      <span>Menu</span>
+                  </a>
+                  <!-- ***** Menu End ***** -->
+              </nav>
+          </div>
+      </div>
+  </div>
+</header>
+<!-- ***** Header Area End ***** -->
+
+    <!-- Chatbot Button -->
+    <button id="chatbot-button" style="z-index: 1000;" onclick="openChatbot()">  <i class="fas fa-robot"></i></button>
+
+    <!-- Chatbot Modal -->
+    <div class="modal fade" id="chatbot-modal" tabindex="-1" aria-labelledby="chatbotLabel" aria-hidden="true" data-bs-backdrop="false">
+        <div class="modal-dialog" >
+            <div class="modal-content bg-dark" >
+                <div class="modal-header">
+                    <h5 class="modal-title text-light" id="chatbotLabel"><i class="fas fa-robot"></i> Chat avec l'IA</h5>
+                    <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="chat-messages"></div>
+                    <div class="input-group mt-3">
+                        <input type="text" id="user-input" class="form-control" placeholder="Posez votre question...">
+                        <button class="btn btn-primary" id="send-button" onclick="sendMessage()">Envoyer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+<!-- ***** Main Banner Area Start ***** -->
+<section class="section main-banner" id="top" data-section="section1">
+    <video autoplay muted loop id="bg-video">
+        <source src="{% static 'assets/images/cuisine.mp4' %}" type="video/mp4" />
+    </video>
+
+    <div class="video-overlay header-text">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="caption">
+                        <p class="merriweather">Bienvenue {{user.first_name}}</p>
+                        <h2>Formez vous  en cuisine</h2>
+                        <h4 class="redressed text-light" style="">Transformez votre apprentissage culinaire avec l'intelligence  </h4>
+                        <h4 class="redressed text-light">artificielle. Posez vos questions, obtenez des réponses précises.
+                            <!--a rel="nofollow" href="https://templatemo.com/page/1" target="_blank"> Maîtrisez l'art de la </a> cuisine <br> <a rel="nofollow" href="https://www.pexels.com/@pressmaster" target="_blank"> avec ChiefQuiz</a-->.
+                            </h4>
+                        <div class="main-button-red1 mt-3 ">
+                            <div class="scroll-to-section1">
+                              
+                              <div class="btn-toolbar mt-4 merriweather" role="toolbar" aria-label="Toolbar with button groups">
+                                <div class="btn-group me-2" role="group" aria-label="First group">
+                                  <a  href="#mescours" type="button" class="btn btn-outline-primary text-light ">Mes Cours</a>
+                                  
+                                </div>
+                                {% if  is_staff %}
+                                <div class="btn-group me-2" role="group" aria-label="Second group">
+                                  <a href="{% url 'upload_cours' %}"   type="button" class="btn btn-outline-light">Ajouter un cours</a>
+                                 
+                                </div>
+                               
+                                {% endif %}
+                               
+                              </div>
+
+
+                              </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ***** Main Banner Area End ***** -->
+
+
+  <section class="services" id="mescours">
+    <div class="container merriweather">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="owl-service-item owl-carousel">
+           {% for cour in cours %}
+            <div class="item">
+              <div class="icon">
+                <img src="{% static 'assets/images/service-icon-01.png' %}" alt="add">
+              </div>
+              <div class="down-content">
+                <h4>{{cour.title}}</h4>
+                <p>{{cour.description}}</p>
+                <p><strong>Enseignant : </strong> {{cour.professeur}}</p>
+                <div class="card-footer mt-3">
+                  <a href="{% url 'course_details' cour.id %}" class="btn btn-outline-light redressed">View Details</a>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+
+            <!--div class="item">
+              <div class="icon">
+                <img src="{% static 'assets/images/service-icon-02.png' %}" alt="">
+              </div>
+              <div class="down-content">
+                <h4>Best Teachers</h4>
+                <p>Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis massa non vestibulum.</p>
+              </div>
+            </div>
+            
+            <div class="item">
+              <div class="icon">
+                <img src="{% static 'assets/images/service-icon-03.png' %}" alt="">
+              </div>
+              <div class="down-content">
+                <h4>Best Students</h4>
+                <p>Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis massa non vestibulum.</p>
+              </div>
+            </div>
+            
+            <div class="item">
+              <div class="icon">
+                <img src="{% static 'assets/images/service-icon-02.png' %}" alt="">
+              </div>
+              <div class="down-content">
+                <h4>Online Meeting</h4>
+                <p>Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis massa non vestibulum.</p>
+              </div>
+            </div>
+            
+            <div class="item">
+              <div class="icon">
+                <img src="{% static 'assets/images/service-icon-03.png' %}" alt="">
+              </div>
+              <div class="down-content">
+                <h4>Best Networking</h4>
+                <p>Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis massa non vestibulum.</p>
+              </div>
+            </div-->
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="upcoming-meetings" id="meetings">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="section-heading merriweather">
+            <h2>Fonctionnalités</h2>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="categories">
+            <h4>Meeting Catgories</h4>
+            <ul>
+              <li><a href="#">Sed tempus enim leo</a></li>
+              <li><a href="#">Aenean molestie quis</a></li>
+              <li><a href="#">Cras et metus vestibulum</a></li>
+              <li><a href="#">Nam et condimentum</a></li>
+              <li><a href="#">Phasellus nec sapien</a></li>
+            </ul>
+            <div class="main-button-red1">
+              <a href="meetings.html" class="mt-3 btn btn-primary" style="border-radius: 4em;">All Upcoming Meetings</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-8">
+          <div class="row">
+            <div class="col-lg-6">
+              <div class="meeting-item">
+                <div class="thumb">
+                  <div class="price">
+                    <span>Cours</span>
+                  </div>
+                  <a href="meeting-details.html">
+                    <img src="{% static 'assets/images/cours_enligne.jpg' %}" alt="New Lecturer Meeting"></a>
+                </div>
+                <div class="down-content">
+                  <div class="date">
+                    <h6>1. <span>- </span></h6>
+                  </div>
+                  <a href="meeting-details.html"><h4>Cours numériques</h4></a>
+                  <p>Vous avez accès à la version numériques<br>des cours</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="meeting-item">
+                <div class="thumb">
+                  <div class="price">
+                    <span>Questions</span>
+                  </div>
+                  <a href="meeting-details.html"><img src="{% static 'assets/images/robot.jpg' %}" alt="Online Teaching"></a>
+                </div>
+                <div class="down-content">
+                  <div class="date">
+                    <h6>2. <span> </span></h6>
+                  </div>
+                  <a href="meeting-details.html"><h4>Une IA pour répondre à vos questions</h4></a>
+                  <p>Disponible 24/7</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="meeting-item">
+                <div class="thumb">
+                  <div class="price">
+                    <span>Quiz</span>
+                  </div>
+                  <a href="meeting-details.html"><img src="{% static 'assets/images/quiz.jpg' %}" alt="Higher Education"></a>
+                </div>
+                <div class="down-content">
+                  <div class="date">
+                    <h6>3. <span></span></h6>
+                  </div>
+                  <a href="meeting-details.html"><h4>Des quiz en permanance pour chaque cours</h4></a>
+                  <p>pour vous aider à vous evaluer avant <br>l'examen.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="meeting-item">
+                <div class="thumb">
+                  <div class="price">
+                    <span>Evaluations</span>
+                  </div>
+                  <a href="meeting-details.html"><img src="{% static 'assets/images/quiz.png' %}" alt="Student Training"></a>
+                </div>
+                <div class="down-content">
+                  <div class="date">
+                    <h6>4. <span></span></h6>
+                  </div>
+                  <a href="meeting-details.html"><h4>Systeme d'evaluation automatique de quiz</h4></a>
+                  <p>Vous donnes les details<br> et les erreurs commises</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="apply-now" id="apply">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6 align-self-center">
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="item">
+                <h3>DÉCOUVREZ L'INTELLIGENCE ARTIFICIELLE AU SERVICE DE VOTRE APPRENTISSAGE</h3>
+                <p>Grâce à notre plateforme innovante, transformez vos cours en outils interactifs avec des quiz générés automatiquement par l'intelligence artificielle. Une méthode d'apprentissage moderne et efficace pour maîtriser chaque notion clé.</p>
+                <div class="main-button-red">
+                  <div class="scroll-to-section"><a href="#contact">Essayez dès maintenant !</a></div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-12">
+              <div class="item">
+                <h3>OPTIMISEZ VOTRE RÉVISION EN TOUTE SIMPLICITÉ</h3>
+                <p>Que vous soyez étudiant en cuisine ou en reconversion professionnelle, notre site vous aide à renforcer vos connaissances à travers des quiz personnalisés, adaptés aux contenus des formations déposés par vos enseignants.</p>
+                <div class="main-button-yellow">
+                  <div class="scroll-to-section"><a href="#contact">Commencez dès aujourd'hui !</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="accordions is-first-expanded">
+            <article class="accordion">
+              <div class="accordion-head">
+                <span>Pourquoi utiliser notre site de quiz ?</span>
+                <span class="icon">
+                  <i class="icon fa fa-chevron-right"></i>
+                </span>
+              </div>
+              <div class="accordion-body">
+                <div class="content">
+                  <p>Notre outil d'IA transforme les cours en quiz interactifs, rendant l'apprentissage ludique et stimulant. Vous progressez rapidement et identifiez les notions à approfondir grâce aux feedbacks détaillés.</p>
+                </div>
+              </div>
+            </article>
+            <article class="accordion">
+              <div class="accordion-head">
+                <span>Comment l'intelligence artificielle vous aide ?</span>
+                <span class="icon">
+                  <i class="icon fa fa-chevron-right"></i>
+                </span>
+              </div>
+              <div class="accordion-body">
+                <div class="content">
+                  <p>L'IA analyse les cours déposés par vos enseignants pour créer des quiz précis et adaptés, couvrant tous les sujets importants. Vous bénéficiez d'un apprentissage structuré et personnalisé.</p>
+                </div>
+              </div>
+            </article>
+            <article class="accordion">
+              <div class="accordion-head">
+                <span>Quels sont les avantages pour les étudiants ?</span>
+                <span class="icon">
+                  <i class="icon fa fa-chevron-right"></i>
+                </span>
+              </div>
+              <div class="accordion-body">
+                <div class="content">
+                  <p>Avec notre plateforme, révisez à votre rythme, identifiez vos points faibles et améliorez vos compétences en cuisine ou pâtisserie grâce à des quiz variés et interactifs. Chaque session vous rapproche de la maîtrise parfaite !</p>
+                </div>
+              </div>
+            </article>
+            <article class="accordion last-accordion">
+              <div class="accordion-head">
+                <span>Pour qui est conçu ce site ?</span>
+                <span class="icon">
+                  <i class="icon fa fa-chevron-right"></i>
+                </span>
+              </div>
+              <div class="accordion-body">
+                <div class="content">
+                  <p>Ce site est pensé pour les étudiants, les professionnels en reconversion et les passionnés de gastronomie qui souhaitent apprendre efficacement. Plus besoin de deviner quoi réviser : notre IA s'occupe de tout !</p>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+
+  
+  
+
+  <section class="our-courses" id="courses">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="section-heading">
+            <h2>Our Popular Courses</h2>
+          </div>
+        </div>
+        <div class="col-lg-12">
+          <div class="owl-courses-item owl-carousel">
+            <div class="item">
+              <img src="{% static 'assets/images/course-01.jpg' %}" alt="Course One">
+              <div class="down-content">
+                <h4>Morbi tincidunt elit vitae justo rhoncus</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>$160</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <img src="{% static 'assets/images/course-02.jpg' %}" alt="Course Two">
+              <div class="down-content">
+                <h4>Curabitur molestie dignissim purus vel</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>$180</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <img src="{% static 'assets/images/course-03.jpg' %}" alt="">
+              <div class="down-content">
+                <h4>Nulla at ipsum a mauris egestas tempor</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>$140</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <img src="{% static 'assets/images/course-04.jpg' %}" alt="">
+              <div class="down-content">
+                <h4>Aenean molestie quis libero gravida</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>$120</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <img src="{% static 'assets/images/course-01.jpg' %}" alt="">
+              <div class="down-content">
+                <h4>Lorem ipsum dolor sit amet adipiscing elit</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>$250</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <img src="{% static 'assets/images/course-02.jpg' %}" alt="">
+              <div class="down-content">
+                <h4>TemplateMo is the best website for Free CSS</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>$270</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <img src="{% static 'assets/images/course-03.jpg' %}" alt="">
+              <div class="down-content">
+                <h4>Web Design Templates at your finger tips</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>$340</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <img src="{% static 'assets/images/course-04.jpg' %}" alt="">
+              <div class="down-content">
+                <h4>Please visit our website again</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>$360</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <img src="{% static 'assets/images/course-01.jpg' %}" alt="">
+              <div class="down-content">
+                <h4>Responsive HTML Templates for you</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>$400</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <img src="{% static 'assets/images/course-02.jpg' %}" alt="">
+              <div class="down-content">
+                <h4>Download Free CSS Layouts for your business</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>$430</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <img src="{% static 'assets/images/course-03.jpg' %}" alt="">
+              <div class="down-content">
+                <h4>Morbi in libero blandit lectus cursus</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>$480</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <img src="{% static 'assets/images/course-04.jpg' %}" alt="">
+              <div class="down-content">
+                <h4>Curabitur molestie dignissim purus</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>$560</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="our-facts">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="row">
+            <div class="col-lg-12">
+              <h2>Quelques points sur notre Centre</h2>
+            </div>
+            <div class="col-lg-6">
+              <div class="row">
+                <div class="col-12">
+                  <div class="count-area-content percentage">
+                    <div class="count-digit">94</div>
+                    <div class="count-title">Reussites</div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="count-area-content">
+                    <div class="count-digit">126</div>
+                    <div class="count-title">Professeurs</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="row">
+                <div class="col-12">
+                  <div class="count-area-content new-students">
+                    <div class="count-digit">2345</div>
+                    <div class="count-title">Nouveaux etudiants</div>
+                  </div>
+                </div> 
+                <div class="col-12">
+                  <div class="count-area-content">
+                    <div class="count-digit">32</div>
+                    <div class="count-title">Prix</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> 
+        <div class="col-lg-6 align-self-center">
+          <div class="video">
+            <a href="https://www.youtube.com/watch?v=HndV87XpkWg" target="_blank"><img src="{% static 'assets/images/play-icon.png' %}" alt=""></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  
+
+
+
+  
+  <section class="contact-us redressed mb-4">
+    <div class="container ">
+    <div class="card bg-transparent" style="border: solid 1px white;">
+      <div class="card-header text-center">
+           <h3 class="card-title text-light">Nous trouver</h3>
+      </div>
+      <div class="card-body">
+        <div class="ratio ratio-16x9">
+               <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2600.668065920297!2d7.2362070757164325!3d49.320569468071554!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4795c59647fe3739%3A0xe8158773f6124109!2sTorhausweg%2071%2C%2066539%20Neunkirchen%2C%20Allemagne!5e0!3m2!1sfr!2sfr!4v1735921911765!5m2!1sfr!2sfr" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+  </section>
+
+ 
+  </style>
+  <section class="contact-us my-5 contact1 py-3  redressed " id="contact" style="border: solid 1px white">
+    <div class="container text-center ">
+        <h2 class="text-light my-5"><strong>Contact Us</strong></h2>
+    <form action="{% url 'contact' %}" method="post">
+      {% csrf_token%}
+        <div class="row">
+          
+        <div class="col-md-6 col-sm">
+
+          <div class="input-group mb-3">
+            <span class="input-group-text"><i class="fas fa-user"></i></span>
+            <div class="form-floating">
+              <input type="text" class="form-control" id="floatingInputGroup1" placeholder="Username" name="username" required>
+              <label for="floatingInputGroup1">Username</label>
+            </div>
+          </div>
+
+            
+        </div>
+        <div class="col-md-6 col-sm">
+          <div class="input-group mb-3">
+            <span class="input-group-text"><i class="fas fa-at"></i></span>
+            <div class="form-floating">
+              <input type="email" class="form-control" id="floatingInputGroup1" placeholder="Email" name="email" required>
+              <label for="floatingInputGroup1">Email</label>
+            </div>
+          </div>
+        </div>    
+        </div>
+        <div class="row">
+            <div class="col-md-6 col-sm">
+              <div class="input-group mb-3">
+                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                <div class="form-floating">
+                  <input type="tel" class="form-control" id="floatingInputGroup1" placeholder="Phone (Optional)" name="phone" required>
+                  <label for="floatingInputGroup1">Phone (Optional)</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 col-sm">
+              <div class="input-group mb-3">
+                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                <div class="form-floating">
+                  <input type="text" class="form-control" id="floatingInputGroup1" placeholder="Company" name="company" required>
+                  <label for="floatingInputGroup1">Company (Optional)</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-12 col-sm">
+              <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                  <span class="input-group-text">Subject</span>
+                  </div>
+                  <input type="text" class="form-control"  aria-label="Username" aria-describedby="basic-addon1" name="subject" required>
+              </div>
+          </div>
+
+            <div class="col-md-12 col-sm">
+
+              
+                <div class="input-group mb-3">
+                  <span class="input-group-text">Message</span>
+                  <div class="form-floating">
+                    <textarea type="text" class="form-control" id="floatingInputGroup1" placeholder="Message" name="message" required> </textarea>
+                    <label for="floatingInputGroup1">Your Message</label>
+                  </div>
+                </div>
+          
+
+            
+            </div>
+
+            
+        </div>
+  
+        <button class="my-5 btn btn-primary px-5" type="submit" style="border-radius: 2em; "> Submit</button>
+    </form>
+    </div>
+  </section>
+
+
+
+  
+  <!-- Scripts -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+  crossorigin="anonymous">
+</script>
+
+    <script src="{% static 'assets/js/isotope.min.js' %}"></script>
+    
+    <script src="{% static 'assets/js/owl-carousel.js' %}"></script>
+    <script src="{% static 'assets/js/lightbox.js' %}"></script>
+
+    <script src="{% static 'assets/js/tabs.js' %}"></script>
+
+    <script src="{% static 'assets/js/video.js' %}"></script>
+
+    <script src="{% static 'assets/js/slick-slider.js' %}"></script>
+    <script src="{% static 'assets/js/custom.js' %}"></script>
+
+
+    <script>
+        //according to loftblog tut
+        $('.nav li:first').addClass('active');
+
+        var showSection = function showSection(section, isAnimate) {
+          var
+          direction = section.replace(/#/, ''),
+          reqSection = $('.section').filter('[data-section="' + direction + '"]'),
+          reqSectionPos = reqSection.offset().top - 0;
+
+          if (isAnimate) {
+            $('body, html').animate({
+              scrollTop: reqSectionPos },
+            800);
+          } else {
+            $('body, html').scrollTop(reqSectionPos);
+          }
+
+        };
+
+        var checkSection = function checkSection() {
+          $('.section').each(function () {
+            var
+            $this = $(this),
+            topEdge = $this.offset().top - 80,
+            bottomEdge = topEdge + $this.height(),
+            wScroll = $(window).scrollTop();
+            if (topEdge < wScroll && bottomEdge > wScroll) {
+              var
+              currentId = $this.data('section'),
+              reqLink = $('a').filter('[href*=\\#' + currentId + ']');
+              reqLink.closest('li').addClass('active').
+              siblings().removeClass('active');
+            }
+          });
+        };
+
+        $('.main-menu, .responsive-menu, .scroll-to-section').on('click', 'a', function (e) {
+          e.preventDefault();
+          showSection($(this).attr('href'), true);
+        });
+
+        $(window).scroll(function () {
+          checkSection();
+        });
+    </script>
+    <script>
+    function openChatbot() {
+        const modal = new bootstrap.Modal(document.getElementById('chatbot-modal'));
+        modal.show();
+    }
+
+    function sendMessage() {
+        const userInput = document.getElementById('user-input');
+        const userMessage = userInput.value.trim();
+        if (!userMessage) return;
+
+        // Ajouter le message utilisateur à l'interface
+        const chatMessages = document.getElementById('chat-messages');
+        const userMessageDiv = document.createElement('div');
+        userMessageDiv.className = 'chat-message user';
+        userMessageDiv.textContent = userMessage;
+        chatMessages.appendChild(userMessageDiv);
+
+        // Efface l'entrée utilisateur
+        userInput.value = '';
+
+        // Appel AJAX pour envoyer le message au backend
+        fetch('/ask_ia', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken(),
+            },
+            body: JSON.stringify({ message: userMessage })
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Ajouter la réponse de l'IA à l'interface
+            const iaMessageDiv = document.createElement('div');
+            iaMessageDiv.className = 'chat-message ia';
+            iaMessageDiv.textContent = data.response;
+            chatMessages.appendChild(iaMessageDiv);
+
+            // Faire défiler vers le bas
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+        });
+    }
+
+    function handleUserInput(event) {
+        // Si la touche "Enter" est pressée
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+    }
+
+    function getCsrfToken() {
+        let cookieValue = null;
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith('csrftoken=')) {
+                cookieValue = cookie.substring('csrftoken='.length);
+                break;
+            }
+        }
+        return cookieValue;
+    }
+
+    // Ajouter un écouteur pour détecter "Enter" sur l'input utilisateur
+    document.addEventListener("DOMContentLoaded", function() {
+        const userInput = document.getElementById('user-input');
+        userInput.addEventListener('keypress', handleUserInput);
+    });
+</script>
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<script defer>
+    {% autoescape off %}
+    {% for ms in messages %}
+        swal('{{ms|safe}}');
+    {% endfor %}
+    {% endautoescape %}
+</script>
+
+
+
+</body>
+</html>

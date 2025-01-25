@@ -1,0 +1,79 @@
+Question 1: What is the most common source of deadly infections among all types of food?
+Options:
+  a: Vegetables
+  b: Meat and poultry
+  c: Fruits
+  d: Dairy products
+Correct Answer: b
+--------------------------------------------------
+Question 2: What are the four main factors that can cause contamination of food?
+Options:
+  a: Contamination of raw materials, contamination by personnel and equipment, processing errors, and lack of refrigeration      
+  b: Contamination of raw materials, inadequate cooking, mold growth, and physical contaminants
+  c: Contamination of packaging materials, lack of sanitation, storage at room temperature, and exposure to light
+  d: Contamination by pests, water contamination, air pollution, and radiation
+Correct Answer: a
+--------------------------------------------------
+Question 3: What are the 5 M's that are most important for ensuring food safety?
+Options:
+  a: Method, manpower, machine, material, and mind
+  b: Marketing, manipulation, management, measurement, and maintenance
+  c: Material, machinery, missions, morals, and money
+  d: Material, equipment, environment, personnel, and method
+Correct Answer: d
+--------------------------------------------------
+Question 4: What should personnel do to reduce the introduction of germs when handling food?
+Options:
+  a: Wear casual clothing to work
+  b: Have long nails and messy hair
+  c: Wear clean work clothes and protective masks, keep hair tied back, and have short and clean nails
+  d: Wear gloves all the time
+Correct Answer: c
+--------------------------------------------------
+Question 5: What should be available for personnel to wash their hands effectively?
+Options:
+  a: Only soap and water
+  b: Soap, water, and a towel
+  c: Soap, water, a brush, and a towel
+  d: Soap, water, a brush, a towel, and a garbage can for disposable towels
+Correct Answer: d
+--------------------------------------------------
+Question 6: What should a worker do before doing tasks that require precision or after any contaminating actions?
+Options:
+  a: Check their phone
+  b: Wash their hands
+  c: Take a break
+  d: Smoke a cigarette
+Correct Answer: b
+--------------------------------------------------
+Question 7: What should be available near the hand washing sink?
+Options:
+  a: A cup and saucer
+  b: A garbage can for leftover food
+  c: A brush and soap dispenser
+  d: A brush, soap dispenser, garbage can for disposable towels, and a towel dispenser
+Correct Answer: d
+--------------------------------------------------
+Question 8: What should be the condition of the work clothing of workers in a food production facility?
+Options:
+  a: Clean and ironed
+  b: Messy and old
+  c: Dirty and smelly
+  d: Clean and in good condition
+Correct Answer: d
+--------------------------------------------------
+Question 9: What should be worn to cover wounds or cuts on the hands and arms?
+Options:
+  a: Nothing is necessary
+  b: A cloth bandage
+  c: A visible and decorative bandage
+  d: A waterproof bandage and a disposable glove that goes over it
+Correct Answer: d
+--------------------------------------------------
+Question 10: What should be done with personal items and clothing when entering a food production facility?
+Options:
+  a: Hang them in a designated area
+  b: Leave them on the floor
+  c: Bring them to the production line
+  d: Leave them in a separate area, such as a locker or designated wardrobe
+Correct Answer: d
