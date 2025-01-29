@@ -1,0 +1,5 @@
+{
+    "DEPLOYMENT_NAME":"gpt-35-turbo-chefquiz",
+    "OPENAI_API_BASE":"https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
+    "OPENAI_API_VERSION":"<OpenAI API Version>"
+}

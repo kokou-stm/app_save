@@ -3,7 +3,7 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - master  # Exécutez l'action lors des commits sur la branche principale
+      - main  # Exécutez l'action lors des commits sur la branche principale
 
 jobs:
   build-and-push:
@@ -24,9 +24,9 @@ jobs:
       # Étape 3 : Construisez l'image Docker
       - name: Build Docker Image
         run: |
-          docker build -t sekponakokou/chefquiz:latest .
+          docker build -t sekponakokou/chef:latest .
 
       # Étape 4 : Poussez l'image vers Docker Hub
       - name: Push Docker Image
         run: |
-          docker push sekponakokou/chefquiz:latest
+          docker push sekponakokou/chef:latest

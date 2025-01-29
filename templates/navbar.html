@@ -1,0 +1,254 @@
+<style>
+    #chatbot-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        font-size: 24px;
+        cursor: pointer;
+    }
+  
+    #chatbot-modal {
+        z-index: 1050;
+    }
+  
+    #chat-messages {
+        height: 300px;
+        overflow-y: auto;
+        border: 1px solid #111010;
+        padding: 10px;
+        background-color: #f9f9f9;
+    }
+  
+    .chat-message {
+        margin-bottom: 10px;
+    }
+  
+    .chat-message.user {
+        text-align: right;
+        color: rgb(7, 7, 7);
+    }
+  
+    .chat-message.ia {
+        text-align: left;
+        /*color: rgb(23, 31, 23);*/
+    }
+  </style>
+
+ 
+ <!-- Sub Header -->
+ <div class="sub-header">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-sm-8">
+          <div class="left-content pt-2">
+            <h6 class="redressed text-light">Apprenez la cuisine <em>Autrement</em> grace à l'intelligence Artificielle</h6>
+          </div>
+        </div>
+        <div class="col-lg-4 col-sm-4">
+          <div class="right-icons">
+            <ul>
+              <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+              <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+              <li><a href="#"><i class="fa fa-behance"></i></a></li>
+              <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+   <!-- ***** Header Area Start ***** -->
+   <header class="header-area header-sticky">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <nav class="main-nav">
+                    <!-- ***** Logo Start ***** -->
+                    <a href="{% url 'index' %}" class="logo merriweather">
+                       ChefQuiz
+                    </a>
+                    <!-- ***** Logo End ***** -->
+                    <!-- ***** Menu Start ***** -->
+                    <ul class="nav merriweather">
+                        <li class="scroll-to-section"><a href="{% url 'index' %}" class="active">Accueil</a></li>
+                        <li><a href="{% url 'lescours' %}" class="merriweather">Cours</a></li>
+                        <li class="scroll-to-section"><a href="#apply">A propos</a></li>
+                       
+                        <li class="scroll-to-section1"><a href="{% url 'faquestion' %}">FAQ</a></li> 
+                        <li class="scroll-to-section"><a href="#contact">Contactez-nous</a></li> 
+                        <li class="has-sub">
+                          <a href="javascript:void(0)">Compte</a>
+                          <ul class="sub-menu">
+                            <li><p class="bg-dark text-light text-center" >{{user.last_name}}</p></li>
+                            {% if  is_staff %}
+                            {% else %}
+                            <li class="bg-transparent text-center"> <p class="text-light">{{ progress_percentage }}%</p> 
+                              <div class="progress mx-2 my-2 " style="width: 100%;">
+                                <div class="progress-bar redressed text-muted" role="progressbar" style="width: {{ progress_percentage }}%;" 
+                                     aria-valuenow="{{ progress_percentage }}%" aria-valuemin="0" aria-valuemax="100">
+                                  {{ progress_percentage }}%
+                                </div>
+                              </div>
+                              
+                            </li>
+                            {% endif %}
+                              <li><a  href="{% url 'dash' %}">Tableau de Bord</a></li>
+                              <li><a  href="#mescours">Mes Cours</a></li>
+                              
+                              <li><a href="{% url 'profile' %}">Edit Profile </a></li>
+                              
+                              <li><a href="{% url 'logout' %}">Deconnexion</a></li>
+                           
+                            </ul>
+                      </li>
+  
+  
+                       
+  
+  
+                    </ul>        
+                    <a class='menu-trigger'>
+                        <span>Menu</span>
+                    </a>
+                    <!-- ***** Menu End ***** -->
+                </nav>
+            </div>
+        </div>
+    </div>
+  </header>
+  <!-- ***** Header Area End ***** -->
+  
+      <!-- Chatbot Button -->
+      <button id="chatbot-button" style="z-index: 1000;" onclick="openChatbot()">  <i class="fas fa-robot"></i></button>
+  
+      <!-- Chatbot Modal -->
+      <div class="modal fade" id="chatbot-modal" tabindex="-1" aria-labelledby="chatbotLabel" aria-hidden="true" data-bs-backdrop="false">
+          <div class="modal-dialog" >
+              <div class="modal-content bg-dark" >
+                  <div class="modal-header">
+                      <h5 class="modal-title text-light" id="chatbotLabel"><i class="fas fa-robot"></i> Chat avec l'IA</h5>
+                      <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                      <div id="chat-messages"></div>
+                      <div class="input-group mt-3">
+                          <input type="text" id="user-input" class="form-control" placeholder="Posez votre question...">
+                          <button class="btn btn-primary" id="send-button" onclick="sendMessage()">Envoyer</button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+    
+
+
+      <script>
+        function openChatbot() {
+            const modal = new bootstrap.Modal(document.getElementById('chatbot-modal'));
+            modal.show();
+        }
+    
+        function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const userMessage = userInput.value.trim();
+            if (!userMessage) return;
+    
+            // Ajouter le message utilisateur à l'interface
+            const chatMessages = document.getElementById('chat-messages');
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'container chat-message user ';
+            
+            userMessageDiv.innerHTML = `
+              <div class=" content merriweather card-header px-3 py-2"
+                  style="display: inline-block; max-width: 80%; background: linear-gradient(rgba(0,0,0, 0.5), rgba(0,0,0, 0.5)); border-radius: 1.5em; border: solid 1px white; word-wrap: break-word; overflow-wrap: break-word;">
+                <button class="btn btn-outline-light" style="border-radius: 100%; margin-right: 0.5em;">
+                  <i class="fas fa-user"></i>
+                </button>
+                ${userMessage}
+              </div>
+            `;
+            //userMessageDiv.textContent = userMessage;
+            chatMessages.appendChild(userMessageDiv);
+    
+            // Efface l'entrée utilisateur
+            userInput.value = '';
+    
+            // Appel AJAX pour envoyer le message au backend
+            fetch('/boat/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken(),
+                },
+                body: JSON.stringify({ message: userMessage })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Ajouter la réponse de l'IA à l'interface
+                const iaMessageDiv = document.createElement('div');
+                iaMessageDiv.className = 'chat-message ia container';
+    
+                iaMessageDiv.innerHTML = `
+              <div class=" merriweather card-header px-3 py-2"
+                  style="display: inline-block; max-width: 80%; background: linear-gradient(rgba(0,0,0, 0.5), rgba(0,0,0, 0.5)); border-radius: 1.5em; border: solid 1px white; word-wrap: break-word; overflow-wrap: break-word;">
+                <button class="btn btn-outline-light" style="border-radius: 100%; margin-right: 0.5em;">
+                  <i class="fas fa-brain"></i>
+                </button>
+                ${data.response}
+              </div>
+            `;
+    
+                //iaMessageDiv.textContent = data.response;
+                chatMessages.appendChild(iaMessageDiv);
+    
+                // Faire défiler vers le bas
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+            });
+        }
+    
+        function handleUserInput(event) {
+            // Si la touche "Enter" est pressée
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        }
+    
+        function getCsrfToken() {
+            let cookieValue = null;
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith('csrftoken=')) {
+                    cookieValue = cookie.substring('csrftoken='.length);
+                    break;
+                }
+            }
+            return cookieValue;
+        }
+    
+        // Ajouter un écouteur pour détecter "Enter" sur l'input utilisateur
+        document.addEventListener("DOMContentLoaded", function() {
+            const userInput = document.getElementById('user-input');
+            userInput.addEventListener('keypress', handleUserInput);
+        });
+    </script>
+    
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script defer>
+        {% autoescape off %}
+        {% for ms in messages %}
+            swal('{{ms|safe}}');
+        {% endfor %}
+        {% endautoescape %}
+    </script>

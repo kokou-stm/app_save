@@ -159,11 +159,11 @@ LOGOUT_REDIRECT_URL = 'login'
 
 #print("Chemin: ", os.listdir(os.path.join(BASE_DIR, "media")))
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-#EMAIL_USE_SSL = False  # Assurez-vous que SSL est désactivé si TLS est activé
-
+EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
+PERCENT=0
+EMAIL_HOST="smtp.gmail.com"
+EMAIL_PORT= 587
+EMAIL_USE_TLS= True
 EMAIL_HOST_USER="voicetranslator0@gmail.com" #os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD="rfqzyhocddgmehbe" #os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_SSL = False  # Assurez-vous que c'est désactivé si TLS est activé

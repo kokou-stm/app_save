@@ -28,6 +28,7 @@ urlpatterns = [
     
     path('contact/', views.contact, name='contact'),
     path('boat/', views.boat, name='boat'),
+    path('graph/', views.dash, name='dash'),
       
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

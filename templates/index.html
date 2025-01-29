@@ -1,203 +1,11 @@
 
-
-
-<!doctype html>
+{% extends 'base.html' %}
 {% load static %}
 
-  <head>
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="TemplateMo">
-    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet">
-
-    <title>ChiefQuiz</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
-
-
-
-    <!-- Additional CSS Files -->
-    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/templatemo-edu-meeting.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/owl.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/lightbox.css' %}">
-<!--
-
-
-
-https://templatemo.com/tm-569-edu-meeting
-
--->
-</head>
-
-<style>
-    @import url("https://fonts.googleapis.com/css2?family=Redressed&family=Merriweather:wght@300;400;700&display=swap");
-    .redressed {
-        font-family: "Redressed", serif;
-    }
-    .merriweather {
-        font-family: "Merriweather", serif;
-    }
-</style>
-<style>
-  #chatbot-button {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-      font-size: 24px;
-      cursor: pointer;
-  }
-
-  #chatbot-modal {
-      z-index: 1050;
-  }
-
-  #chat-messages {
-      height: 300px;
-      overflow-y: auto;
-      border: 1px solid #ddd;
-      padding: 10px;
-      background-color: #f9f9f9;
-  }
-
-  .chat-message {
-      margin-bottom: 10px;
-  }
-
-  .chat-message.user {
-      text-align: right;
-      color: blue;
-  }
-
-  .chat-message.ia {
-      text-align: left;
-      /*color: rgb(23, 31, 23);*/
-  }
-</style>
-
-
-<body>
-
-
- <!-- Sub Header -->
- <div class="sub-header">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-sm-8">
-        <div class="left-content pt-2">
-          <h6 class="redressed text-light">Apprenez la cuisine <em>Autrement</em> grace à l'intelligence Artificielle</h6>
-        </div>
-      </div>
-      <div class="col-lg-4 col-sm-4">
-        <div class="right-icons">
-          <ul>
-            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-            <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-            <li><a href="#"><i class="fa fa-behance"></i></a></li>
-            <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
- <!-- ***** Header Area Start ***** -->
- <header class="header-area header-sticky">
-  <div class="container">
-      <div class="row">
-          <div class="col-12">
-              <nav class="main-nav">
-                  <!-- ***** Logo Start ***** -->
-                  <a href="{% url 'index' %}" class="logo merriweather">
-                     ChefQuiz
-                  </a>
-                  <!-- ***** Logo End ***** -->
-                  <!-- ***** Menu Start ***** -->
-                  <ul class="nav merriweather">
-                      <li class="scroll-to-section"><a href="{% url 'index' %}" class="active">Accueil</a></li>
-                      <li><a href="{% url 'lescours' %}" class="merriweather">Cours</a></li>
-                      <li class="scroll-to-section"><a href="#apply">A propos</a></li>
-                     
-                      <li class="scroll-to-section1"><a href="{% url 'faquestion' %}">FAQ</a></li> 
-                      <li class="scroll-to-section"><a href="#contact">Contactez-nous</a></li> 
-                      <li class="has-sub">
-                        <a href="javascript:void(0)">Compte</a>
-                        <ul class="sub-menu">
-                          <li><p class="bg-dark text-light text-center" >{{user.last_name}}</p></li>
-                          {% if  is_staff %}
-                          {% else %}
-                          <li class="bg-transparent text-center"> <p class="text-light">{{ progress_percentage }}%</p> 
-                            <div class="progress mx-2 my-2 " style="width: 100%;">
-                              <div class="progress-bar redressed text-muted" role="progressbar" style="width: {{ progress_percentage }}%;" 
-                                   aria-valuenow="{{ progress_percentage }}%" aria-valuemin="0" aria-valuemax="100">
-                                {{ progress_percentage }}%
-                              </div>
-                            </div>
-                            
-                          </li>
-                          {% endif %}
-                            <li><a  href="#mescours">Mes Cours</a></li>
-                            
-                            <li><a href="{% url 'profile' %}">Edit Profile </a></li>
-                            
-                            <li><a href="{% url 'logout' %}">Deconnexion</a></li>
-                         
-                          </ul>
-                    </li>
-
-
-                     
-
-
-                  </ul>        
-                  <a class='menu-trigger'>
-                      <span>Menu</span>
-                  </a>
-                  <!-- ***** Menu End ***** -->
-              </nav>
-          </div>
-      </div>
-  </div>
-</header>
-<!-- ***** Header Area End ***** -->
-
-    <!-- Chatbot Button -->
-    <button id="chatbot-button" style="z-index: 1000;" onclick="openChatbot()">  <i class="fas fa-robot"></i></button>
-
-    <!-- Chatbot Modal -->
-    <div class="modal fade" id="chatbot-modal" tabindex="-1" aria-labelledby="chatbotLabel" aria-hidden="true" data-bs-backdrop="false">
-        <div class="modal-dialog" >
-            <div class="modal-content bg-dark" >
-                <div class="modal-header">
-                    <h5 class="modal-title text-light" id="chatbotLabel"><i class="fas fa-robot"></i> Chat avec l'IA</h5>
-                    <button type="button" class="btn-close bg-light" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="chat-messages"></div>
-                    <div class="input-group mt-3">
-                        <input type="text" id="user-input" class="form-control" placeholder="Posez votre question...">
-                        <button class="btn btn-primary" id="send-button" onclick="sendMessage()">Envoyer</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
-
+  {% block content %}
+  <body>
+    
 <!-- ***** Main Banner Area Start ***** -->
 <section class="section main-banner" id="top" data-section="section1">
     <video autoplay muted loop id="bg-video">
@@ -320,21 +128,37 @@ https://templatemo.com/tm-569-edu-meeting
             <h2>Fonctionnalités</h2>
           </div>
         </div>
+
         <div class="col-lg-4">
-          <div class="categories">
-            <h4>Meeting Catgories</h4>
-            <ul>
-              <li><a href="#">Sed tempus enim leo</a></li>
-              <li><a href="#">Aenean molestie quis</a></li>
-              <li><a href="#">Cras et metus vestibulum</a></li>
-              <li><a href="#">Nam et condimentum</a></li>
-              <li><a href="#">Phasellus nec sapien</a></li>
-            </ul>
-            <div class="main-button-red1">
-              <a href="meetings.html" class="mt-3 btn btn-primary" style="border-radius: 4em;">All Upcoming Meetings</a>
+          <div class="card text-center h-100">
+            <div class="card-header merriweather">
+              LeaderBoard 
+            </div>
+            <div class="card-body">
+            <div class="scores"  id="scores" style="display: none;"> {{scores}}</div>
+            <div  id="progress_percentage" style="display: none;"> {{progress_percentage}}</div>
+              <ol class="list-group list-group-numbered">
+                {% for key, val in percents_etud.items  %}
+                <li class="list-group-item d-flex justify-content-between align-items-start py-3">
+                  <div class="ms-2 me-auto merriweather ">
+                   
+                    <div class="fw-bold "><i class="fas fa-user mx-2"></i> {{key}}</div>
+                    {{etu.username.last_name}}
+                  </div>
+                  <span class="badge bg-primary rounded-pill"> {{ val }}%</span>
+                </li>
+                {% endfor %}
+               
+              </ol>
+    
+    
+            </div>
+            <div class="card-footer text-muted">
+              Classification
             </div>
           </div>
         </div>
+
         <div class="col-lg-8">
           <div class="row">
             <div class="col-lg-6">
@@ -348,7 +172,7 @@ https://templatemo.com/tm-569-edu-meeting
                 </div>
                 <div class="down-content">
                   <div class="date">
-                    <h6>1. <span>- </span></h6>
+                    <h6>1. <span></span></h6>
                   </div>
                   <a href="meeting-details.html"><h4>Cours numériques</h4></a>
                   <p>Vous avez accès à la version numériques<br>des cours</p>
@@ -932,160 +756,7 @@ https://templatemo.com/tm-569-edu-meeting
     </div>
   </section>
 
-
+</body>
+  {% endblock content %}
 
   
-  <!-- Scripts -->
-  <!-- Bootstrap core JavaScript -->
-  <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
-  crossorigin="anonymous">
-</script>
-
-    <script src="{% static 'assets/js/isotope.min.js' %}"></script>
-    
-    <script src="{% static 'assets/js/owl-carousel.js' %}"></script>
-    <script src="{% static 'assets/js/lightbox.js' %}"></script>
-
-    <script src="{% static 'assets/js/tabs.js' %}"></script>
-
-    <script src="{% static 'assets/js/video.js' %}"></script>
-
-    <script src="{% static 'assets/js/slick-slider.js' %}"></script>
-    <script src="{% static 'assets/js/custom.js' %}"></script>
-
-
-    <script>
-        //according to loftblog tut
-        $('.nav li:first').addClass('active');
-
-        var showSection = function showSection(section, isAnimate) {
-          var
-          direction = section.replace(/#/, ''),
-          reqSection = $('.section').filter('[data-section="' + direction + '"]'),
-          reqSectionPos = reqSection.offset().top - 0;
-
-          if (isAnimate) {
-            $('body, html').animate({
-              scrollTop: reqSectionPos },
-            800);
-          } else {
-            $('body, html').scrollTop(reqSectionPos);
-          }
-
-        };
-
-        var checkSection = function checkSection() {
-          $('.section').each(function () {
-            var
-            $this = $(this),
-            topEdge = $this.offset().top - 80,
-            bottomEdge = topEdge + $this.height(),
-            wScroll = $(window).scrollTop();
-            if (topEdge < wScroll && bottomEdge > wScroll) {
-              var
-              currentId = $this.data('section'),
-              reqLink = $('a').filter('[href*=\\#' + currentId + ']');
-              reqLink.closest('li').addClass('active').
-              siblings().removeClass('active');
-            }
-          });
-        };
-
-        $('.main-menu, .responsive-menu, .scroll-to-section').on('click', 'a', function (e) {
-          e.preventDefault();
-          showSection($(this).attr('href'), true);
-        });
-
-        $(window).scroll(function () {
-          checkSection();
-        });
-    </script>
-    <script>
-    function openChatbot() {
-        const modal = new bootstrap.Modal(document.getElementById('chatbot-modal'));
-        modal.show();
-    }
-
-    function sendMessage() {
-        const userInput = document.getElementById('user-input');
-        const userMessage = userInput.value.trim();
-        if (!userMessage) return;
-
-        // Ajouter le message utilisateur à l'interface
-        const chatMessages = document.getElementById('chat-messages');
-        const userMessageDiv = document.createElement('div');
-        userMessageDiv.className = 'chat-message user';
-        userMessageDiv.textContent = userMessage;
-        chatMessages.appendChild(userMessageDiv);
-
-        // Efface l'entrée utilisateur
-        userInput.value = '';
-
-        // Appel AJAX pour envoyer le message au backend
-        fetch('/ask_ia', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCsrfToken(),
-            },
-            body: JSON.stringify({ message: userMessage })
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Ajouter la réponse de l'IA à l'interface
-            const iaMessageDiv = document.createElement('div');
-            iaMessageDiv.className = 'chat-message ia';
-            iaMessageDiv.textContent = data.response;
-            chatMessages.appendChild(iaMessageDiv);
-
-            // Faire défiler vers le bas
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-        });
-    }
-
-    function handleUserInput(event) {
-        // Si la touche "Enter" est pressée
-        if (event.key === "Enter") {
-            sendMessage();
-        }
-    }
-
-    function getCsrfToken() {
-        let cookieValue = null;
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.startsWith('csrftoken=')) {
-                cookieValue = cookie.substring('csrftoken='.length);
-                break;
-            }
-        }
-        return cookieValue;
-    }
-
-    // Ajouter un écouteur pour détecter "Enter" sur l'input utilisateur
-    document.addEventListener("DOMContentLoaded", function() {
-        const userInput = document.getElementById('user-input');
-        userInput.addEventListener('keypress', handleUserInput);
-    });
-</script>
-
-<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
-<script defer>
-    {% autoescape off %}
-    {% for ms in messages %}
-        swal('{{ms|safe}}');
-    {% endfor %}
-    {% endautoescape %}
-</script>
-
-
-
-</body>
-</html>

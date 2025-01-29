@@ -8,7 +8,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 
 
-os.environ['HUGGINGFACEHUB_API_TOKEN'] = "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"
+
 
 # Initialisation des embeddings
 huggingface_embeddings = HuggingFaceEmbeddings(
@@ -53,5 +53,5 @@ def process_message_with_rag(message, path="cuisine1.pdf"):
     return relevant_docs
 
 # Test the function
-response = process_message_with_rag("Qu'est-ce que la cuisine ?", path="cuisine1.pdf")
-print(response)
+#response = process_message_with_rag("Qu'est-ce que la cuisine ?", path="cuisine1.pdf")
+#print(response)

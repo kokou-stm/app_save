@@ -35,20 +35,37 @@ import codecs,math
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse, HttpResponseForbidden
 from django.db.models import Sum
+from langchain_openai import AzureChatOpenAI
+from langchain_openai import  AzureOpenAIEmbeddings
 
 @login_required
 def index(request):
-    cours = []
-    context = {}
+    
+    progress_percentage=0
+    cours = Cours.objects.all()
+    
+    percents_etud = {}
+    list_etu = Etudiant.objects.all()
+    for etud in list_etu: 
+        total_score = sum(score['score'] for score in etud.scores)
+        try:
+            progress_etud = round((total_score / max_score) * 100, 1) if max_score > 0 else 0
+            
+        except:
+            progress_etud = 0
+        percents_etud[f"{etud.username.first_name} {etud.username.last_name}"]= progress_etud
+    
     if request.user.is_staff:
         prof = Professeur.objects.get(username = request.user)
         cours = Cours.objects.filter(professeur=prof)
-        context = {'is_staff': request.user.is_staff, 'cours': cours}
+        context = {'is_staff': request.user.is_staff, 'cours': cours,  'cours': cours,
+                   'list_etud': list_etu,
+                  'percents_etud': percents_etud}
        
     else:
-        progress_percentage=0
-        cours = Cours.objects.all()
         etudiant = Etudiant.objects.get(username = request.user)
+        scores =  [score['score'] for score in etudiant.scores]
+        print("scores! ", scores)
         max_score = QuestionAnswers.objects.aggregate(total=Sum('score'))['total']
         print("Max_score: ", max_score)
         try:
@@ -56,14 +73,52 @@ def index(request):
             progress_percentage = (total_score / max_score) * 100 if max_score > 0 else 0
         except:
             pass
+
+      
         context = {'progress_percentage': round(progress_percentage, 2),
                    'is_staff': request.user.is_staff,
-                   'cours': cours}
+                   'cours': cours,
+                   'list_etud': list_etu,
+                    'percents_etud': percents_etud,
+                    'scores': scores}
     
     print(cours)
     return render(request, "index.html", context)
 #print("Base :" ,os.path.join(settings.BASE_DIR, "/media/uploads/cuisine-proffessionnelle-avancee-1.pdf"))
 
+
+
+def dash(request):
+
+    progress_percentage=0
+    cours = Cours.objects.all()
+    etudiant = Etudiant.objects.get(username = request.user)
+    scores =  [score['score'] for score in etudiant.scores]
+    print("scores! ", scores)
+    max_score = QuestionAnswers.objects.aggregate(total=Sum('score'))['total']
+    print("Max_score: ", max_score)
+    try:
+        total_score = sum(score['score'] for score in etudiant.scores)
+        progress_percentage = (total_score / max_score) * 100 if max_score > 0 else 0
+    except:
+        pass
+    percents_etud = {}
+    list_etu = Etudiant.objects.all()
+    for etud in list_etu: 
+        total_score = sum(score['score'] for score in etud.scores)
+        progress_etud = round((total_score / max_score) * 100, 1) if max_score > 0 else 0
+        percents_etud[f"{etud.username.first_name} {etud.username.last_name}"]= progress_etud
+    
+    
+    context = {'progress_percentage': round(progress_percentage, 2),
+                'is_staff': request.user.is_staff,
+                'list_etud': list_etu,
+                'percents_etud': percents_etud,
+                'scores': scores}
+    
+    return render(request, "dash.html", context)
+
+#print("Base :" ,os.path.join(settings.BASE_DIR, "/media/uploads/cuisine-proffessionnelle-avancee-1.pdf"))
 
 
 def profile(request):
@@ -88,15 +143,35 @@ def profile(request):
         membre.save()
         messages.info(request, f"Modifications enregistrés !")
         return redirect('index')  # Redirige vers la page du profil (ou une autre page)
+    
+    context = {}
+    if request.user.is_staff:
+        context = {'is_staff': request.user.is_staff, 'membre': membre}
+       
+    else:
+        progress_percentage=0
+       
+        etudiant = Etudiant.objects.get(username = request.user)
+        max_score = QuestionAnswers.objects.aggregate(total=Sum('score'))['total']
+        print("Max_score: ", max_score)
+        try:
+            total_score = sum(score['score'] for score in etudiant.scores)
+            progress_percentage = (total_score / max_score) * 100 if max_score > 0 else 0
+        except:
+            pass
+        context = {'progress_percentage': round(progress_percentage, 2),
+                   'is_staff': request.user.is_staff,'membre': membre
+                   }
+    
 
-    return render(request, 'profile.html', {'membre': membre})
+    return render(request, 'profile.html', context)
 
     
 
 
 def faquestion(request):
     print('Og')
-
+    
     return render(request, "faquestion.html")
 
 @login_required
@@ -121,16 +196,21 @@ def home(request):
 
 from langchain.prompts import PromptTemplate
 from langchain_openai import OpenAIEmbeddings
+
 from langchain_community.vectorstores import FAISS
 from langchain.chains import RetrievalQA
 import openai
 from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv())
-openai.api_key ="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"
-os.environ["OPENAI_API_KEY"] ="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"
+openai.api_key ="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"
+os.environ["OPENAI_API_KEY"] ="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"
 os.environ['HUGGINGFACEHUB_API_TOKEN'] ="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"# Charger les documents
 
-embeddings = OpenAIEmbeddings()
+#embeddings = OpenAIEmbeddings()
+embeddings = AzureOpenAIEmbeddings(model="text-embedding-3-large",
+                                    azure_endpoint="https://realtimekokou.openai.azure.com/openai/deployments/text-embedding-3-large/embeddings?api-version=2023-05-15",
+                                    api_key="h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j",
+                                    openai_api_version="2023-05-15")
 
 @login_required
 def upload_cours(request):
@@ -488,47 +568,101 @@ def register(request):
                     user.password = pass1
                     user.set_password(user.password)
                     user.save()
-                    subject= "Bienvenue sur ChefQuiz ! "
+                    
+                    subject = "Bienvenue sur ChefQuiz !"
+
                     email_message = f"""
-                    Bonjour {prenom},
+                    <!DOCTYPE html>
+                    <html lang="fr">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Bienvenue sur ChefQuiz !</title>
+                        <style>
+                            body {{
+                                font-family: Arial, sans-serif;
+                                background-color: #f4f7fa;
+                                color: #333;
+                                margin: 0;
+                                padding: 0;
+                            }}
+                            .container {{
+                                max-width: 600px;
+                                margin: 20px auto;
+                                padding: 20px;
+                                background-color: #ffffff;
+                                border-radius: 8px;
+                                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                            }}
+                            h1 {{
+                                color: #d9534f;
+                                text-align: center;
+                            }}
+                            p {{
+                                font-size: 16px;
+                                line-height: 1.6;
+                                margin: 10px 0;
+                            }}
+                            ul {{
+                                font-size: 16px;
+                                margin: 10px 0;
+                            }}
+                            li {{
+                                margin-bottom: 8px;
+                            }}
+                            .highlight {{
+                                font-weight: bold;
+                                color: #d9534f;
+                            }}
+                            .footer {{
+                                text-align: center;
+                                font-size: 14px;
+                                margin-top: 20px;
+                                color: #888;
+                            }}
+                            .button {{
+                                display: inline-block;
+                                padding: 12px 20px;
+                                margin-top: 20px;
+                                background-color: #d9534f;
+                                color: #fff;
+                                text-decoration: none;
+                                border-radius: 4px;
+                                text-align: center;
+                            }}
+                            .button:hover {{
+                                background-color: #c9302c;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <h1>Bienvenue sur ChefQuiz, {prenom} ! 👩‍🍳👨‍🍳</h1>
+                            <p>Bonjour {prenom},</p>
+                            <p>Bienvenue sur <span class="highlight">ChefQuiz</span>, la plateforme innovante qui vous accompagne dans votre apprentissage culinaire ! Nous sommes ravis de vous avoir parmi nous et convaincus que cette aventure sera aussi savoureuse qu’enrichissante.</p>
+                            <p><span class="highlight">ChefQuiz</span> utilise une technologie avancée, le modèle RAG (Retrieval-Augmented Generation), pour vous proposer des quiz personnalisés à partir des cours publiés par vos professeurs. Cela vous permet de tester vos connaissances de manière interactive et dynamique, tout en renforçant les compétences acquises dans chaque leçon.</p>
+                            <p><strong>Voici ce que vous pouvez attendre de ChefQuiz :</strong></p>
+                            <ul>
+                                <li><span class="highlight">Des quiz adaptés à vos cours :</span> Chaque question générée est directement liée au contenu de vos leçons, garantissant une révision ciblée et efficace.</li>
+                                <li><span class="highlight">Une progression suivie en temps réel :</span> Vous pourrez suivre votre performance et identifier les sujets à approfondir pour progresser.</li>
+                                <li><span class="highlight">Une expérience d’apprentissage flexible :</span> Les quiz sont accessibles à tout moment, pour vous permettre d’apprendre à votre rythme et selon vos disponibilités.</li>
+                            </ul>
+                            <p>Pour commencer, explorez vos cours disponibles sur votre tableau de bord, et laissez-vous guider par les quiz adaptés à chaque leçon. Plus vous interagissez avec le contenu, plus vous renforcez vos compétences culinaires !</p>
+                            <p>Si vous avez des questions ou besoin d’aide, n’hésitez pas à nous contacter. Notre équipe est là pour vous accompagner à chaque étape de votre apprentissage.</p>
+                            <p>Bon apprentissage et à très bientôt sur <span class="highlight">ChefQuiz</span> !</p>
+                            <div class="footer">
+                                <p>Cordialement,</p>
+                                <p>L’équipe ChefQuiz</p>
+                                <p>03 27 51 77 47</p>
+                                <p><a href="https://chefquiz.de" target="_blank">https://chefquiz.de</a></p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                    """
 
-                    Bienvenue sur ChefQuiz, la plateforme innovante qui vous accompagne dans votre apprentissage culinaire !
-                    Nous sommes ravis de vous avoir parmi nous et nous sommes convaincus que cette aventure sera aussi 
-                    savoureuse qu'enrichissante.
+                    emailsender(subject, email_message, user.email)
 
-                    ChefQuiz utilise une technologie avancée, le modèle RAG (Retrieval-Augmented Generation), pour vous 
-                    proposer des quiz personnalisés à partir des cours que vos professeurs ont publiés. Cela vous permet 
-                    de tester vos connaissances de manière interactive et dynamique, tout en renforçant les compétences 
-                    acquises dans chaque leçon.
-                    Voici ce que vous pouvez attendre de ChefQuiz :
-
-                        * Des quiz adaptés à vos cours : Chaque question générée est directement liée au contenu de vos leçons, 
-                        garantissant une révision ciblée et efficace.
-                        * Une progression suivie en temps réel : Vous pourrez suivre votre performance et identifier les sujets
-                        à approfondir pour progresser.
-                        * Une expérience d'apprentissage flexible : Les quiz sont accessibles à tout moment, pour vous permettre
-                        d'apprendre à votre rythme et selon vos disponibilités.
-
-                    Pour commencer, explorez vos cours disponibles sur votre tableau de bord, et laissez-vous guider par les quiz
-                    adaptés à chaque leçon. Plus vous interagissez avec le contenu, plus vous renforcez vos compétences culinaires !
-
-                    Si vous avez des questions ou avez besoin d’aide, n'hésitez pas à nous contacter. Notre équipe est là pour \n
-                    vous accompagner à chaque étape de votre apprentissage.
-
-                    Bon apprentissage et à très bientôt sur ChefQuiz !
-
-                    Cordialement,
-                    L’équipe ChefQuiz
-                    03 27 51 77 47
-                    https://chefquiz.de
-
-"""
-                    email = EmailMessage(subject,
-                             email_message,
-                             f"ChefQuiz <{settings.EMAIL_HOST}>",
-                             [user.email])
-
-                    email.send()
                     mess = f"Welcome, {prenom}! Your account has been successfully created. To activate your account, please retrieve your verification code from the email sent to {user.email}"
                         
                     messages.info(request, mess)
@@ -537,12 +671,83 @@ def register(request):
                     verification_code.generate_code()
                     print(verification_code.code)
                     
-                    code = EmailMessage('Votre code de vérification',
-                             f'Votre code de vérification est : {verification_code.code}',
-                             f"ChefQuiz <{settings.EMAIL_HOST}>",
-                             [user.email])
+                    subject = "Votre code de vérification ChefQuiz"
 
-                    code.send()
+                    email_message = f"""
+                    <!DOCTYPE html>
+                    <html lang="fr">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Code de vérification</title>
+                        <style>
+                            body {{
+                                font-family: Arial, sans-serif;
+                                background-color: #f4f7fa;
+                                color: #333;
+                                margin: 0;
+                                padding: 0;
+                            }}
+                            .container {{
+                                max-width: 600px;
+                                margin: 20px auto;
+                                padding: 20px;
+                                background-color: #ffffff;
+                                border-radius: 8px;
+                                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                            }}
+                            h1 {{
+                                color: #d9534f;
+                                text-align: center;
+                            }}
+                            p {{
+                                font-size: 16px;
+                                line-height: 1.6;
+                                margin: 10px 0;
+                            }}
+                            .code-box {{
+                                text-align: center;
+                                margin: 20px 0;
+                            }}
+                            .code {{
+                                display: inline-block;
+                                font-size: 24px;
+                                font-weight: bold;
+                                background-color: #f8f9fa;
+                                padding: 10px 20px;
+                                border: 1px solid #ddd;
+                                border-radius: 5px;
+                                color: #d9534f;
+                                letter-spacing: 2px;
+                            }}
+                            .footer {{
+                                text-align: center;
+                                font-size: 14px;
+                                margin-top: 20px;
+                                color: #888;
+                            }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <h1>Votre code de vérification</h1>
+                            <p>Bonjour {prenom},</p>
+                            <p>Voici votre code de vérification pour accéder à votre compte ChefQuiz. Entrez ce code sur notre site pour compléter votre connexion ou validation :</p>
+                            <div class="code-box">
+                                <span class="code">{verification_code.code}</span>
+                            </div>
+                            <p>Ce code est valide pendant les <strong>30 prochaines minutes</strong>. Si vous n’avez pas demandé ce code, veuillez ignorer cet e-mail ou nous contacter immédiatement.</p>
+                            <div class="footer">
+                                <p>Merci de faire confiance à <strong>ChefQuiz</strong> !</p>
+                                <p>03 27 51 77 47 | <a href="https://chefquiz.de" target="_blank">https://chefquiz.de</a></p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                    """
+
+                    emailsender(subject, email_message, user.email)
+
 
                     #Membre.objects.create(user=user, email=email, nom= username ).save()
                     return redirect("code")
@@ -603,35 +808,100 @@ def forgotpassword(request):
                token = default_token_generator.make_token(user)
                uid = urlsafe_base64_encode(force_bytes(user.id))
                current_host = request.META["HTTP_HOST"]
-               Subject = "Password Reset ChefQuiz "
-               message = f"""
-               Hi {username},
-               Are you having trouble signing in?
-
-               Resetting your password is easy.
-               Just click on the url below and follow the instructions.
-               We will have you up and running in no time.
-
-
-              {current_host}/updatepassword/{token}/{uid}/
-
-               Note that this link is valid for 1 hour.
-
-               If you did not make this request then please ignore this email. 
                
-               Thanks,
-               ChefQuiz Authentication
-               """
+               Subject = "Password Reset Chefquiz "
                
-            
-               #message = mark_safe(render_to_string("emailpsswdreset.html", {}))
-               
-               email = EmailMessage(Subject,
-                             message,
-                             f"ChefQuiz <{settings.EMAIL_HOST}>",
-                             [user.email])
+               code_message = f"""
+                <!DOCTYPE html>
+                <html lang="fr">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Réinitialisation de mot de passe</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" 
+                        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+                    <style>
+                        body {{
+                            font-family: Arial, sans-serif;
+                            background-color: #f8f9fa;
+                            color: #333;
+                            margin: 0;
+                            padding: 0;
+                        }}
+                        .container {{
+                            max-width: 600px;
+                            margin: 30px auto;
+                            padding: 20px;
+                            background-color: #ffffff;
+                            border-radius: 10px;
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        }}
+                        h2 {{
+                            color: #007bff;
+                            text-align: center;
+                            margin-bottom: 20px;
+                        }}
+                        p {{
+                            font-size: 16px;
+                            line-height: 1.6;
+                            margin: 15px 0;
+                        }}
+                        .link-container {{
+                            text-align: center;
+                            margin-top: 20px;
+                        }}
+                        .button {{
+                            display: inline-block;
+                            padding: 12px 20px;
+                            background-color: #007bff;
+                            color: #ffffff;
+                            text-decoration: none;
+                            border-radius: 5px;
+                            font-size: 16px;
+                            font-weight: bold;
+                            border: none;
+                        }}
+                        .button:hover {{
+                            background-color: #0056b3;
+                        }}
+                        .footer {{
+                            text-align: center;
+                            margin-top: 30px;
+                            font-size: 14px;
+                            color: #888;
+                        }}
+                        .footer a {{
+                            color: #007bff;
+                            text-decoration: none;
+                        }}
+                        .footer a:hover {{
+                            text-decoration: underline;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h2>Réinitialisation de mot de passe</h2>
+                        <p>Bonjour <strong>{username}</strong>,</p>
+                        <p>Vous avez demandé à réinitialiser votre mot de passe pour accéder à votre compte ChefQuiz. Cliquez sur le lien ci-dessous pour choisir un nouveau mot de passe :</p>
+                        <div class="link-container">
+                            <a href="{current_host}/updatepassword/{token}/{uid}/" class="button">Réinitialiser mon mot de passe</a>
+                        </div>
+                        <p>Ce lien est valable pendant <strong>1 heure</strong>. Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet e-mail en toute sécurité.</p>
+                        <div class="footer">
+                            <p>Merci,</p>
+                            <p>L'équipe <strong>ChefQuiz</strong></p>
+                            <p><a href="https://chefquiz.de">chefquiz.de</a> | +33 327 517 747</p>
+                        </div>
+                    </div>
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" 
+                            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN6jIeHz" crossorigin="anonymous"></script>
+                </body>
+                </html>
+                """
+               emailsender(Subject, code_message, user.email)
 
-               email.send()
+              
                messages.success(request, f"We have send a reset password email to {user.email}, open it and follow the instructions !",)
           else:
                print("User not exist")
@@ -703,8 +973,6 @@ def deconnexion(request):
          logout(request)
          return redirect("index")
     
-from django.core.mail import send_mail
-
 @login_required
 def contact(request):
     context={}
@@ -717,22 +985,11 @@ def contact(request):
             print(message)
             
             print(Gmail,  [settings.EMAIL_HOST_USER])
-            '''email = EmailMessage(f"{Subject} ", message, f"{Gmail}",                                 
-                                 [settings.EMAIL_HOST_USER])
-
-            email.send()'''
-            
-
-            send_mail(
-                f"{Subject} ",
-                message,
-                f"{Gmail}",
-                [settings.EMAIL_HOST_USER, "sitsopekokou@gmail.com"],
-                fail_silently=False,
-            )
+            emailsender(Subject, message, Gmail)
 
             messages.success(request, "Your message is succesfull send  !!!")
            
+
             #return JsonResponse({'success': True, 'mess': "Your message is succesfull send  !!!"})
             return redirect("index")
         #return HttpResponseRedirect("y")
@@ -845,6 +1102,8 @@ def ask_ia(request, course_id=None):
         })
        
     return render(request, "chat.html", {"course_id":course_id})
+
+
 
 
 
@@ -973,41 +1232,88 @@ def chat(document_text, question,cours):
 
 
 
-def boat(question):
- 
-    """Communicate with Azure OpenAI to generate questions and answers."""
-    open_client = AzureOpenAI(
-        api_key='6xv3rz6Asc5Qq86B8vqjhKQzSTUZPmCcSuDm5CLEV5dj9m8gTHlNJQQJ99AKACYeBjFXJ3w3AAABACOGyHXT',
-        api_version="2023-12-01-preview",
-        azure_endpoint="https://chatlearning.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview"
-    )
+from django.http import JsonResponse
+import json
+
+# Mémoire de session pour stocker l'historique des conversations
+chat_memory = []
+from langchain_community.chat_models import AzureChatOpenAI
+from langchain_openai import  AzureOpenAIEmbeddings
+import numpy as np
+#import pandas as pd
+from dotenv import load_dotenv, set_key
+# callbacks
+from langchain_community.callbacks import get_openai_callback
+# messages
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+# output parsers
+from langchain_core.output_parsers import StrOutputParser
+from langchain_openai import AzureChatOpenAI
+os.environ["AZURE_OPENAI_ENDPOINT"]="https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview"
+os.environ["AZURE_OPENAI_API_KEY"]="h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j"
+os.environ["AZURE_OPENAI_API_VERSION"]="2024-07-01-preview"
+
+
+"""messages = [
+    (
+        "system",
+        "You are a helpful assistant that translates English to French. Translate the user sentence.",
+    ),
+    ("human", "I love programming."),
+]
+ai_msg = llm_api.invoke(messages)
+print(ai_msg["content"])
+"""
+def boat(request):
+
+
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        question = data.get('message', '')
+        print('La question: ', question)
+        embeddings = AzureOpenAIEmbeddings(model="text-embedding-3-large",
+                                    azure_endpoint="https://realtimekokou.openai.azure.com/openai/deployments/text-embedding-3-large/embeddings?api-version=2023-05-15",
+                                    api_key="h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j",
+                                    openai_api_version="2023-05-15")
+        #llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+
+
+        llm_azure = AzureChatOpenAI(
+                #openai_api_base="https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
+                openai_api_version="2024-07-01-preview",
+                deployment_name="gpt-35-turbo-chefquiz",
+                openai_api_key='h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j',
+                openai_api_type='azure',
+                azure_endpoint= "https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
+            )
+
+        folder_path = os.path.join(settings.MEDIA_ROOT, "chat_boat_azure")
+        vectordb =FAISS.load_local(folder_path, embeddings , allow_dangerous_deserialization=True )
+        memory = ConversationBufferMemory(
+        memory_key="chat_history",
+        output_key="answer",
+        return_messages=True
+        )
+        
+        qa = ConversationalRetrievalChain.from_llm(
+            llm_azure,
+            retriever=vectordb.as_retriever(),
+            return_source_documents=True,
+            #chain_type_kwargs={"prompt": prompt},
+            return_generated_question=True,
+            memory=memory,
+        
+        )
     
-    # Construct the prompt
-    prompt = (
-        f""" 
-        Vous êtes un expert en formation de cuisine. L'etudiant pose la question suivante: {question}. 
-        Fournissez une réponse résumée, pratique et facile à comprendre, comme si vous étiez un instructeur en cuisine. 
-        Répondez en français.
-        """
-        )
-   
-    open_client = AzureOpenAI(
-        api_key='6xv3rz6Asc5Qq86B8vqjhKQzSTUZPmCcSuDm5CLEV5dj9m8gTHlNJQQJ99AKACYeBjFXJ3w3AAABACOGyHXT',
-        api_version="2023-12-01-preview",
-        azure_endpoint="https://chatlearning.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview"
-    )
+        #question = "Qu'est ce que la cuisine?"
+        result = qa.invoke({"question": question})
+        
 
-    chat_completion = open_client.chat.completions.create(
-            model="gpt-35-turbo",
-            messages=[
-                {"role": "system", "content": "Tu es expert formateur en cuisine"},
-                {"role": "user", "content": prompt},
-            ]
-        )
+        return JsonResponse({'response': result["answer"],})
 
-    response = chat_completion.choices[0].message.content
-    return response
-
+# Fonction utilitaire pour formater l'historique des conversations
+def format_conversation(memory):
+    return "\n".join([f"{msg['role']}: {msg['content']}" for msg in memory])
 
 def error_404(request, exception):
     return render(request, "errors/404.html", status=404)
@@ -1081,6 +1387,39 @@ def relevant_doc(query, save_path):
 
 
 
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib, ssl
+
+email_address = 'voicetranslator0@gmail.com'
+email_password = 'rfqzyhocddgmehbe'
+
+smtp_address = 'smtp.gmail.com'
+smtp_port = 465
+
+def emailsender(Subject, html, user_email):
+    message = MIMEMultipart("alternative")
+    # on ajoute un sujet
+    message["Subject"] = Subject
+    # un émetteur
+    message["From"] = f"Chefquiz <{email_address}>"
+    # un destinataire
+    message["To"] = user_email
+    # on crée deux éléments MIMEText 
+    html_mime = MIMEText(html, 'html')
+
+    # on attache ces deux éléments 
+    message.attach(html_mime)
+
+    # on crée la connexion
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(smtp_address, smtp_port, context=context) as server:
+        # connexion au compte
+        server.login(email_address, email_password)
+        # envoi du mail
+        server.sendmail(email_address, user_email, message.as_string())
+
+
 
 
 
@@ -1091,6 +1430,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain_openai import OpenAI, ChatOpenAI
 
 def save_db(doc_path, folder_path, embeddings):
+
     loader = PyPDFLoader(doc_path)
     pages = loader.load()
     print(f'This document have {len(pages)} pages')
@@ -1124,7 +1464,22 @@ prompt = PromptTemplate.from_template(
 )
 
 def load_db_qa(path, embeddings,  question):
-    llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+    embeddings = AzureOpenAIEmbeddings(model="text-embedding-3-large",
+                                    azure_endpoint="https://realtimekokou.openai.azure.com/openai/deployments/text-embedding-3-large/embeddings?api-version=2023-05-15",
+                                    api_key="h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j",
+                                    openai_api_version="2023-05-15")
+    #llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+
+
+    llm_azure = AzureChatOpenAI(
+            #openai_api_base="https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
+            openai_api_version="2024-07-01-preview",
+            deployment_name="gpt-35-turbo-chefquiz",
+            openai_api_key='h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j',
+            openai_api_type='azure',
+            azure_endpoint= "https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
+        )
+    #llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
     folder_path = os.path.join(settings.MEDIA_ROOT, path)
     vectordb =FAISS.load_local(folder_path, embeddings , allow_dangerous_deserialization=True )
     memory = ConversationBufferMemory(
@@ -1134,7 +1489,7 @@ def load_db_qa(path, embeddings,  question):
     )
     
     qa = ConversationalRetrievalChain.from_llm(
-        llm,
+        llm_azure,
         retriever=vectordb.as_retriever(),
         return_source_documents=True,
         #chain_type_kwargs={"prompt": prompt},
@@ -1147,3 +1502,32 @@ def load_db_qa(path, embeddings,  question):
     result = qa.invoke({"question": question})
     
     return result
+
+
+
+def save_db_azure(doc_path, folder_path):
+    
+    embeddings = AzureOpenAIEmbeddings(model="text-embedding-3-large",
+                                    azure_endpoint="https://realtimekokou.openai.azure.com/openai/deployments/text-embedding-3-large/embeddings?api-version=2023-05-15",
+                                    api_key="h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j",
+                                    openai_api_version="2023-05-15")
+    
+    loader = PyPDFLoader(doc_path)
+    pages = loader.load()
+    print(f'This document have {len(pages)} pages')
+    print(pages[0].metadata)
+
+    r_splitter = RecursiveCharacterTextSplitter(chunk_size= 500, chunk_overlap= 10)
+    docs = r_splitter.split_documents(pages)
+    print(len(docs))
+
+    vectordb = FAISS.from_documents(docs, embeddings)
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    # Sauvegarder l'index FAISS
+    vectordb.save_local(folder_path)
+    return 
+
+'''folder_path = os.path.join(settings.MEDIA_ROOT, "videocall_boat")
+print("chemin", settings.BASE_DIR)
+save_db(os.path.join(settings.BASE_DIR, "lessons/rag_videocall.pdf"), folder_path, embeddings)'''

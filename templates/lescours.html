@@ -131,12 +131,15 @@ https://templatemo.com/tm-569-edu-meeting
 <!-- Team -->
 <section id="team" class="pb-5 mt-5">
     <div class="container mt-5">
-        <h5 class="section-title h1 text-muted">Tous les cours
-            <a class="btn btn-outline-primary me-3" href="{% url 'index' %}" ><strong> <-Retour</strong></a>
-            {% if is_staff %}
-            <a class="btn btn-outline-primary me-3" href="{% url 'upload_cours' %}" ><strong> Ajouter</strong></a>
-            {% endif %}
-        </h5>
+      <h5 class="section-title h1 text-muted fs-1 fs-md-2 fs-lg-3">Tous les cours
+        <a class="btn btn-outline-primary me-3" href="{% url 'index' %}" ><strong> <-Retour</strong></a>
+        {% if is_staff %}
+        <a class="btn btn-outline-primary me-3" href="{% url 'upload_cours' %}" ><strong> Ajouter</strong></a>
+        {% endif %}
+    </h5>
+
+    
+       
         
         <div class="row">
             {% for cour in cours %}
