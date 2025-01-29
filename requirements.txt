@@ -1,4 +1,4 @@
-Django==5.1
+Django
 faiss-cpu
 langchain-community
 langchain-openai
