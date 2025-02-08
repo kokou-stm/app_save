@@ -83,7 +83,7 @@ integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG
                     <div class="row">
                         <div class="col-md-6">
                            <div class="card text-center ">
-                            <h6 class="card-title merriweather">Nombre total de quiz</h5>
+                            <h6 class="card-title merriweather">Nombre total de quiz: {{nbre_quiz}}</h5>
                             <h6 class="card-text">Score total: {{progress_percentage}} %</p>
                             <a href="#LeaderBoard"  class="btn btn-primary">LeaderBoard</a>
                            </div>
@@ -92,7 +92,9 @@ integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG
                             <div class="card">
                                 <div class="container d-flex justify-content-center align-items-center" style="height: 30vh;">
                                     <div style="width: 200px; height: 200px;">
+                                      {% if not is_staff %}
                                       <canvas id="circleChart"></canvas>
+                                      {% endif %}
                                     </div>
                                   </div>
                             </div>
@@ -111,7 +113,7 @@ integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG
     <div class="col-md-8 align-items-stretch">
       <div class="card text-center h-100">
         <div class="card-header">
-          Featured
+          Graph
         </div>
         <div class="card-body">
           <div style="width: 80%; margin: 50px auto;">
@@ -124,6 +126,7 @@ integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG
       </div>
 
     </div>
+
     <div class="col-md-4  align-items-stretch">
       <div class="card text-center h-100">
         <div class="card-header bg-primary text-light" id="LeaderBoard">
@@ -131,6 +134,10 @@ integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG
         </div>
         <div class="card-body">
         <div class="scores"  id="scores" style="display: none;"> {{scores}}</div>
+        <div class=""  id="quiz_number" style="display: none;" > {{quiz_number}}</div>
+        <div class=""  id="moyenne" style="display: none;" > {{moyenne}}</div>
+        <div class=""  id="best_list" style="display: none;" > {{best_list}}</div>
+        
         <div  id="progress_percentage" style="display: none;"> {{progress_percentage}}</div>
          
         <ol class="list-group list-group-numbered">
@@ -163,33 +170,61 @@ integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG
 
 
   <script>
-    var xValues = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+    //var xValues = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
    // Obtenir le contenu textuel de l'élément
 const scoresText = document.getElementById("scores").textContent;
+var xValues = document.getElementById("quiz_number").textContent;
+var moyenne = document.getElementById("moyenne").textContent;
+var best_list = document.getElementById("best_list").textContent;
+
+
+
 
 
 
     new Chart("myChart", {
       type: "line",
       data: {
-        labels: xValues,
+        labels: JSON.parse(xValues),
         datasets: [{
+          label: 'Ma  progression',  
           data:   JSON.parse(scoresText),
           borderColor: "red",
           fill: false
         }, {
-          data: [1600, 1700, 1700, 1900, 2000, 2700, 4000, 5000, 6000, 7000],
+          label: 'Progression moyenne',  
+          data:JSON.parse(moyenne),  // [16, 17, 17, 19, 20, 27, 40, 50, 60, 70],
           borderColor: "green",
           fill: false
         }, {
-          data: [300, 700, 2000, 5000, 6000, 4000, 2000, 1000, 200, 100],
+          label: 'La meilleur progression', 
+          data: JSON.parse(best_list), // [30, 70, 20, 50, 60, 40, 20, 10, 20, 10],
           borderColor: "blue",
           fill: false
         }]
       },
       options: {
-        legend: { display: false }
-      }
+            responsive: true,
+            plugins: {
+              legend: {
+                display: true
+              }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Numéros de Quiz'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Scores'
+                    }
+                }
+            }
+        }
     });
   </script>
 

@@ -1,10 +1,4 @@
 
-
-
-
-
-
-
 <!doctype html>
 {% load static %}
 
@@ -142,7 +136,7 @@ https://templatemo.com/tm-569-edu-meeting
                         {% if is_staff %}
                         <a class="btn btn-primary " href="#meetings" > Details-> </a>
                         {% else %}
-                        <a class="btn btn-primary " href="#meetings" > Commencer-></a>
+                        <a class="btn btn-primary " href="#quiz_begin" > Commencer-></a>
                         {% endif%}
                       </div>
                    
@@ -168,7 +162,9 @@ https://templatemo.com/tm-569-edu-meeting
       color: #6c757d;
     }
   </style>
-  <section class="meetings-page">
+
+  {% if not  is_staff %}
+  <section class="meetings-page p-2" id="quiz_begin">
     <div class="container mt-5 redressed">
       <div id="customCarousel" class="carousel slide" data-bs-ride="false" data-bs-keyboard="true" data-bs-interval="false" >
         <!-- Diapositives -->
@@ -178,7 +174,7 @@ https://templatemo.com/tm-569-edu-meeting
               <h2>Debut du Quiz</h2>
             </div>
           </div>
-          <form method="POST" action="{% url 'quiz_score' quiz.id %}">
+          <form method="POST" action="{% url 'quiz_score' quiz.id %}" id="quiz-form1">
             {% csrf_token %}
             {% for question in questions %}
 
@@ -193,7 +189,8 @@ https://templatemo.com/tm-569-edu-meeting
                   <div class="card mb-1">
                     <div class="card-header">
                         <h4>Question {{ forloop.counter }}: {{ question.question_text }}</h4>
-                        <div class="timer text-dark" id="timer-{{ forloop.counter }}">Temps restant : 60s</div>
+                        <div class="text-dark">Temps restant : <span class="text-dark" id="timer">60s</span></div> 
+                        <div class="timer text-dark" id="timer-{{ forloop.counter }}"></div>
                     </div>
                     <div class="card-body">
                         <ul>
@@ -224,14 +221,22 @@ https://templatemo.com/tm-569-edu-meeting
       </div>
   
       <!-- Boutons personnalisés -->
+   
+
       <div class="carousel-buttons">
-        <button class="btn btn-primary me-2" onclick="prevSlide()"> <-Precedent</button>
-        <button class="btn btn-primary" onclick="nextSlide()">Suivant -></button>
-      </div>
+        <button class="btn btn-primary me-2" onclick="prevSlide()">← Précédent</button>
+        <button id="next-btn" class="btn btn-primary" onclick="nextSlide()">Suivant →</button>
+        <button id="submit-btn" class="btn btn-success" style="display: none;" type="button" onclick="submitQuiz()">Soumettre</button>
+
+    </div>
+    
+
     </div>
   </section>
 
-  <section class="meetings-page" id="meetings">
+
+  {% else  %}
+  <section class="meetings-page p-2" id="meetings">
     <div class="container redressed mb-5 ">
         <div class="row mt-5">
           <div class="col-lg-8">
@@ -330,197 +335,75 @@ https://templatemo.com/tm-569-edu-meeting
       </div>
 
 
+  </section>
+{% endif %}
+  
+  <section class="meetings-page" id="meetings">
+
+  </section>
+
+
+  
+  <section class="our-facts">
     <div class="container">
       <div class="row">
-        <div class="col-lg-12">
+        <div class="col-lg-6">
           <div class="row">
             <div class="col-lg-12">
-              <div class="filters">
-                <ul>
-                  <li data-filter="*"  class="active">All Meetings</li>
-                  <li data-filter=".soon">Soon</li>
-                  <li data-filter=".imp">Important</li>
-                  <li data-filter=".att">Attractive</li>
-                </ul>
-              </div>
+              <h2>Quelques points sur notre Centre</h2>
             </div>
-            <div class="col-lg-12">
-              <div class="row grid">
-                <div class="col-lg-4 templatemo-item-col all soon">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$14.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-01.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>12</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>New Lecturers Meeting</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
+            <div class="col-lg-6">
+              <div class="row">
+                <div class="col-12">
+                  <div class="count-area-content percentage bg-secondary">
+                    <div class="count-digit">94</div>
+                    <div class="count-title">Reussites</div>
                   </div>
                 </div>
-                <div class="col-lg-4 templatemo-item-col all imp">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$22.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-02.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>14</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Online Teaching Techniques</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all soon">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$24.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-03.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>16</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Network Teaching Concept</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all att">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$32.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-04.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>18</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Online Teaching Tools</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all att">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$34.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-02.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>22</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>New Teaching Techniques</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all imp">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$45.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-03.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>24</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Technology Conference</h4></a>
-                      <p>TemplateMo is the best website<br>when it comes to Free CSS.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all imp att">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$52.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-01.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>27</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Online Teaching Techniques</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all soon imp">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$64.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-02.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>28</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Instant Lecture Design</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all att soon">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$74.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-03.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>30</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Online Social Networking</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
+                <div class="col-12">
+                  <div class="count-area-content bg-secondary">
+                    <div class="count-digit">126</div>
+                    <div class="count-title">Professeurs</div>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="col-lg-12">
-              <div class="pagination">
-                <ul>
-                  <li><a href="#">1</a></li>
-                  <li class="active"><a href="#">2</a></li>
-                  <li><a href="#">3</a></li>
-                  <li><a href="#"><i class="fa fa-angle-right"></i></a></li>
-                </ul>
+            <div class="col-lg-6">
+              <div class="row">
+                <div class="col-12">
+                  <div class="count-area-content new-students bg-secondary">
+                    <div class="count-digit">2345</div>
+                    <div class="count-title">Nouveaux etudiants</div>
+                  </div>
+                </div> 
+                <div class="col-12">
+                  <div class="count-area-content bg-secondary">
+                    <div class="count-digit">32</div>
+                    <div class="count-title">Prix</div>
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
+        </div> 
+        <div class="col-lg-6 align-self-center">
+          <div class="video">
+            <a href="https://www.youtube.com/watch?v=HndV87XpkWg" target="_blank"><img src="{% static 'assets/images/play-icon.png' %}" alt=""></a>
           </div>
         </div>
       </div>
     </div>
-    <div class="footer">
+  </section>
+
+  <section class="meetings-page p-1">
+    <div class="footer p-1">
       <p>Copyright © 2022 Edu Meeting Co., Ltd. All Rights Reserved. 
           <br>
-          Design: <a href="https://templatemo.com" target="_parent" title="free css templates">TemplateMo</a>
+          XPERTIM GMBH 
           <br>
-          Distibuted By: <a href="https://themewagon.com" target="_blank" title="Build Better UI, Faster">ThemeWagon</a>
+         
+          
+           <a   title="Build Better UI, Faster">Torhausweg 71 , 66539 Neunkirchen, Allemagne</a>
         </p>
     </div>
   </section>
@@ -545,6 +428,51 @@ https://templatemo.com/tm-569-edu-meeting
 
     <script src="{% static 'assets/js/slick-slider.js' %}"></script>
     <script src="{% static 'assets/js/custom.js' %}"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+          const nextButton = document.getElementById("next-btn");
+          const submitButton = document.getElementById("submit-btn");
+          const carousel = document.getElementById("customCarousel");
+          const items = carousel.querySelectorAll(".carousel-item");
+          const quizForm = document.getElementById("quiz-form"); // Récupère le formulaire
+  
+          function updateButtons() {
+              let activeIndex = [...items].findIndex(item => item.classList.contains("active"));
+  
+              // Si c'est la dernière question, cacher "Suivant" et afficher "Soumettre"
+              if (activeIndex === items.length - 1) {
+                  nextButton.style.display = "none";
+                  submitButton.style.display = "inline-block";
+              } else {
+                  nextButton.style.display = "inline-block";
+                  submitButton.style.display = "none";
+              }
+          }
+  
+          // Mettre à jour les boutons au changement de slide
+          carousel.addEventListener("slid.bs.carousel", updateButtons);
+  
+          // Initialisation au chargement
+          updateButtons();
+      });
+  
+      function prevSlide() {
+          const carousel = new bootstrap.Carousel(document.getElementById("customCarousel"));
+          carousel.prev();
+      }
+  
+      function nextSlide() {
+          const carousel = new bootstrap.Carousel(document.getElementById("customCarousel"));
+          carousel.next();
+      }
+  
+      // Fonction pour soumettre le formulaire
+      function submitQuiz() {
+        console.log("form: ",  document.getElementById("quiz-form1"))
+          document.getElementById("quiz-form1").submit(); // Soumet le formulaire
+      }
+  </script>
 
 
     <script>
@@ -609,9 +537,9 @@ let timeRemaining = 60; // 60 secondes pour chaque diapositive
 function updateTimer() {
   timerElements.forEach((timer, index) => {
     if (index === currentSlideIndex) {
-      timer.textContent = `Temps restant : ${timeRemaining}s`;
+      timer.textContent = ""//`Temps restant : ${timeRemaining}s`;
     } else {
-      timer.textContent = 'Temps restant : 60s'; // Réinitialisation des autres
+      timer.textContent =""// 'Temps restant : 60s'; // Réinitialisation des autres
     }
   });
 }
@@ -653,11 +581,32 @@ function nextSlide() {
 // Événement déclenché lorsque la diapositive change
 carousel.addEventListener('slid.bs.carousel', (event) => {
   currentSlideIndex = event.to; // Met à jour l'index de la diapositive active
-  resetCountdown(); // Réinitialise le décompte
+  resetCountdown(); // Réinitialise le 
+  startTimer()
 });
 
 // Lancer le décompte initial
 startCountdown();
+
+</script>
+
+<script>
+       let timeLeft = 60; // Temps initial en secondes
+        const timerDisplay = document.getElementById("timer");
+
+        function startTimer() {
+            timeLeft = 60; 
+            const countdown = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(countdown); // Arrête le timer
+                    timerDisplay.textContent = "Temps écoulé !";
+                    //alert("Le temps est écoulé !");
+                } else {
+                    timeLeft--; // Décrémente le temps
+                    timerDisplay.textContent = timeLeft;
+                }
+            }, 1000); // Exécute toutes les 1 seconde
+        }
 
 </script>
 </body>

@@ -1,132 +1,22 @@
 
 
 
-<!doctype html>
+{% extends 'base.html' %}
 {% load static %}
 
-<head>
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="TemplateMo">
-    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet">
-
-    <title>ChiefQuiz</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
-
-
-
-    <!-- Additional CSS Files -->
-    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/templatemo-edu-meeting.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/owl.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/lightbox.css' %}">
-<!--
-
-
-
-https://templatemo.com/tm-569-edu-meeting
-
--->
-</head>
-
-<style>
-    @import url("https://fonts.googleapis.com/css2?family=Redressed&family=Merriweather:wght@300;400;700&display=swap");
-    .redressed {
-        font-family: "Redressed", serif;
-    }
-    .merriweather {
-        font-family: "Merriweather", serif;
-    }
-</style>
-
+  {% block content %}
 <body>
 
-   
- <!-- Sub Header -->
- <div class="sub-header">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-sm-8">
-        <div class="left-content">
-          <p>Apprenez la cuisine <em>Autrement</em> grace à l'intelligence Artificielle</p>
-        </div>
-      </div>
-      <div class="col-lg-4 col-sm-4">
-        <div class="right-icons">
-          <ul>
-            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-            <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-            <li><a href="#"><i class="fa fa-behance"></i></a></li>
-            <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
- <!-- ***** Header Area Start ***** -->
-<header class="header-area header-sticky">
-  <div class="container">
-      <div class="row">
-          <div class="col-12">
-              <nav class="main-nav">
-                  <!-- ***** Logo Start ***** -->
-                  <a href="index.html" class="logo merriweather">
-                     ChiefQuiz
-                  </a>
-                  <!-- ***** Logo End ***** -->
-                  <!-- ***** Menu Start ***** -->
-                  <ul class="nav merriweather">
-                      <li class="scroll-to-section"><a href="#top" class="active">Accueil</a></li>
-                      <li><a href="meetings.html" class="merriweather">Réunions</a></li>
-                      <li class="scroll-to-section"><a href="#apply">Postuler maintenant</a></li>
-                     
-                      <li class="scroll-to-section"><a href="#courses">Cours</a></li> 
-                      <li class="scroll-to-section"><a href="#contact">Contactez-nous</a></li> 
-                      <li class="has-sub">
-                        <a href="javascript:void(0)">Compte</a>
-                        <ul class="sub-menu">
-                          <li><p class="bg-dark text-light text-center" >{{user.username}}</p></li>
-                            <li><a href="meetings.html">Mes Cours</a></li>
-                            <li><a href="meeting-details.html">Détails de la réunion</a></li>
-                            <li><a href="{% url 'home' %}">Edit Profile </a></li>
-                            <li><a href="{% url 'home' %}">Mes Emprunts</a></li>
-                            <li><a href="{% url 'logout' %}">Deconnexion</a></li>
-                         
-                          </ul>
-                    </li>
-
-
-                     
-
-
-                  </ul>        
-                  <a class='menu-trigger'>
-                      <span>Menu</span>
-                  </a>
-                  <!-- ***** Menu End ***** -->
-              </nav>
-          </div>
-      </div>
-  </div>
-</header>
-<!-- ***** Header Area End ***** -->
-
+ 
   <section class="heading-page header-text" id="top">
     <div class="container redressed">
       <div class="row">
+        <div class="col"></div>
         <div class="col-lg-6">
           
-          <div class="card text-center bg-transparent text-light">
-            <div class="card-header">
+          <div class="card text-center bg-secondary text-light">
+            <div class="card-header merriweather">
               Ajouter un cours
             </div>
             <div class="card-body">
@@ -134,7 +24,7 @@ https://templatemo.com/tm-569-edu-meeting
               <!-- Content here -->
         
             
-            <form method="post" enctype="multipart/form-data">
+            <form method="post" id="upload_form" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="input-group mb-5">
                     <span class="input-group-text" id="basic-addon2">Titre</span>
@@ -162,6 +52,22 @@ https://templatemo.com/tm-569-edu-meeting
                 </div>
               
             </form>
+            <div class="text-center" id="spinner_group" style="display: none">
+              <div class="spinner-container">
+                <div class="spinner-grow spinner1" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow spinner2" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="spinner-grow spinner3" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+              
+              
+             
+            </div> 
 
         
          
@@ -178,201 +84,249 @@ https://templatemo.com/tm-569-edu-meeting
     </div>
   </section>
 
-  <section class="meetings-page" id="meetings">
+  <section class="our-courses" id="courses">
     <div class="container">
       <div class="row">
         <div class="col-lg-12">
-          <div class="row">
-            <div class="col-lg-12">
-              <div class="filters">
-                <ul>
-                  <li data-filter="*"  class="active">All Meetings</li>
-                  <li data-filter=".soon">Soon</li>
-                  <li data-filter=".imp">Important</li>
-                  <li data-filter=".att">Attractive</li>
-                </ul>
-              </div>
-            </div>
-            <div class="col-lg-12">
-              <div class="row grid">
-                <div class="col-lg-4 templatemo-item-col all soon">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$14.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-01.jpg" alt=""></a>
+          <div class="section-heading">
+            <h2>Differentes formations</h2>
+          </div>
+        </div>
+        <div class="col-lg-12">
+          <div class="owl-courses-item owl-carousel">
+            <div class="item">
+              <a href="{%  static 'docs/formation_initiation.pdf' %}" target="_blank">
+              <img src="{% static 'assets/images/cours1.png' %}" alt="Course One"></a>
+              <div class="down-content">
+                <h4>Parcours d'initiation en cuisine </h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
                     </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>12</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>New Lecturers Meeting</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all imp">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$22.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-02.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>14</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Online Teaching Techniques</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all soon">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$24.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-03.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>16</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Network Teaching Concept</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all att">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$32.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-04.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>18</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Online Teaching Tools</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all att">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$34.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-02.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>22</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>New Teaching Techniques</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all imp">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$45.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-03.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>24</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Technology Conference</h4></a>
-                      <p>TemplateMo is the best website<br>when it comes to Free CSS.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all imp att">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$52.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-01.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>27</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Online Teaching Techniques</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all soon imp">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$64.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-02.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>28</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Instant Lecture Design</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all att soon">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$74.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-03.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>30</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Online Social Networking</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
+                    <div class="col-4">
+                       <span>4 mois</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="col-lg-12">
-              <div class="pagination">
-                <ul>
-                  <li><a href="#">1</a></li>
-                  <li class="active"><a href="#">2</a></li>
-                  <li><a href="#">3</a></li>
-                  <li><a href="#"><i class="fa fa-angle-right"></i></a></li>
-                </ul>
+            <div class="item">
+              <a href="{%  static 'docs/FormationCourDuSoir.pdf' %}" target="_blank">
+                <img src="{% static 'assets/images/cours2.png' %}" alt="Course One"></a>
+              <div class="down-content">
+                <h4>Essentiel des Arts culinaires Cours du Soir</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>3 mois</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+            <div class="item">
+              <a href="{%  static 'docs/formation_professionel.pdf' %}" target="_blank">
+              <img src="{% static 'assets/images/cours3.png' %}" alt=""></a>
+              <div class="down-content">
+                <h4>Professionels en cuisine de pattiserie</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>6 mois</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <a href="{% static 'docs/FormationCourDuSoir.pdf'%}">
+              <img src="{% static 'assets/images/cours2.png' %}" alt="Course Two"></a>
+              <div class="down-content">
+                <h4>Essentiel des Arts culinaires Cours du Soir</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>3 mois</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <a href="{%  static 'docs/formation_professionel.pdf' %}" target="_blank">
+                <img src="{% static 'assets/images/cours3.png' %}" alt="Course One"></a>
+              <div class="down-content">
+                <h4>Professionels en cuisine de pattiserie</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>6 mois</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
           </div>
         </div>
       </div>
     </div>
-    <div class="footer">
+  </section>
+
+  <section class="our-facts">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="row">
+            <div class="col-lg-12">
+              <h2>Quelques points sur notre Centre</h2>
+            </div>
+            <div class="col-lg-6">
+              <div class="row">
+                <div class="col-12">
+                  <div class="count-area-content percentage bg-secondary">
+                    <div class="count-digit">94</div>
+                    <div class="count-title">Reussites</div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="count-area-content bg-secondary">
+                    <div class="count-digit">126</div>
+                    <div class="count-title">Professeurs</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="row">
+                <div class="col-12">
+                  <div class="count-area-content new-students bg-secondary">
+                    <div class="count-digit">2345</div>
+                    <div class="count-title">Nouveaux etudiants</div>
+                  </div>
+                </div> 
+                <div class="col-12">
+                  <div class="count-area-content bg-secondary">
+                    <div class="count-digit">32</div>
+                    <div class="count-title">Prix</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> 
+        <div class="col-lg-6 align-self-center">
+          <div class="video">
+            <a href="https://www.youtube.com/watch?v=HndV87XpkWg" target="_blank"><img src="{% static 'assets/images/play-icon.png' %}" alt=""></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </section>
+
+  <section class="meetings-page p-1">
+    <div class="footer p-1">
       <p>Copyright © 2022 Edu Meeting Co., Ltd. All Rights Reserved. 
           <br>
-          Design: <a href="https://templatemo.com" target="_parent" title="free css templates">TemplateMo</a>
+          XPERTIM GMBH 
           <br>
-          Distibuted By: <a href="https://themewagon.com" target="_blank" title="Build Better UI, Faster">ThemeWagon</a>
+        
+           <a   title="Build Better UI, Faster">Torhausweg 71 , 66539 Neunkirchen, Allemagne</a>
         </p>
     </div>
   </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const coursform = document.getElementById('upload_form');
+      
+      coursform.addEventListener('submit', async (event) => {
+          event.preventDefault(); // Empêche le rechargement de la page
+  
+  
+          const spinner_group = document.getElementById("spinner_group");
+         
+          // Collecte les données du formulaire
+          const formData = new FormData(coursform);
+         
+          const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  
+          // Envoie les données via fetch
+          try {
+            coursform.style.display = "none";
+            spinner_group.style.display = "block";
+  
+              const response = await fetch("{% url 'upload_cours' %}", {
+                  method: 'POST',
+                  headers: {
+                      'X-CSRFToken': csrfToken,
+                  },
+                  body: formData,
+              });
+  
+              if (response.ok) {
+                  const result = await response.json();
+                  if (result.redirect_url) {
+                    console.log("Lien: ", result.redirect_url)
+                      // Redirige vers la page d'affichage du quiz
+                      window.location.href = result.redirect_url;
+                  } else {
+                      console.error("Erreur lors de la génération du quiz.");
+                  }
+              } else {
+                  console.error("Erreur lors de la requête : ", response.status);
+                  coursform.style.display = "block";
+                  spinner_group.style.display = "none";
+  
+              }
+          } catch (error) {
+              console.error("Erreur réseau ou serveur : ", error);
+              coursform.style.display = "block";
+              spinner_group.style.display = "none";
+          }
+      });
+  });
+  
+  </script>
+
 
   <!-- Scripts -->
   <!-- Bootstrap core JavaScript -->
@@ -443,6 +397,4 @@ https://templatemo.com/tm-569-edu-meeting
         });
     </script>
 </body>
-
-</body>
-</html>
+{% endblock content %}

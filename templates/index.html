@@ -53,83 +53,66 @@
 <!-- ***** Main Banner Area End ***** -->
 
 
-  <section class="services" id="mescours">
-    <div class="container merriweather">
-      <div class="row">
-        <div class="col-lg-12">
-          <div class="owl-service-item owl-carousel">
-           {% for cour in cours %}
-            <div class="item">
-              <div class="icon">
-                <img src="{% static 'assets/images/service-icon-01.png' %}" alt="add">
+<section class="services " id="mescours">
+  <div class="container merriweather">
+      <div class="row mb-3">
+          <div class="col-auto">
+            <form id="search-form" class="d-flex" role="search">
+              <div class="input-group">
+                  <input id="search-input" class="form-control" type="search" placeholder="Recherchez un cours" aria-label="Search">
+                  <button class="btn btn-outline-primary text-light" type="submit">
+                      <i class="fas fa-search"></i>
+                  </button>
               </div>
-              <div class="down-content">
-                <h4>{{cour.title}}</h4>
-                <p>{{cour.description}}</p>
-                <p><strong>Enseignant : </strong> {{cour.professeur}}</p>
-                <div class="card-footer mt-3">
-                  <a href="{% url 'course_details' cour.id %}" class="btn btn-outline-light redressed">View Details</a>
-                </div>
-              </div>
-            </div>
-            {% endfor %}
+          </form>
+          
 
-            <!--div class="item">
-              <div class="icon">
-                <img src="{% static 'assets/images/service-icon-02.png' %}" alt="">
-              </div>
-              <div class="down-content">
-                <h4>Best Teachers</h4>
-                <p>Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis massa non vestibulum.</p>
-              </div>
-            </div>
-            
-            <div class="item">
-              <div class="icon">
-                <img src="{% static 'assets/images/service-icon-03.png' %}" alt="">
-              </div>
-              <div class="down-content">
-                <h4>Best Students</h4>
-                <p>Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis massa non vestibulum.</p>
-              </div>
-            </div>
-            
-            <div class="item">
-              <div class="icon">
-                <img src="{% static 'assets/images/service-icon-02.png' %}" alt="">
-              </div>
-              <div class="down-content">
-                <h4>Online Meeting</h4>
-                <p>Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis massa non vestibulum.</p>
-              </div>
-            </div>
-            
-            <div class="item">
-              <div class="icon">
-                <img src="{% static 'assets/images/service-icon-03.png' %}" alt="">
-              </div>
-              <div class="down-content">
-                <h4>Best Networking</h4>
-                <p>Suspendisse tempor mauris a sem elementum bibendum. Praesent facilisis massa non vestibulum.</p>
-              </div>
-            </div-->
-            
+              
           </div>
-        </div>
       </div>
-    </div>
-  </section>
+      <div class="row">
+          <div class="col-lg-12">
 
-  <section class="upcoming-meetings" id="meetings">
+
+              <div id="courses-container" class="owl-service-item owl-carousel " style="">
+                {% for cour in cours %}
+                 <div class="item">
+                   <div class="icon">
+                     <img src="{% static 'assets/images/service-icon-01.png' %}" alt="add">
+                   </div>
+                   <div class="down-content">
+                     <h4>{{cour.title}}</h4>
+                     <p>{{cour.description}}</p>
+                     <p><strong>Enseignant : </strong> {{cour.professeur}}</p>
+                     <div class="card-footer mt-3">
+                       <a href="{% url 'course_details' cour.id %}" class="btn btn-outline-light redressed">View Details</a>
+                     </div>
+                   </div>
+                 </div>
+                 {% endfor %}
+     
+                
+                 
+               </div>
+          </div>
+      </div>
+
+
+      
+  </div>
+</section>
+
+
+  <section class="upcoming-meetings " id="meetings">
     <div class="container">
       <div class="row">
         <div class="col-lg-12">
-          <div class="section-heading merriweather">
+          <div class="section-heading merriweather mt-5">
             <h2>Fonctionnalités</h2>
           </div>
         </div>
 
-        <div class="col-lg-4">
+        <div class="col-lg-4 mb-3">
           <div class="card text-center h-100">
             <div class="card-header merriweather">
               LeaderBoard 
@@ -167,14 +150,14 @@
                   <div class="price">
                     <span>Cours</span>
                   </div>
-                  <a href="meeting-details.html">
+                  <a href="{% url 'lescours' %}">
                     <img src="{% static 'assets/images/cours_enligne.jpg' %}" alt="New Lecturer Meeting"></a>
                 </div>
                 <div class="down-content">
                   <div class="date">
                     <h6>1. <span></span></h6>
                   </div>
-                  <a href="meeting-details.html"><h4>Cours numériques</h4></a>
+                  <a href="{% url 'lescours' %}"><h4>Cours numériques</h4></a>
                   <p>Vous avez accès à la version numériques<br>des cours</p>
                 </div>
               </div>
@@ -185,13 +168,13 @@
                   <div class="price">
                     <span>Questions</span>
                   </div>
-                  <a href="meeting-details.html"><img src="{% static 'assets/images/robot.jpg' %}" alt="Online Teaching"></a>
+                  <a onclick="openChatbot()"><img src="{% static 'assets/images/robot.jpg' %}" alt="Online Teaching"></a>
                 </div>
                 <div class="down-content">
                   <div class="date">
                     <h6>2. <span> </span></h6>
                   </div>
-                  <a href="meeting-details.html"><h4>Une IA pour répondre à vos questions</h4></a>
+                  <a onclick="openChatbot()"><h4>Une IA pour répondre à vos questions</h4></a>
                   <p>Disponible 24/7</p>
                 </div>
               </div>
@@ -202,13 +185,13 @@
                   <div class="price">
                     <span>Quiz</span>
                   </div>
-                  <a href="meeting-details.html"><img src="{% static 'assets/images/quiz.jpg' %}" alt="Higher Education"></a>
+                  <a  href="{% url 'popupquiz' 'pop' %}"><img src="{% static 'assets/images/quiz.jpg' %}" alt="Higher Education"></a>
                 </div>
                 <div class="down-content">
                   <div class="date">
                     <h6>3. <span></span></h6>
                   </div>
-                  <a href="meeting-details.html"><h4>Des quiz en permanance pour chaque cours</h4></a>
+                  <a href="{% url 'popupquiz' 'pop' %}"><h4>Des quiz en permanance pour chaque cours</h4></a>
                   <p>pour vous aider à vous evaluer avant <br>l'examen.</p>
                 </div>
               </div>
@@ -219,13 +202,13 @@
                   <div class="price">
                     <span>Evaluations</span>
                   </div>
-                  <a href="meeting-details.html"><img src="{% static 'assets/images/quiz.png' %}" alt="Student Training"></a>
+                  <a href="{% url 'popupquiz' 'add' %}"><img src="{% static 'assets/images/quiz.png' %}" alt="Student Training"></a>
                 </div>
                 <div class="down-content">
                   <div class="date">
                     <h6>4. <span></span></h6>
                   </div>
-                  <a href="meeting-details.html"><h4>Systeme d'evaluation automatique de quiz</h4></a>
+                  <a href="{% url 'popupquiz' 'add' %}"><h4>Systeme d'evaluation automatique de quiz</h4></a>
                   <p>Vous donnes les details<br> et les erreurs commises</p>
                 </div>
               </div>
@@ -243,10 +226,10 @@
           <div class="row">
             <div class="col-lg-12">
               <div class="item">
-                <h3>DÉCOUVREZ L'INTELLIGENCE ARTIFICIELLE AU SERVICE DE VOTRE APPRENTISSAGE</h3>
+                <h3 class="">DÉCOUVREZ L'INTELLIGENCE ARTIFICIELLE AU SERVICE DE VOTRE APPRENTISSAGE</h3>
                 <p>Grâce à notre plateforme innovante, transformez vos cours en outils interactifs avec des quiz générés automatiquement par l'intelligence artificielle. Une méthode d'apprentissage moderne et efficace pour maîtriser chaque notion clé.</p>
                 <div class="main-button-red">
-                  <div class="scroll-to-section"><a href="#contact">Essayez dès maintenant !</a></div>
+                  <div ><a href="https://www.youtube.com/watch?v=fqePZvhdkms" target="_blank">Voir Plus</a></div>
                 </div>
               </div>
             </div>
@@ -255,7 +238,7 @@
                 <h3>OPTIMISEZ VOTRE RÉVISION EN TOUTE SIMPLICITÉ</h3>
                 <p>Que vous soyez étudiant en cuisine ou en reconversion professionnelle, notre site vous aide à renforcer vos connaissances à travers des quiz personnalisés, adaptés aux contenus des formations déposés par vos enseignants.</p>
                 <div class="main-button-yellow">
-                  <div class="scroll-to-section"><a href="#contact">Commencez dès aujourd'hui !</a></div>
+                  <div ><a href="https://www.youtube.com/watch?v=wIPZyXuD5XM" target="_blank">En savoir plus</a></div>
                 </div>
               </div>
             </div>
@@ -330,15 +313,16 @@
       <div class="row">
         <div class="col-lg-12">
           <div class="section-heading">
-            <h2>Our Popular Courses</h2>
+            <h2>Differentes formations</h2>
           </div>
         </div>
         <div class="col-lg-12">
           <div class="owl-courses-item owl-carousel">
             <div class="item">
-              <img src="{% static 'assets/images/course-01.jpg' %}" alt="Course One">
+              <a href="{%  static 'docs/formation_initiation.pdf' %}" target="_blank">
+              <img src="{% static 'assets/images/cours1.png' %}" alt="Course One"></a>
               <div class="down-content">
-                <h4>Morbi tincidunt elit vitae justo rhoncus</h4>
+                <h4>Parcours d'initiation en cuisine </h4>
                 <div class="info">
                   <div class="row">
                     <div class="col-8">
@@ -351,16 +335,17 @@
                       </ul>
                     </div>
                     <div class="col-4">
-                       <span>$160</span>
+                       <span>4 mois</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="item">
-              <img src="{% static 'assets/images/course-02.jpg' %}" alt="Course Two">
+              <a href="{%  static 'docs/FormationCourDuSoir.pdf' %}" target="_blank">
+                <img src="{% static 'assets/images/cours2.png' %}" alt="Course One"></a>
               <div class="down-content">
-                <h4>Curabitur molestie dignissim purus vel</h4>
+                <h4>Essentiel des Arts culinaires Cours du Soir</h4>
                 <div class="info">
                   <div class="row">
                     <div class="col-8">
@@ -371,16 +356,17 @@
                       </ul>
                     </div>
                     <div class="col-4">
-                       <span>$180</span>
+                       <span>3 mois</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="item">
-              <img src="{% static 'assets/images/course-03.jpg' %}" alt="">
+              <a href="{%  static 'docs/formation_professionel.pdf' %}" target="_blank">
+              <img src="{% static 'assets/images/cours3.png' %}" alt=""></a>
               <div class="down-content">
-                <h4>Nulla at ipsum a mauris egestas tempor</h4>
+                <h4>Professionels en cuisine de pattiserie</h4>
                 <div class="info">
                   <div class="row">
                     <div class="col-8">
@@ -392,16 +378,17 @@
                       </ul>
                     </div>
                     <div class="col-4">
-                       <span>$140</span>
+                       <span>6 mois</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="item">
-              <img src="{% static 'assets/images/course-04.jpg' %}" alt="">
+              <a href="{% static 'docs/FormationCourDuSoir.pdf'%}">
+              <img src="{% static 'assets/images/cours2.png' %}" alt="Course Two"></a>
               <div class="down-content">
-                <h4>Aenean molestie quis libero gravida</h4>
+                <h4>Essentiel des Arts culinaires Cours du Soir</h4>
                 <div class="info">
                   <div class="row">
                     <div class="col-8">
@@ -409,21 +396,20 @@
                         <li><i class="fa fa-star"></i></li>
                         <li><i class="fa fa-star"></i></li>
                         <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
                       </ul>
                     </div>
                     <div class="col-4">
-                       <span>$120</span>
+                       <span>3 mois</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
             <div class="item">
-              <img src="{% static 'assets/images/course-01.jpg' %}" alt="">
+              <a href="{%  static 'docs/formation_professionel.pdf' %}" target="_blank">
+                <img src="{% static 'assets/images/cours3.png' %}" alt="Course One"></a>
               <div class="down-content">
-                <h4>Lorem ipsum dolor sit amet adipiscing elit</h4>
+                <h4>Professionels en cuisine de pattiserie</h4>
                 <div class="info">
                   <div class="row">
                     <div class="col-8">
@@ -432,170 +418,16 @@
                         <li><i class="fa fa-star"></i></li>
                         <li><i class="fa fa-star"></i></li>
                         <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
                       </ul>
                     </div>
                     <div class="col-4">
-                       <span>$250</span>
+                       <span>6 mois</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="item">
-              <img src="{% static 'assets/images/course-02.jpg' %}" alt="">
-              <div class="down-content">
-                <h4>TemplateMo is the best website for Free CSS</h4>
-                <div class="info">
-                  <div class="row">
-                    <div class="col-8">
-                      <ul>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                      </ul>
-                    </div>
-                    <div class="col-4">
-                       <span>$270</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="item">
-              <img src="{% static 'assets/images/course-03.jpg' %}" alt="">
-              <div class="down-content">
-                <h4>Web Design Templates at your finger tips</h4>
-                <div class="info">
-                  <div class="row">
-                    <div class="col-8">
-                      <ul>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                      </ul>
-                    </div>
-                    <div class="col-4">
-                       <span>$340</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="item">
-              <img src="{% static 'assets/images/course-04.jpg' %}" alt="">
-              <div class="down-content">
-                <h4>Please visit our website again</h4>
-                <div class="info">
-                  <div class="row">
-                    <div class="col-8">
-                      <ul>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                      </ul>
-                    </div>
-                    <div class="col-4">
-                       <span>$360</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="item">
-              <img src="{% static 'assets/images/course-01.jpg' %}" alt="">
-              <div class="down-content">
-                <h4>Responsive HTML Templates for you</h4>
-                <div class="info">
-                  <div class="row">
-                    <div class="col-8">
-                      <ul>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                      </ul>
-                    </div>
-                    <div class="col-4">
-                       <span>$400</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="item">
-              <img src="{% static 'assets/images/course-02.jpg' %}" alt="">
-              <div class="down-content">
-                <h4>Download Free CSS Layouts for your business</h4>
-                <div class="info">
-                  <div class="row">
-                    <div class="col-8">
-                      <ul>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                      </ul>
-                    </div>
-                    <div class="col-4">
-                       <span>$430</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="item">
-              <img src="{% static 'assets/images/course-03.jpg' %}" alt="">
-              <div class="down-content">
-                <h4>Morbi in libero blandit lectus cursus</h4>
-                <div class="info">
-                  <div class="row">
-                    <div class="col-8">
-                      <ul>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                      </ul>
-                    </div>
-                    <div class="col-4">
-                       <span>$480</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="item">
-              <img src="{% static 'assets/images/course-04.jpg' %}" alt="">
-              <div class="down-content">
-                <h4>Curabitur molestie dignissim purus</h4>
-                <div class="info">
-                  <div class="row">
-                    <div class="col-8">
-                      <ul>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                        <li><i class="fa fa-star"></i></li>
-                      </ul>
-                    </div>
-                    <div class="col-4">
-                       <span>$560</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            
           </div>
         </div>
       </div>
@@ -607,19 +439,19 @@
       <div class="row">
         <div class="col-lg-6">
           <div class="row">
-            <div class="col-lg-12">
-              <h2>Quelques points sur notre Centre</h2>
+            <div class="col-lg-12 ">
+              <h2 class="text-dark">Quelques points sur notre Centre</h2>
             </div>
-            <div class="col-lg-6">
+            <div class="col-lg-6 ">
               <div class="row">
                 <div class="col-12">
-                  <div class="count-area-content percentage">
+                  <div class="count-area-content  percentage bg-secondary" >
                     <div class="count-digit">94</div>
                     <div class="count-title">Reussites</div>
                   </div>
                 </div>
                 <div class="col-12">
-                  <div class="count-area-content">
+                  <div class="count-area-content bg-secondary" >
                     <div class="count-digit">126</div>
                     <div class="count-title">Professeurs</div>
                   </div>
@@ -629,13 +461,13 @@
             <div class="col-lg-6">
               <div class="row">
                 <div class="col-12">
-                  <div class="count-area-content new-students">
+                  <div class="count-area-content new-students bg-secondary ">
                     <div class="count-digit">2345</div>
                     <div class="count-title">Nouveaux etudiants</div>
                   </div>
                 </div> 
                 <div class="col-12">
-                  <div class="count-area-content">
+                  <div class="count-area-content  bg-secondary" >
                     <div class="count-digit">32</div>
                     <div class="count-title">Prix</div>
                   </div>
@@ -659,11 +491,11 @@
 
 
   
-  <section class="contact-us redressed mb-4">
+  <section class="contact-us redressed pb-3">
     <div class="container ">
     <div class="card bg-transparent" style="border: solid 1px white;">
       <div class="card-header text-center">
-           <h3 class="card-title text-light">Nous trouver</h3>
+           <h3 class="card-title text-light merriweather">Nous trouver</h3>
       </div>
       <div class="card-body">
         <div class="ratio ratio-16x9">
@@ -675,10 +507,9 @@
   </section>
 
  
-  </style>
-  <section class="contact-us my-5 contact1 py-3  redressed " id="contact" style="border: solid 1px white">
+  <section class="contact-us  contact1     redressed " id="contact" style="border: solid 1px white">
     <div class="container text-center ">
-        <h2 class="text-light my-5"><strong>Contact Us</strong></h2>
+        <h2 class="text-light my-5"><strong>Nous Contacter</strong></h2>
     <form action="{% url 'contact' %}" method="post">
       {% csrf_token%}
         <div class="row">
@@ -755,6 +586,89 @@
     </form>
     </div>
   </section>
+
+  
+
+
+  <section class="meetings-page p-1 ">
+    <div class="footer p-1">
+      <p>Copyright © 2022 Edu Meeting Co., Ltd. All Rights Reserved. 
+          <br>
+          XPERTIM GMBH 
+          <br>
+         
+          
+           <a   title="Build Better UI, Faster">Torhausweg 71 , 66539 Neunkirchen, Allemagne</a>
+        </p>
+    </div>
+  </section>
+
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#search-input').on('input', function() {
+            var query = $(this).val();
+            $.ajax({
+                url: '{% url "search_courses" %}',
+                data: {
+                    'query': query
+                },
+                dataType: 'json',
+                success: function(data) {
+                    $('#courses-container').empty();
+                    if (data.courses.length > 0) {
+                        data.courses.forEach(function(cours) {
+                          console.log("Cours: ", ``)
+                       
+                          var courseDetailUrl = `{% url 'course_details' 0 %}`.replace('/0/', `/${cours.cours_id}/`);
+                            var courseItem = `
+
+                               <div class="item" style='display: inline-block;'>
+                                    <div class="icon">
+                                      <img src="{% static 'assets/images/service-icon-01.png' %}" alt="add">
+                                    </div>
+                                    <div class="down-content">
+                                      <h4>${cours.title}</h4>
+                                      <p>{{cour.description}}</p>
+                                      <p><strong>Enseignant : </strong> ${cours.professeur}</p>
+                                      <div class="card-footer mt-3">
+                                     
+                                        <a href="${courseDetailUrl}" class="btn btn-outline-light redressed">View Details</a>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                               
+                            `;
+                            $('#courses-container').append(courseItem);
+                        });
+                    } else {
+                        $('#courses-container').append("<p class='text-light'>Aucun cours trouvé.</p>");
+                let courseItem =     `{% for cour in cours %}
+                 <div class="item style='display: inline-block;' ">
+                   <div class="icon">
+                     <img src="{% static 'assets/images/service-icon-01.png' %}" alt="add">
+                   </div>
+                   <div class="down-content">
+                     <h4>{{cour.title}}</h4>
+                     <p>{{cour.description}}</p>
+                     <p><strong>Enseignant : </strong> {{cour.professeur}}</p>
+                     <div class="card-footer mt-3">
+                       <a href="{% url 'course_details' cour.id %}" class="btn btn-outline-light redressed">View Details</a>
+                     </div>
+                   </div>
+                 </div>
+                 {% endfor %}`
+
+                // $('#courses-container').append(courseItem);
+                    }
+                }
+            });
+        });
+    });
+</script>
+
 
 </body>
   {% endblock content %}

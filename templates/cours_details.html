@@ -1,196 +1,115 @@
 
 
 
-<!doctype html>
+{% extends 'base.html' %}
 {% load static %}
 
-<head>
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="TemplateMo">
-    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet">
-
-    <title>ChiefQuiz</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
+  {% block content %}
 
 
 
-    <!-- Additional CSS Files -->
-    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/templatemo-edu-meeting.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/owl.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/lightbox.css' %}">
-<!--
-
-
-
-https://templatemo.com/tm-569-edu-meeting
-
--->
-</head>
-
-<style>
-    @import url("https://fonts.googleapis.com/css2?family=Redressed&family=Merriweather:wght@300;400;700&display=swap");
-    .redressed {
-        font-family: "Redressed", serif;
-    }
-    .merriweather {
-        font-family: "Merriweather", serif;
-    }
-</style>
 
 <body>
-
+  <style>
+  
+    #a_propos{
+      display: none;
+    }
+    #contact{
+      display: none;
+    }
+  </style>
+  
    
- <!-- Sub Header -->
- <div class="sub-header">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-sm-8">
-        <div class="left-content pt-2">
-          <h6 class="redressed text-light">Apprenez la cuisine <em>Autrement</em> grace à l'intelligence Artificielle</h6>
-        </div>
-      </div>
-      <div class="col-lg-4 col-sm-4">
-        <div class="right-icons">
-          <ul>
-            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-            <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-            <li><a href="#"><i class="fa fa-behance"></i></a></li>
-            <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
- <!-- ***** Header Area Start ***** -->
- <header class="header-area header-sticky">
-  <div class="container">
-      <div class="row">
-          <div class="col-12">
-              <nav class="main-nav">
-                  <!-- ***** Logo Start ***** -->
-                  <a href="{% url 'index' %}" class="logo merriweather">
-                     ChiefQuiz
-                  </a>
-                  <!-- ***** Logo End ***** -->
-                  <!-- ***** Menu Start ***** -->
-                  <ul class="nav merriweather">
-                      <li class="scroll-to-section"><a href="{% url 'index' %}" class="active">Accueil</a></li>
-                      <li><a href="{% url 'lescours' %}" class="merriweather">Cours</a></li>
-                      <li class="scroll-to-section"><a href="#apply">A propos</a></li>
-                     
-                      <li class="scroll-to-section1"><a href="{% url 'faquestion' %}">FAQ</a></li> 
-                      <li class="scroll-to-section"><a href="#contact">Contactez-nous</a></li> 
-                      <li class="has-sub">
-                        <a href="javascript:void(0)">Compte</a>
-                        <ul class="sub-menu">
-                          <li><p class="bg-dark text-light text-center" >{{user.last_name}}</p></li>
-                          {% if  is_staff %}
-                          {% else %}
-                          <li class="bg-transparent">
-                            <div class="progress mx-2 my-2 " style="width: 100%;">
-                              <div class="progress-bar redressed" role="progressbar" style="width: {{ progress_percentage }}%;" 
-                                   aria-valuenow="{{ progress_percentage }}%" aria-valuemin="0" aria-valuemax="100">
-                                {{ progress_percentage }}%
-                              </div>
-                            </div>
-                            
-                          </li>
-                          {% endif %}
-                            <li><a  href="#mescours">Mes Cours</a></li>
-                            
-                            <li><a href="{% url 'home' %}">Edit Profile </a></li>
-                            
-                            <li><a href="{% url 'logout' %}">Deconnexion</a></li>
-                         
-                          </ul>
-                    </li>
 
-
-                     
-
-
-                  </ul>        
-                  <a class='menu-trigger'>
-                      <span>Menu</span>
-                  </a>
-                  <!-- ***** Menu End ***** -->
-              </nav>
-          </div>
-      </div>
-  </div>
-</header>
-<!-- ***** Header Area End ***** -->
 
 
 <section class="heading-page header-text" id="top">
     <div class="container merriweather">
-      <div class="row">
-     
-        <div class="col-lg-8">
-          <div class="container mt-5">
-            <div class="card redressed bg-transparent text-light" style="border: solid 1px white;">
-                <div class="card-header text-center">
-                    <h3 class="card-title">
-                      <div class="row">
-                      <div class="col"><a class="btn btn-primary text-light me-3" href="{% url 'index' %}" ><strong> <-Retour</strong></a> {{ course.title }} </div>
-                      <div class="col">Prof: {{ course.professeur.username }}</div> 
-                    </div>
-                    </h3>
-                </div>
-                <div class="card-header">
-                  <h5><strong class="text-light my-3">Description :</strong> {{ course.description }}</h5>
-                </div>
-                <div class="card-body text-light ">
-                    
-                    <!--h5><strong>Professeur :</strong> {{ course.professeur.username }}</h5-->
-                   
-                    {% if course.file %}
-                    <a href="{{ course.file.url }}" class="btn btn-primary text-light me-3 " target="_blank"> fichier </a>
-                    <a href="{% url 'ask_ai' course.id %}" class="btn btn-primary text-light" >J'ai des questions</a>
-                        
-                    {% else %}
-                        <p class="text-danger">Aucun fichier disponible pour ce cours.</p>
-                    {% endif %}
-                    
-                </div>
-                <div class="card-footer">
-                    
-                    {% if quizzes %}
-                        <h5 class="mb-3">Quiz associés :</h5>
-                        <ul class="list-group">
-                            {% for quiz in quizzes %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                  
-                                    {{ quiz.quiz_title }}
+      <div class="row mt-5 ">
+        <div class="col">
 
+        </div>
+        <div class="col-lg-8">
+          <div class=" mt-5">
+            <div class="row">
+              <div class="col-md-2"></div>
+              <div class="col-md-10">
+                <div class="card redressed bg-secondary text-light" style="border: solid 1px white;">
+                  <div class="card-header text-center">
+                      <h3 class="card-title">
+                        <div class="row">
+                          <div class="col"><a class="btn btn-primary text-light me-3 " href="{% url 'index' %}" ><strong class="redressed"> <-Retour</strong></a></div>
+                        <div class="col" style=""> <h5>{{ course.title }}</h5> </div>
+                        <div class="col" style=""><h5>Prof: {{ course.professeur.username }}</h5> 
+                          
+                        </div> 
+                        {% if is_staff %}
+                        <div class="col">
+                          <a href="{% url 'quiz_creator' course.id  %}" class="btn btn-primary btn-sm">Ajouter un quiz -></a>
+                        </div>
+                        {% endif %}
+                      </div>
+                      </h3>
+                  </div>
+                  <div class="card-header">
+                    <h5><strong class="text-light my-3">Description :</strong> {{ course.description }}</h5>
+                  </div>
+                  <div class="card-body text-light ">
+                      
+                      <!--h5><strong>Professeur :</strong> {{ course.professeur.username }}</h5-->
+                     
+                      {% if course.file %}
+                      <a href="{{ course.file.url }}" class="btn btn-primary text-light me-3 " target="_blank"> fichier </a>
+                      <a href="{% url 'ask_ai' course.id %}" class="btn btn-primary text-light" >J'ai des questions</a>
+                          
+                      {% else %}
+                          <p class="text-danger">Aucun fichier disponible pour ce cours.</p>
+                      {% endif %}
+                      
+                  </div>
+                  <div class="card-footer">
+                      
+                      {% if quizzes %}
+                          <h5 class="mb-3">Quiz associés :</h5>
+                          
+                          <ul class="list-group">
+                            {% if not is_staff %}
+                              {% for val in scores %}
+                                  <li class="list-group-item d-flex justify-content-between align-items-center">
                                     
-                                    {% if not is_staff %}
+                                      {{ val.quiz_i.quiz_title }}
+    
                                     
-                                    <p>Score : {{quiz.total_score}}/{{quiz.max_score}}</p>
-                                    <a href="{% url 'quiz_details' quiz.id  %}" class="btn btn-primary btn-sm">Passer le quiz</a>
-                                    {% else %}
-                                    <a href="{% url 'quiz'   %}" class="btn btn-primary btn-sm">Ajouter</a>
-                                    <a href="{% url 'quiz_details' quiz.id  %}" class="btn btn-primary btn-sm">Voir le quiz</a>
-                                    {% endif %}
-                                    
-                                   
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-warning">Aucun quiz associé à ce cours pour le moment.</p>
-                    {% endif %}
-                </div>
+                                      
+                                      <p>Score : {{val.score}}/{{val.quiz_i.max_score}}</p>
+                                      <a href="{% url 'quiz_details' val.quiz_i.id  %}" class="btn btn-primary btn-sm">Passer le quiz</a>
+                                     
+                                      
+                                     
+                                      
+                                     
+                                  </li>
+                              {% endfor %}
+                              {% else %}
+                              {% for q in quizzes %}
+                              <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ q.quiz_title }}
+                              <a href="{% url 'quiz_details' q.id  %}" class="btn btn-primary btn-sm">Voir le quiz</a>
+                               </li>
+                              {% endfor %}
+                              {% endif %}
+                          </ul>
+                      {% else %}
+                          <p class="text-warning">Aucun quiz associé à ce cours pour le moment.</p>
+                      {% endif %}
+                  </div>
+              </div>
+
+              </div>
             </div>
+            
         </div>
         </div>
 
@@ -199,198 +118,194 @@ https://templatemo.com/tm-569-edu-meeting
     </div>
   </section>
 
-  <section class="meetings-page" id="meetings">
+  <section class="our-courses" id="courses">
     <div class="container">
       <div class="row">
         <div class="col-lg-12">
-          <div class="row">
-            <div class="col-lg-12">
-              <div class="filters">
-                <ul>
-                  <li data-filter="*"  class="active">All Meetings</li>
-                  <li data-filter=".soon">Soon</li>
-                  <li data-filter=".imp">Important</li>
-                  <li data-filter=".att">Attractive</li>
-                </ul>
-              </div>
-            </div>
-            <div class="col-lg-12">
-              <div class="row grid">
-                <div class="col-lg-4 templatemo-item-col all soon">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$14.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-01.jpg" alt=""></a>
+          <div class="section-heading">
+            <h2>Differentes formations</h2>
+          </div>
+        </div>
+        <div class="col-lg-12">
+          <div class="owl-courses-item owl-carousel">
+            <div class="item">
+              <a href="{%  static 'docs/formation_initiation.pdf' %}" target="_blank">
+              <img src="{% static 'assets/images/cours1.png' %}" alt="Course One"></a>
+              <div class="down-content">
+                <h4>Parcours d'initiation en cuisine </h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
                     </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>12</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>New Lecturers Meeting</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all imp">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$22.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-02.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>14</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Online Teaching Techniques</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all soon">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$24.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-03.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>16</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Network Teaching Concept</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all att">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$32.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-04.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>18</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Online Teaching Tools</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all att">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$34.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-02.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>22</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>New Teaching Techniques</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all imp">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$45.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-03.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>24</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Technology Conference</h4></a>
-                      <p>TemplateMo is the best website<br>when it comes to Free CSS.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all imp att">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$52.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-01.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>27</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Online Teaching Techniques</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all soon imp">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$64.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-02.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>28</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Instant Lecture Design</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-lg-4 templatemo-item-col all att soon">
-                  <div class="meeting-item">
-                    <div class="thumb">
-                      <div class="price">
-                        <span>$74.00</span>
-                      </div>
-                      <a href="meeting-details.html"><img src="assets/images/meeting-03.jpg" alt=""></a>
-                    </div>
-                    <div class="down-content">
-                      <div class="date">
-                        <h6>Nov <span>30</span></h6>
-                      </div>
-                      <a href="meeting-details.html"><h4>Online Social Networking</h4></a>
-                      <p>Morbi in libero blandit lectus<br>cursus ullamcorper.</p>
+                    <div class="col-4">
+                       <span>4 mois</span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="col-lg-12">
-              <div class="pagination">
-                <ul>
-                  <li><a href="#">1</a></li>
-                  <li class="active"><a href="#">2</a></li>
-                  <li><a href="#">3</a></li>
-                  <li><a href="#"><i class="fa fa-angle-right"></i></a></li>
-                </ul>
+            <div class="item">
+              <a href="{%  static 'docs/FormationCourDuSoir.pdf' %}" target="_blank">
+                <img src="{% static 'assets/images/cours2.png' %}" alt="Course One"></a>
+              <div class="down-content">
+                <h4>Essentiel des Arts culinaires Cours du Soir</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>3 mois</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
+            <div class="item">
+              <a href="{%  static 'docs/formation_professionel.pdf' %}" target="_blank">
+              <img src="{% static 'assets/images/cours3.png' %}" alt=""></a>
+              <div class="down-content">
+                <h4>Professionels en cuisine de pattiserie</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>6 mois</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <a href="{% static 'docs/FormationCourDuSoir.pdf'%}">
+              <img src="{% static 'assets/images/cours2.png' %}" alt="Course Two"></a>
+              <div class="down-content">
+                <h4>Essentiel des Arts culinaires Cours du Soir</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>3 mois</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="item">
+              <a href="{%  static 'docs/formation_professionel.pdf' %}" target="_blank">
+                <img src="{% static 'assets/images/cours3.png' %}" alt="Course One"></a>
+              <div class="down-content">
+                <h4>Professionels en cuisine de pattiserie</h4>
+                <div class="info">
+                  <div class="row">
+                    <div class="col-8">
+                      <ul>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                        <li><i class="fa fa-star"></i></li>
+                      </ul>
+                    </div>
+                    <div class="col-4">
+                       <span>6 mois</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
           </div>
         </div>
       </div>
     </div>
-    <div class="footer">
+  </section>
+
+  
+  <section class="our-facts">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="row">
+            <div class="col-lg-12">
+              <h2>Quelques points sur notre Centre</h2>
+            </div>
+            <div class="col-lg-6">
+              <div class="row">
+                <div class="col-12">
+                  <div class="count-area-content percentage bg-secondary">
+                    <div class="count-digit">94</div>
+                    <div class="count-title">Reussites</div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="count-area-content bg-secondary">
+                    <div class="count-digit">126</div>
+                    <div class="count-title">Professeurs</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-6">
+              <div class="row">
+                <div class="col-12">
+                  <div class="count-area-content new-students bg-secondary">
+                    <div class="count-digit">2345</div>
+                    <div class="count-title">Nouveaux etudiants</div>
+                  </div>
+                </div> 
+                <div class="col-12">
+                  <div class="count-area-content bg-secondary">
+                    <div class="count-digit">32</div>
+                    <div class="count-title">Prix</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> 
+        <div class="col-lg-6 align-self-center">
+          <div class="video">
+            <a href="https://www.youtube.com/watch?v=HndV87XpkWg" target="_blank"><img src="{% static 'assets/images/play-icon.png' %}" alt=""></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </section>
+
+  <section class="meetings-page p-1">
+    <div class="footer p-1">
       <p>Copyright © 2022 Edu Meeting Co., Ltd. All Rights Reserved. 
           <br>
-          Design: <a href="https://templatemo.com" target="_parent" title="free css templates">TemplateMo</a>
+          XPERTIM GMBH 
           <br>
-          Distibuted By: <a href="https://themewagon.com" target="_blank" title="Build Better UI, Faster">ThemeWagon</a>
+         
+          
+           <a   title="Build Better UI, Faster">Torhausweg 71 , 66539 Neunkirchen, Allemagne</a>
         </p>
     </div>
   </section>
@@ -465,5 +380,4 @@ https://templatemo.com/tm-569-edu-meeting
     </script>
 </body>
 
-</body>
-</html>
+{% endblock content %}

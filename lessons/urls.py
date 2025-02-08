@@ -1,6 +1,7 @@
 from django.conf.urls.static import static
 from django.conf import settings
-from django.urls import path
+from django.urls import path, re_path
+from django.views.static import serve
 
 from . import views
 
@@ -8,7 +9,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('home/', views.home, name='home'),
     path('upload_cours/', views.upload_cours, name='upload_cours'),
-    path('quiz/<int:course_id>', views.quiz, name='quiz_creator'),
+    path('quiz_creator/<int:course_id>/', views.quiz, name='quiz_creator'),
     path('quiz/', views.quiz, name='quiz'),
     path('profile/', views.profile, name='profile'),
     path('code/', views.code, name='code'),
@@ -29,7 +30,9 @@ urlpatterns = [
     path('contact/', views.contact, name='contact'),
     path('boat/', views.boat, name='boat'),
     path('graph/', views.dash, name='dash'),
+    path('popupquiz/<str:add_val>/', views.popupquiz, name='popupquiz'),
+    path('search/', views.search_courses, name='search_courses'),
       
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-      
+] 
+urlpatterns+= [re_path(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
+    re_path(r'^static/(?P<path>.*)$', serve,{'document_root': settings.STATIC_ROOT}),]

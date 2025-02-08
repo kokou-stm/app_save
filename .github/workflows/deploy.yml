@@ -32,19 +32,4 @@ jobs:
       - name: Push Docker image
         run: docker push chezquizregister.azurecr.io/chefquiz:latest
 
-      # Étape 6 : Déployer sur Azure Container Instance
-      - name: Deploy to Azure Container Instance
-        uses: azure/aci-deploy@v1
-        with:
-          resource-group: Projet
-          dns-name-label: chefquiz
-          registry-login-server: chezquizregister.azurecr.io
-          image: chezquizregister.azurecr.io/chefquiz:latest
-          name: chezquizregister
-          location: eastus
-          ports: "8000"
-          registry-username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
-          registry-password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
-          resources: |
-            requests.memory: "2Gi"
-            requests.cpu: "1"
+     

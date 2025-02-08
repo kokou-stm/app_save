@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,13 +23,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-3&f9adfe$a(6low^lki1ytj-xk9%u*p$+)d@*ieytn-@dk73*n'
+SECRET_KEY = os.environ.get('SECRET_KEY')# 'django-insecure-3&f9adfe$a(6low^lki1ytj-xk9%u*p$+)d@*ieytn-@dk73*n'
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["cae4-193-50-192-71.ngrok-free.app", "localhost", "127.0.0.1"]
-CSRF_TRUSTED_ORIGINS =["http://*.127.0.0.1","http://*.localhost", "https://*.cae4-193-50-192-71.ngrok-free.app"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]#cae4-193-50-192-71.ngrok-free.app", 
+#CSRF_TRUSTED_ORIGINS =["http://*.127.0.0.1","http://*.localhost", "https://*.cae4-193-50-192-71.ngrok-free.app"]
 
 # Application definition
 
@@ -84,15 +87,14 @@ DATABASES = {
 }
 
 
-import os
 
 '''DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'postgres',  # Nom de la base de données
-        'USER': 'chefquiz',  # Nom d'utilisateur de votre base de données
-        'PASSWORD': "Sekpona1@",  # Mot de passe (utilisez l'environnement pour plus de sécurité)
-        'HOST': "chefquiz.postgres.database.azure.com",  # L'hôte de la base de données
+        'USER': 'chefquizdb',  # Nom d'utilisateur de votre base de données
+        'PASSWORD': "Validation1@1221",  # Mot de passe (utilisez l'environnement pour plus de sécurité)
+        'HOST': "chefquizdb.postgres.database.azure.com",  # L'hôte de la base de données
         'PORT': 5432,  # Le port, par défaut 5432 pour PostgreSQL
         "OPTIONS": {
            'sslmode': 'require',
@@ -135,9 +137,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = 'lessons/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'lessons/static']
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+print("Root: ", STATIC_ROOT)
+STATICFILES_DIRS = [BASE_DIR / 'static']
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
@@ -156,7 +160,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'login'
 
-
 #print("Chemin: ", os.listdir(os.path.join(BASE_DIR, "media")))
 
 EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
@@ -164,6 +167,11 @@ PERCENT=0
 EMAIL_HOST="smtp.gmail.com"
 EMAIL_PORT= 587
 EMAIL_USE_TLS= True
-EMAIL_HOST_USER="voicetranslator0@gmail.com" #os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD="rfqzyhocddgmehbe" #os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_USER=os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD=os.environ.get('EMAIL_HOST_PASSWORD')
+AZURE_EMBEDDING_ENDPOINT=os.environ.get('AZURE_EMBEDDING_ENDPOINT')
+AZURE_CHAT_ENDPOINT=os.environ.get('AZURE_CHAT_ENDPOINT')
+
+AZURE_CHAT_API_KEY=os.environ.get('AZURE_CHAT_API_KEY')
+AZURE_EMBEDDING_API_KEY=os.environ.get('AZURE_EMBEDDING_API_KEY')
 EMAIL_USE_SSL = False  # Assurez-vous que c'est désactivé si TLS est activé

@@ -41,7 +41,7 @@ def clean_filename(instance, filename):
 # Create your models here.
 class VerificationCode(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='verification_code')
-    code = models.CharField(max_length=6, unique=True, default='')
+    code = models.CharField(max_length=6,  default='')
     created_at = models.DateTimeField(auto_now_add=True)
     
     def generate_code(self):

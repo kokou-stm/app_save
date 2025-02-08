@@ -1,64 +1,103 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import CourseForm
 from django.http import JsonResponse
 from .models import *
 from .api import *
 from django.conf import settings
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-from django.conf import settings
 from django.contrib import messages
-import datetime
-from datetime import timedelta
 import PyPDF2
 import openai
 from django.db.models import Q
 from django.core.mail import EmailMessage
-from django.http import JsonResponse
 from django.urls import reverse
-
 from django.views.decorators.csrf import csrf_exempt
 from django.core.validators import validate_email
 from django.contrib.auth.password_validation import validate_password
-from .models import *
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
-
-from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.core.exceptions import ValidationError
-import codecs,math
+import codecs, math
+
+from langchain.prompts import PromptTemplate
+from langchain.chains import RetrievalQA,  ConversationalRetrievalChain
+from langchain.memory import ConversationBufferMemory
+from langchain_community.vectorstores import FAISS
+from langchain.chains import RetrievalQA
+from langchain_community.document_loaders import PyPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.memory import ConversationBufferMemory
+from langchain_openai import AzureChatOpenAI, AzureOpenAIEmbeddings
+
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse, HttpResponseForbidden
 from django.db.models import Sum
-from langchain_openai import AzureChatOpenAI
-from langchain_openai import  AzureOpenAIEmbeddings
+
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+import json
+import numpy as np
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib, ssl
+
+
+
+email_address = settings.EMAIL_HOST_USER
+email_password = settings.EMAIL_HOST_PASSWORD
+
+smtp_address = settings.EMAIL_HOST
+smtp_port = 465
+embeddings = AzureOpenAIEmbeddings(model="text-embedding-3-large",
+                                    azure_endpoint=settings.AZURE_EMBEDDING_ENDPOINT,
+                                    api_key=settings.AZURE_EMBEDDING_API_KEY,
+                                    openai_api_version="2023-05-15")
+
+open_client = AzureOpenAI(
+        api_key=settings.AZURE_CHAT_API_KEY,
+        api_version="2023-12-01-preview",
+        azure_endpoint=settings.AZURE_CHAT_ENDPOINT
+    )
+
+llm_azure = AzureChatOpenAI(
+                #openai_api_base="https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
+                openai_api_version="2024-07-01-preview",
+                deployment_name="gpt-35-turbo-chefquiz",
+                openai_api_key=settings.AZURE_EMBEDDING_API_KEY,
+                openai_api_type='azure',
+                azure_endpoint= "https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
+            )
+
 
 @login_required
 def index(request):
     
     progress_percentage=0
     cours = Cours.objects.all()
-    
+    max_score = QuestionAnswers.objects.aggregate(total=Sum('score'))['total']
+    print("Max_score: ", max_score)
+    if not max_score:
+        max_score = 1
     percents_etud = {}
+    
     list_etu = Etudiant.objects.all()
     for etud in list_etu: 
         total_score = sum(score['score'] for score in etud.scores)
-        try:
-            progress_etud = round((total_score / max_score) * 100, 1) if max_score > 0 else 0
-            
-        except:
-            progress_etud = 0
+        progress_etud = round((total_score / max_score) * 100, 1) if max_score > 0 else 0
         percents_etud[f"{etud.username.first_name} {etud.username.last_name}"]= progress_etud
+    percents_etud = dict(sorted(percents_etud.items(), key=lambda item: item[1], reverse=True))
+
+    print("Percent",percents_etud)
     
     if request.user.is_staff:
         prof = Professeur.objects.get(username = request.user)
         cours = Cours.objects.filter(professeur=prof)
-        context = {'is_staff': request.user.is_staff, 'cours': cours,  'cours': cours,
+        context = {'is_staff': request.user.is_staff, 'cours': cours,  
                    'list_etud': list_etu,
                   'percents_etud': percents_etud}
        
@@ -84,41 +123,95 @@ def index(request):
     
     print(cours)
     return render(request, "index.html", context)
-#print("Base :" ,os.path.join(settings.BASE_DIR, "/media/uploads/cuisine-proffessionnelle-avancee-1.pdf"))
 
+
+from django.http import JsonResponse
+from .models import Cours
+
+def search_courses(request):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        query = request.GET.get('query', '')
+        if query:
+            results = Cours.objects.filter(title__icontains=query) | Cours.objects.filter(description__icontains=query)
+           
+            if results.count()==0:
+              results = Cours.objects.all()
+            courses = [{'title': cours.title, 'description': cours.description, 'professeur': cours.professeur.username.username, "cours_id":cours.id} for cours in results]
+            return JsonResponse({'courses': courses})
+    return JsonResponse({'courses': []})
 
 
 def dash(request):
 
     progress_percentage=0
     cours = Cours.objects.all()
-    etudiant = Etudiant.objects.get(username = request.user)
-    scores =  [score['score'] for score in etudiant.scores]
-    print("scores! ", scores)
+    quiz = Quiz.objects.all().count()
+    quiz_number = [i for i in range(1, 1+quiz)]
+    print("Number: ", len(quiz_number))
     max_score = QuestionAnswers.objects.aggregate(total=Sum('score'))['total']
     print("Max_score: ", max_score)
-    try:
-        total_score = sum(score['score'] for score in etudiant.scores)
-        progress_percentage = (total_score / max_score) * 100 if max_score > 0 else 0
-    except:
-        pass
+    if max_score == None:
+        max_score = 1
     percents_etud = {}
     list_etu = Etudiant.objects.all()
-    for etud in list_etu: 
+    for n, etud in enumerate(list_etu): 
         total_score = sum(score['score'] for score in etud.scores)
         progress_etud = round((total_score / max_score) * 100, 1) if max_score > 0 else 0
         percents_etud[f"{etud.username.first_name} {etud.username.last_name}"]= progress_etud
+        if n==2:
+            print("Etudiant: ",etud, len(etud.scores))
+    percents_etud = dict(sorted(percents_etud.items(), key=lambda item: item[1], reverse=True))
+    moyenne = [[score['score'] for score in etudiant_i.scores] for etudiant_i in list_etu]
     
-    
-    context = {'progress_percentage': round(progress_percentage, 2),
+    #moyenne = [i.extend([0]*(len(quiz_number)-len(i))) for i in moyenne if len(i)< len(quiz_number)]
+    for i in range(len(moyenne)):
+        if len(moyenne[i]) < len(quiz_number):
+            moyenne[i].extend([0] * (len(quiz_number) - len(moyenne[i])))
+
+    best_calcul = [np.mean(np.array(value)) for value in moyenne ]
+    context = {
                 'is_staff': request.user.is_staff,
                 'list_etud': list_etu,
                 'percents_etud': percents_etud,
-                'scores': scores}
-    
-    return render(request, "dash.html", context)
+                }
+    #print("best_calcul ", best_calcul)
+    try:
+        best_list =moyenne[best_calcul.index(max(best_calcul))]
+        
+        #print("moyenne1",moyenne)
+        moyenne = np.array(moyenne)#, dtype=np.int32)
+        moyenne = list(np.mean(moyenne, axis = 0, dtype=np.int32))
+        moyenne = [float(m) for m in moyenne]
+        #print("Percent",percents_etud) 
 
-#print("Base :" ,os.path.join(settings.BASE_DIR, "/media/uploads/cuisine-proffessionnelle-avancee-1.pdf"))
+        #print("moyenne", moyenne, len(moyenne))
+        #print("best_list", best_list, len(best_list))
+        
+        context['scores'] =[0]
+        context['best_list']= best_list
+        context['moyenne'] = moyenne
+    except:
+        pass
+    
+    
+    
+    
+    if not request.user.is_staff:
+        etudiant = Etudiant.objects.get(username = request.user)
+        scores =  [score['score'] for score in etudiant.scores]
+        print("scores! ", scores)
+        try:
+            total_score = sum(score['score'] for score in etudiant.scores)
+            progress_percentage = (total_score / max_score) * 100 if max_score > 0 else 0
+            context['progress_percentage']= round(progress_percentage, 2)
+            context['scores'] =scores
+        except:
+            pass
+    
+    context['quiz_number'] =quiz_number
+    context['nbre_quiz'] = len(quiz_number)
+    print(context['nbre_quiz'])
+    return render(request, "dash.html", context)
 
 
 def profile(request):
@@ -166,8 +259,6 @@ def profile(request):
 
     return render(request, 'profile.html', context)
 
-    
-
 
 def faquestion(request):
     print('Og')
@@ -194,23 +285,6 @@ def home(request):
 
     return render(request, 'home.html')
 
-from langchain.prompts import PromptTemplate
-from langchain_openai import OpenAIEmbeddings
-
-from langchain_community.vectorstores import FAISS
-from langchain.chains import RetrievalQA
-import openai
-from dotenv import load_dotenv, find_dotenv
-_ = load_dotenv(find_dotenv())
-openai.api_key ="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"
-os.environ["OPENAI_API_KEY"] ="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"
-os.environ['HUGGINGFACEHUB_API_TOKEN'] ="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"# Charger les documents
-
-#embeddings = OpenAIEmbeddings()
-embeddings = AzureOpenAIEmbeddings(model="text-embedding-3-large",
-                                    azure_endpoint="https://realtimekokou.openai.azure.com/openai/deployments/text-embedding-3-large/embeddings?api-version=2023-05-15",
-                                    api_key="h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j",
-                                    openai_api_version="2023-05-15")
 
 @login_required
 def upload_cours(request):
@@ -230,102 +304,17 @@ def upload_cours(request):
         folder_path = os.path.join(settings.MEDIA_ROOT, save_path)
         print("folderpath: ", folder_path)
         cours_path = course.file.path
+        
         save_db(cours_path, folder_path, embeddings)
         #process_message_with_rag(cours)
         messages.info(request, f"Cours {title} a été bien ajouté.")
+        redirect_url = reverse('quiz_creator', args=[course.id])
+        return JsonResponse({'redirect_url': redirect_url})
         
-        courses = Cours.objects.all()
-        return redirect('quiz')
+        #return redirect('quiz_creator', course_id=course.id)
 
     return render(request, 'upload_cours.html')
 
-def quiz1(request, course_id=None):
-    courses = Cours.objects.all() 
-    if request.method == 'POST':
-        quiz_title = request.POST.get('quiz_title')
-        quiz_description = request.POST.get('quiz_description')
-        course_id = request.POST.get('course_id')
-        number = request.POST.get('number')
-        tone = request.POST.get('tone')
-        course = Cours.objects.get(id=course_id)
-        quiz, created = Quiz.objects.get_or_create(
-            quiz_title=quiz_title,
-            quiz_description=quiz_description,
-            course=course
-        )
-
-       
-        cours = Cours.objects.get(id = course.id)
-        path = cours.file.path
-        print("lien: ", path)
-        #return render(request, "quiz.html", {'courses': courses})
-        text = parse_file(path)
-        grade=10
-        data = chat_with_openai(text[:1000], number, grade, tone, response_json)
-        data = json.loads(data)
-        quiz_data = []
-        i = 1
-        for key, value in data.items():
-            #print(f"Question {value['no']}: {value['mcq']}")
-            #print("Options:")
-            """for option_key, option_value in value['options'].items():
-                print(f"  {option_key}: {option_value}")
-            print(f"Correct Answer: {value['correct']}")"""
-            #print("-" * 50)
-            quiz_element = {
-            "no": value["no"],
-            "mcq": value["mcq"],
-            "options": value["options"],
-            "correct": value["correct"]
-             }
-            print(f"{i}: ", quiz_element)
-            quiz_data.append(quiz_element)
-            i+=1
-            
-            question = QuestionAnswers.objects.create(
-                quiz=quiz,
-                question_text=value['mcq'],
-                numero = int(value["no"]),
-                options=value["options"],
-                great_answer=value['correct'],
-                required_time=60,  # Temps requis par défaut
-                score=10  # Score par défaut
-            )
-            
-        quiz_data = json.dumps(quiz_data)
-        questions = QuestionAnswers.objects.filter(quiz=quiz)
-
-        # Afficher le quiz et les questions dans la vue
-        return render(request, 'quiz_details.html', {
-            'quiz': quiz,
-            'questions': questions
-        })
-       
-        '''for qa in qa_data:
-            question = QuestionAnswers.objects.create(
-                quiz=quiz,
-                question_text=qa.get("question", ""),
-               
-                great_answer=qa.get("answer", ""),  # Assuming the correct answer is the same as the given one
-                required_time=60,  # Set default time or compute based on the question length
-                score=10  # Assign a score per question or calculate dynamically
-            )
-        quiz = Quiz.objects.get(id=quiz.id)
-        questions = QuestionAnswers.objects.filter(quiz=quiz)
-
-        return render(request, 'quiz_display.html', {
-            'quiz': quiz,
-            'questions': questions
-        })'''
-    if course_id:
-       
-       courses = Cours.objects.filter(id=course_id)      
-    
-      
-    return render(request, "quiz.html", {'courses': courses, 'is_staff': request.user.is_staff})
-
-
-from django.http import JsonResponse
 
 def quiz(request, course_id=None):
     courses = Cours.objects.all()
@@ -334,7 +323,7 @@ def quiz(request, course_id=None):
         quiz_description = request.POST.get('quiz_description')
         course_id = request.POST.get('course_id')
         number = request.POST.get('number')
-        tone = request.POST.get('tone')
+        difficulty = request.POST.get('tone')
         course = Cours.objects.get(id=course_id)
        
         quiz, created = Quiz.objects.get_or_create(
@@ -347,10 +336,14 @@ def quiz(request, course_id=None):
         # Générer le quiz (logique existante)
         cours = Cours.objects.get(id=course.id)
         path = cours.file.path
-        text = parse_file(path)
+        '''text = parse_file(path)
         grade = 5
         data = chat_with_openai(text[:1000], number, grade, tone, response_json)
         data = json.loads(data)
+        '''
+        data = chat_with_openai(number, difficulty, f"{course_id}")
+        data = json.loads(data)
+        
 
         for key, value in data.items():
             QuestionAnswers.objects.create(
@@ -413,12 +406,11 @@ def update_quiz(request, quiz_id=None):
                 questions_answers.options=options
                 questions_answers.great_answer = great_answer
                 questions_answers.save()
-                
+        messages.info(request, "Modifications enregistrés !")
         # Rediriger après soumission
         return redirect("index")  # Changez l'URL en fonction de vos besoins
 
     return render(request, 'quiz_form.html', {'quiz': quiz})
-
 
 
 def generate_quiz(path_quiz):
@@ -434,22 +426,68 @@ def upload_file(request):
         form = CourseForm()
     return render(request, 'upload_file.html', {'form': form})
 
+@login_required
 def listecours(request):
     cours = Cours.objects.all()
-    return render(request, 'lescours.html', {'cours': cours, 'is_staff': request.user.is_staff,})
+    context = {'cours': cours, 'is_staff': request.user.is_staff}
+    if not  request.user.is_staff:
+        etudiant = Etudiant.objects.get(username = request.user)
+        scores =  [score['score'] for score in etudiant.scores]
+        print("scores! ", scores)
+        max_score = QuestionAnswers.objects.aggregate(total=Sum('score'))['total']
+        print("Max_score: ", max_score)
+        try:
+            total_score = sum(score['score'] for score in etudiant.scores)
+            progress_percentage = (total_score / max_score) * 100 if max_score > 0 else 0
+            context['progress_percentage']= round(progress_percentage, 2)
+         
+        except:
+            pass
+    
+        
+            
+    return render(request, 'lescours.html', context)
 
 def course_details(request, course_id):
     # Récupération du cours
     course = get_object_or_404(Cours, id=course_id)
-    
-    # Récupération du quiz associé
-    quizzes = Quiz.objects.filter(course=course)
    
-    context = {
-        'course': course,
-        'quizzes': quizzes,
-        'is_staff': request.user.is_staff,
-    }
+    print('Chemin: ', course.file.path)
+    quizzes = Quiz.objects.filter(course=course)
+    context = {'course': course, 'is_staff': request.user.is_staff, 'quizzes': quizzes}
+    # Récupération du quiz associé
+    
+    print("Quiz: ", quizzes)
+    scores = []
+    if not request.user.is_staff:
+        etudiant = Etudiant.objects.get(username = request.user)
+        
+        
+        max_score = QuestionAnswers.objects.aggregate(total=Sum('score'))['total']
+        print("Max_score: ", max_score)
+        try:
+            total_score = sum(score['score'] for score in etudiant.scores)
+            progress_percentage = (total_score / max_score) * 100 if max_score > 0 else 0
+            context['progress_percentage']= round(progress_percentage, 2)
+         
+        except:
+            pass
+
+        for quizze in quizzes:
+            score_dict = next((score for score in etudiant.scores if score['quiz_id'] == quizze.id), 0)
+            print("val: ",score_dict)
+            if score_dict == 0:
+                score_val = 0
+            else:
+                score_val =  score_dict['score']
+            scores.append({
+                "quiz_i": quizze,
+                "score" : score_val #, score_dict['max_score']
+            })
+        
+    
+    context['scores']= scores
+    print("Context: ", context)
     return render(request, 'cours_details.html', context)
 
 
@@ -477,6 +515,7 @@ def quiz_score(request, quiz_id):
 
     # Si l'utilisateur soumet ses réponses
     if request.method == 'POST':
+        print("Data: ", request.POST)
         total_score = 0
         max_score = 0
         # Calculer le score de l'étudiant
@@ -504,15 +543,9 @@ def quiz_score(request, quiz_id):
         if etudiant.scores is None:
             etudiant.scores = []
         messages.success(request,  f"""Votre Score: {total_score}/{max_score} Soit {round((total_score/max_score)*100, 2)}%""")
-        quiz.total_score = total_score
+        #quiz.total_score = total_score
         quiz.max_score=max_score
         quiz.save()
-        etudiant.scores.append({
-            'quiz_id': quiz.id,
-            'score': total_score,
-            'max_score': max_score,
-        })
-        etudiant.save()
         for existing_score in etudiant.scores:
             if existing_score['quiz_id'] == quiz.id:
                 # Mise à jour des données existantes
@@ -526,7 +559,22 @@ def quiz_score(request, quiz_id):
                 'score': score,
                 'max_score': max_score,
             })
-
+        
+        
+        for existing_score in etudiant.scores:
+            if existing_score['quiz_id'] == quiz.id:
+                # Mise à jour des données existantes
+                existing_score['score'] = score
+                existing_score['max_score'] = max_score
+                break
+        else:
+            # Ajouter une nouvelle entrée si le quiz_id n'existe pas
+            etudiant.scores.append({
+                'quiz_id': quiz_id,
+                'score': score,
+                'max_score': max_score,
+            })
+        etudiant.save()
         # Rediriger vers une page de résultat ou afficher un message de succès
         return render(request, 'quiz_result.html', {
             'quiz': quiz,
@@ -537,6 +585,17 @@ def quiz_score(request, quiz_id):
                             })
 
     return render(request, 'quiz_display.html', {'quiz': quiz, 'questions': questions})
+
+def popupquiz(request, add_val=None):
+    print(request.build_absolute_uri())
+    mess = ""
+    print("add_val", str(add_val))
+    if str(add_val) == 'add':
+        mess= "Passez les quiz et obtenez decouvrez la correction par IA." 
+    elif str(add_val) == 'pop':
+        mess= "Selectionnez un cours, et decouvrez les quiz associés."
+    messages.info(request, str(mess))
+    return redirect("index")
 
 def register(request):
     mess = ""
@@ -569,6 +628,30 @@ def register(request):
                     user.set_password(user.password)
                     user.save()
                     
+
+                    #try:
+                    # Essayer de récupérer l'étudiant et de lui attribuer des scores
+                    etudiant = Etudiant.objects.get(username=user)
+                    if etudiant.scores is None:
+                        etudiant.scores = []
+                    
+                    quizes = Quiz.objects.all()
+                    for quiz in quizes:
+                        etudiant.scores.append({
+                            'quiz_id': quiz.id,
+                            'score': 0,
+                            'max_score': quiz.max_score,
+                        })
+                    etudiant.save()
+
+                    ''' except Exception as e:
+                        print('Erreur lors de l\'assignation des scores:', e)
+                        messages.error(request, "Une erreur est survenue lors de l'initialisation des scores.")'''
+                
+
+
+
+
                     subject = "Bienvenue sur ChefQuiz !"
 
                     email_message = f"""
@@ -661,7 +744,7 @@ def register(request):
                     </html>
                     """
 
-                    emailsender(subject, email_message, user.email)
+                    emailsender(subject, email_message, email_address,  user.email)
 
                     mess = f"Welcome, {prenom}! Your account has been successfully created. To activate your account, please retrieve your verification code from the email sent to {user.email}"
                         
@@ -746,18 +829,20 @@ def register(request):
                     </html>
                     """
 
-                    emailsender(subject, email_message, user.email)
-
+                    emailsender(subject, email_message, email_address, user.email)
+                
 
                     #Membre.objects.create(user=user, email=email, nom= username ).save()
                     return redirect("code")
             except Exception as e:
-                    print("error: ", e)
+                    print("error: ", type(e), e)
                     #err = " ".join(e)
-                    messages.error(request, e)
+                    
+                    messages.error(request, f"Erreur survenue lors de la creation de compte, veuillez reessayer.")
                     return render(request, template_name="register.html")
             
-        #messages.info(request, "Bonjour")
+        else:
+            messages.info(request, mess)
 
     return render(request, template_name="register.html")
 
@@ -797,7 +882,47 @@ def connection(request):
     return render(request, template_name="login.html")
 
 
+
+from django.core.mail import send_mail  # Use Django's email sending
+from django.utils.html import strip_tags # For plain text version
+from django.template.loader import render_to_string # For cleaner HTML
+
 def forgotpassword(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        user = User.objects.filter(email=email).first()
+
+        if user:
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.id))
+            current_site = request.META["HTTP_HOST"] # Replace with your actual domain
+            subject = "Password Reset Chefquiz"
+
+            # Use a template for cleaner HTML
+            html_message = render_to_string('account/password_reset_email.html', {
+                'user': user,
+                'reset_link': f"{current_site}/updatepassword/{token}/{uid}/",
+            })
+
+            plain_message = strip_tags(html_message) # Create plain text version
+
+            send_mail(
+                subject,
+                plain_message,  # Send plain text version
+                email_address,  # From email
+                [user.email],  # To email(s)
+                html_message=html_message,  # Send HTML version
+            )
+
+            messages.success(request, f"A reset password email has been sent to {user.email}.")
+        else:
+            messages.success(request, "The email address does not match any account.")
+
+    return render(request, "account/forgot_password.html")
+
+
+
+def forgotpassword1(request):
      if request.method =="POST":
           username = request.user.username
           email = request.POST.get("email")
@@ -807,7 +932,7 @@ def forgotpassword(request):
                print("User exist")
                token = default_token_generator.make_token(user)
                uid = urlsafe_base64_encode(force_bytes(user.id))
-               current_host = request.META["HTTP_HOST"]
+               current_host =request.META["HTTP_HOST"]
                
                Subject = "Password Reset Chefquiz "
                
@@ -851,20 +976,22 @@ def forgotpassword(request):
                             margin-top: 20px;
                         }}
                         .button {{
-                            display: inline-block;
-                            padding: 12px 20px;
-                            background-color: #007bff;
-                            color: #ffffff;
-                            text-decoration: none;
-                            border-radius: 5px;
-                            font-size: 16px;
-                            font-weight: bold;
-                            border: none;
-                        }}
+                        display: inline-block;
+                        padding: 12px 20px;
+                        background-color: #007bff;
+                        color: #ffffff;
+                        text-decoration: none;
+                        border-radius: 5px;
+                        font-size: 16px;
+                        font-weight: bold;
+                        border: none;
+                        cursor: pointer; /* Assurez-vous d'avoir cette ligne */
+                        pointer-events: auto; /* Ajouter cette ligne */
+                    }}
                         .button:hover {{
                             background-color: #0056b3;
                         }}
-                        .footer {{
+                                        .footer {{
                             text-align: center;
                             margin-top: 30px;
                             font-size: 14px;
@@ -899,7 +1026,7 @@ def forgotpassword(request):
                 </body>
                 </html>
                 """
-               emailsender(Subject, code_message, user.email)
+               emailsender(Subject, code_message, email_address, user.email)
 
               
                messages.success(request, f"We have send a reset password email to {user.email}, open it and follow the instructions !",)
@@ -946,27 +1073,53 @@ def updatepassword(request, token, uid):
 def code(request):
     mess = ""
 
-   
     if request.method == "POST":
-        
-        print("="*5, "NEW CONECTION", "="*5)
+        print("=" * 5, "NEW CONNECTION_code", "=" * 5)
+
         email = request.POST.get("email")
         code_v = request.POST.get("code")
-        user = User.objects.filter(email= email).first()
-        verification_code, created = VerificationCode.objects.get_or_create(user=user)
         
-        print(verification_code.code)
-        if str(code_v) == str(verification_code.code) :
-            messages.info(request, "Votre compte est activé . Connectez vous!")
-            return redirect("login")
-        else:
-            mess = "Invalid code !!!"
-      
-        messages.info(request, mess)
+        # Vérifier si l'email est fourni et s'il existe dans la base de données
+        if not email:
+            mess = "L'email est requis."
+            messages.error(request, mess)
+            return render(request, "code.html")
+        
+        user = User.objects.filter(email=email).first()
+        
+        # Si l'utilisateur n'existe pas
+        if not user:
+            mess = "Aucun utilisateur trouvé avec cet email."
+            messages.error(request, mess)
+            return render(request, "code.html")
 
-    return render(request, template_name="code.html")
+        try:
+            print("1hjjk")
+            # Récupérer ou créer le code de vérification pour l'utilisateur
+            verification_code, created = VerificationCode.objects.get_or_create(user=user)
+            
+            print("code: ", verification_code.code)
 
+            # Vérification du code
+            if str(code_v) == str(verification_code.code):
+                messages.success(request, "Votre compte est activé. Connectez-vous!")
 
+               
+                # Redirection vers la page de connexion
+                return redirect("login")
+
+            else:
+                # Code incorrect
+                mess = "Code de vérification invalide."
+                messages.info(request, mess)
+
+        except Exception as e:
+            # Gérer les erreurs dans le bloc try, par exemple, si la création du code échoue
+            print("Erreur lors de la récupération du code:", str(e))
+            mess = "Une erreur est survenue. Veuillez vérifier l'email et/ou le code."
+            messages.error(request, mess)
+
+    return render(request, template_name="code.html" )
 
 def deconnexion(request):
          print("Deconnexion")
@@ -985,9 +1138,10 @@ def contact(request):
             print(message)
             
             print(Gmail,  [settings.EMAIL_HOST_USER])
-            emailsender(Subject, message, Gmail)
+            emailsender(Subject, message, settings.EMAIL_HOST_USER, settings.EMAIL_HOST_USER, contact="yes")
+            
 
-            messages.success(request, "Your message is succesfull send  !!!")
+            messages.success(request, "Nous avons bien reçu votre message. Nous vous revenons très bientot !!!")
            
 
             #return JsonResponse({'success': True, 'mess': "Your message is succesfull send  !!!"})
@@ -1015,11 +1169,6 @@ def create_user_profile(user):
             email=user.email
         )
 
-
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.contrib.auth.models import User
-from .models import Professeur, Etudiant
 
 @receiver(post_save, sender=User)
 def manage_user_role(sender, instance, created, **kwargs):
@@ -1066,46 +1215,39 @@ def manage_user_role(sender, instance, created, **kwargs):
                 )
 
 
-
-
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-
 @csrf_exempt
 def ask_ia(request, course_id=None):
-    
+    cours = Cours.objects.get(id = course_id)
+    print('Chemin: ', cours.file.url)
     if request.method == 'POST':
         print("Ok")
         data = json.loads(request.body)
         user_message = data.get('message', '')
         # Remplacez ceci par l'appel réel à votre modèle RAG
-        cours = Cours.objects.get(id = course_id)
+        
         path = cours.file.path
         #relevant_document =  parse_file(path)[:500]# from chat import process_message_with_rag relevant_document= process_message_with_rag(user_message, path)
         #ia_response= chat(document_text=relevant_document, question= user_message, cours=cours)
         ia_response = load_db_qa(f"{course_id}", embeddings,  user_message)
+        print("ia: ", ia_response)
         #ia_response = f"Voici une réponse générée pour : {user_message}, {text}"
         source_documents = []
         for doc in ia_response.get("source_documents", []):
             # Extraire les informations pertinentes de chaque document
             doc_info = {
-                "source": doc.metadata.get('source', 'Non spécifié'),
-                "page_content": doc.page_content[:500]  # Limiter à 500 caractères pour éviter trop de texte
+                "source": cours.file.url, # doc.metadata.get('source', 'Non spécifié'),
+                "page_label": doc.metadata.get('page_label', 'Non spécifié'),
+                "page_content": doc.page_content[:500]+ "..."  # Limiter à 500 caractères pour éviter trop de texte
             }
             source_documents.append(doc_info)
-        
+        #print("Sources: ", source_documents)
         # Renvoyer la réponse dans un format JSON sérialisable
         return JsonResponse({
             'response': ia_response["answer"],
             'source_documents': source_documents
         })
        
-    return render(request, "chat.html", {"course_id":course_id})
-
-
-
-
+    return render(request, "chat.html", {"course_id":course_id, "cours":cours})
 
 
 
@@ -1129,79 +1271,9 @@ def parse_file(path):
         raise Exception(
             "Unsupported file format. Only PDF and TXT files are supported."
         )
-
-def chat_with_openai(text, number, grade, tone, response_json):
- 
-    """Communicate with Azure OpenAI to generate questions and answers."""
-    open_client = AzureOpenAI(
-        api_key='6xv3rz6Asc5Qq86B8vqjhKQzSTUZPmCcSuDm5CLEV5dj9m8gTHlNJQQJ99AKACYeBjFXJ3w3AAABACOGyHXT',
-        api_version="2023-12-01-preview",
-        azure_endpoint="https://chatlearning.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview"
-    )
     
-    # Construct the prompt
-    prompt = (
-        f"""
-        Texte : {text}
-        Vous êtes un expert en création de QCM. A partir du texte ci-dessus, vous devez
-        créer un quiz de {number} questions à choix multiples pour les élèves de {grade} dans {tone}.
-        Veillez à ce que les questions ne se répètent pas et vérifiez que toutes les questions sont conformes au texte.
-        Veillez à formater votre réponse comme le RESPONSE_JSON ci-dessous et utilisez-le comme guide.
-        Veillez à faire les QCM {number}.
-        ### RESPONSE_JSON
-        {response_json}
-
-        """
-        )
-   
-    open_client = AzureOpenAI(
-        api_key='6xv3rz6Asc5Qq86B8vqjhKQzSTUZPmCcSuDm5CLEV5dj9m8gTHlNJQQJ99AKACYeBjFXJ3w3AAABACOGyHXT',
-        api_version="2023-12-01-preview",
-        azure_endpoint="https://chatlearning.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview"
-    )
-
-    chat_completion = open_client.chat.completions.create(
-            model="gpt-35-turbo",
-            messages=[
-                {"role": "system", "content": "You are an expert MCQ maker."},
-                {"role": "user", "content": prompt},
-            ]
-        )
-
-    response = chat_completion.choices[0].message.content
-    return response
-
-
-
-
-"""
-from langchain.prompts import PromptTemplate
-import numpy as np
-
-from langchain_community.vectorstores import FAISS
-import sentence_transformers
-from langchain_community.embeddings import HuggingFaceBgeEmbeddings
-from langchain_huggingface import HuggingFaceEmbeddings
-import os
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import PyPDFLoader
-os.environ['HUGGINGFACEHUB_API_TOKEN'] ="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"
-# Step 2: Embed and store in a FAISS vector database
-import faiss.contrib.torch_utils
-
-huggingface_embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-l6-v2",  # alternatively use "sentence-transformers/all-MiniLM-l6-v2" for a light and faster experience.
-    model_kwargs={'device':'cpu'},
-    encode_kwargs={'normalize_embeddings': True}
-)
-
-"""
 def chat(document_text, question,cours):
-    open_client = AzureOpenAI(
-        api_key='6xv3rz6Asc5Qq86B8vqjhKQzSTUZPmCcSuDm5CLEV5dj9m8gTHlNJQQJ99AKACYeBjFXJ3w3AAABACOGyHXT',
-        api_version="2023-12-01-preview",
-        azure_endpoint="https://chatlearning.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview"
-    )
+    
     prompt = (
         f"Vous êtes un expert en cuisine et un formateur aidant un étudiant à se préparer pour son examen de cuisine. "
         f"L'étudiant étudie le contenu suivant tiré de son document :\n\n"
@@ -1232,26 +1304,10 @@ def chat(document_text, question,cours):
 
 
 
-from django.http import JsonResponse
-import json
 
 # Mémoire de session pour stocker l'historique des conversations
 chat_memory = []
-from langchain_community.chat_models import AzureChatOpenAI
-from langchain_openai import  AzureOpenAIEmbeddings
-import numpy as np
-#import pandas as pd
-from dotenv import load_dotenv, set_key
-# callbacks
-from langchain_community.callbacks import get_openai_callback
-# messages
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
-# output parsers
-from langchain_core.output_parsers import StrOutputParser
-from langchain_openai import AzureChatOpenAI
-os.environ["AZURE_OPENAI_ENDPOINT"]="https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview"
-os.environ["AZURE_OPENAI_API_KEY"]="h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j"
-os.environ["AZURE_OPENAI_API_VERSION"]="2024-07-01-preview"
+
 
 
 """messages = [
@@ -1271,21 +1327,11 @@ def boat(request):
         data = json.loads(request.body)
         question = data.get('message', '')
         print('La question: ', question)
-        embeddings = AzureOpenAIEmbeddings(model="text-embedding-3-large",
-                                    azure_endpoint="https://realtimekokou.openai.azure.com/openai/deployments/text-embedding-3-large/embeddings?api-version=2023-05-15",
-                                    api_key="h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j",
-                                    openai_api_version="2023-05-15")
+        
         #llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
 
-        llm_azure = AzureChatOpenAI(
-                #openai_api_base="https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
-                openai_api_version="2024-07-01-preview",
-                deployment_name="gpt-35-turbo-chefquiz",
-                openai_api_key='h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j',
-                openai_api_type='azure',
-                azure_endpoint= "https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
-            )
+        
 
         folder_path = os.path.join(settings.MEDIA_ROOT, "chat_boat_azure")
         vectordb =FAISS.load_local(folder_path, embeddings , allow_dangerous_deserialization=True )
@@ -1353,7 +1399,7 @@ def process_message_with_rag(cours):
     print(pages[0].page_content)
     print(pages[0].metadata)
     
-    r_splitter = RecursiveCharacterTextSplitter(chunk_size= 300, chunk_overlap= 5)
+    r_splitter = RecursiveCharacterTextSplitter(chunk_size= 500, chunk_overlap= 5)
     docs = r_splitter.split_documents(pages)
     print(len(docs))
     
@@ -1387,17 +1433,9 @@ def relevant_doc(query, save_path):
 
 
 
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-import smtplib, ssl
 
-email_address = 'voicetranslator0@gmail.com'
-email_password = 'rfqzyhocddgmehbe'
 
-smtp_address = 'smtp.gmail.com'
-smtp_port = 465
-
-def emailsender(Subject, html, user_email):
+def emailsender(Subject, html, email_address,  user_email, contact = None):
     message = MIMEMultipart("alternative")
     # on ajoute un sujet
     message["Subject"] = Subject
@@ -1407,7 +1445,8 @@ def emailsender(Subject, html, user_email):
     message["To"] = user_email
     # on crée deux éléments MIMEText 
     html_mime = MIMEText(html, 'html')
-
+    if contact:
+        user_email = [user_email, "sitsopekokou@gmail.com"]
     # on attache ces deux éléments 
     message.attach(html_mime)
 
@@ -1423,11 +1462,6 @@ def emailsender(Subject, html, user_email):
 
 
 
-from langchain_community.document_loaders import PyPDFLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.chains import RetrievalQA,  ConversationalRetrievalChain
-from langchain.memory import ConversationBufferMemory
-from langchain_openai import OpenAI, ChatOpenAI
 
 def save_db(doc_path, folder_path, embeddings):
 
@@ -1463,22 +1497,10 @@ prompt = PromptTemplate.from_template(
     #input_variables=["context", "question"]  # Inclure les deux variables nécessaires
 )
 
-def load_db_qa(path, embeddings,  question):
-    embeddings = AzureOpenAIEmbeddings(model="text-embedding-3-large",
-                                    azure_endpoint="https://realtimekokou.openai.azure.com/openai/deployments/text-embedding-3-large/embeddings?api-version=2023-05-15",
-                                    api_key="h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j",
-                                    openai_api_version="2023-05-15")
+def load_db_qa1(path, embeddings,  question):
+    
     #llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
-
-    llm_azure = AzureChatOpenAI(
-            #openai_api_base="https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
-            openai_api_version="2024-07-01-preview",
-            deployment_name="gpt-35-turbo-chefquiz",
-            openai_api_key='h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j',
-            openai_api_type='azure',
-            azure_endpoint= "https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
-        )
     #llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
     folder_path = os.path.join(settings.MEDIA_ROOT, path)
     vectordb =FAISS.load_local(folder_path, embeddings , allow_dangerous_deserialization=True )
@@ -1498,19 +1520,53 @@ def load_db_qa(path, embeddings,  question):
        
     )
    
-    #question = "Qu'est ce que la cuisine?"
+    
     result = qa.invoke({"question": question})
     
     return result
 
 
 
+def load_db_qa(path, embeddings, question):
+    folder_path = os.path.join(settings.MEDIA_ROOT, path)
+    vectordb = FAISS.load_local(folder_path, embeddings, allow_dangerous_deserialization=True)
+
+    memory = ConversationBufferMemory(
+        memory_key="chat_history",
+        output_key="answer",
+        return_messages=True
+    )
+
+    # Définition du Prompt personnalisé
+    custom_prompt = PromptTemplate(
+        input_variables=["context", "question", "chat_history"],
+        template="""Tu es un assistant intelligent qui répond aux questions en fonction du contexte donné.
+        
+        Contexte : {context}
+        Historique du chat : {chat_history}
+        Question : {question}
+        
+        Réponds de manière claire et précise.
+        """
+    )
+
+    # Création de la chaîne de récupération conversationnelle avec le prompt personnalisé
+    qa = ConversationalRetrievalChain.from_llm(
+        llm_azure,
+        retriever=vectordb.as_retriever(),
+        return_source_documents=True,
+        return_generated_question=True,
+        memory=memory,
+        combine_docs_chain_kwargs={"prompt": custom_prompt},  # Ajout du prompt ici
+    )
+
+    result = qa.invoke({"question": question})
+    return result
+
+
 def save_db_azure(doc_path, folder_path):
     
-    embeddings = AzureOpenAIEmbeddings(model="text-embedding-3-large",
-                                    azure_endpoint="https://realtimekokou.openai.azure.com/openai/deployments/text-embedding-3-large/embeddings?api-version=2023-05-15",
-                                    api_key="h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j",
-                                    openai_api_version="2023-05-15")
+    
     
     loader = PyPDFLoader(doc_path)
     pages = loader.load()
@@ -1528,6 +1584,107 @@ def save_db_azure(doc_path, folder_path):
     vectordb.save_local(folder_path)
     return 
 
-'''folder_path = os.path.join(settings.MEDIA_ROOT, "videocall_boat")
-print("chemin", settings.BASE_DIR)
-save_db(os.path.join(settings.BASE_DIR, "lessons/rag_videocall.pdf"), folder_path, embeddings)'''
+
+
+RESPONSE_JSON = {
+    "1": {
+        "no": "1",
+        "mcq": "multiple choice question",
+        "options": {
+            "a": "choice here",
+            "b": "choice here",
+            "c": "choice here",
+            "d": "choice here",
+        },
+        "correct": "correct answer",
+    },
+    "2": {
+        "no": "2",
+        "mcq": "multiple choice question",
+        "options": {
+            "a": "choice here",
+            "b": "choice here",
+            "c": "choice here",
+            "d": "choice here",
+        },
+        "correct": "correct answer",
+    },
+    "3": {
+        "no": "3",
+        "mcq": "multiple choice question",
+        "options": {
+            "a": "choice here",
+            "b": "choice here",
+            "c": "choice here",
+            "d": "choice here",
+        },
+        "correct": "correct answer",
+    },
+}
+
+
+def relevant_docs(path):
+    
+    llm_azure = AzureChatOpenAI(
+                #openai_api_base="https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
+                openai_api_version="2024-07-01-preview",
+                deployment_name="gpt-35-turbo-chefquiz",
+                openai_api_key=settings.AZURE_EMBEDDING_API_KEY,
+                openai_api_type='azure',
+                azure_endpoint= "https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
+            )
+    folder_path = os.path.join(settings.MEDIA_ROOT,path)
+    print("Folder: ", folder_path)
+    vectordb =FAISS.load_local(folder_path, embeddings , allow_dangerous_deserialization=True )
+
+    # Run chain
+    qa_chain = RetrievalQA.from_chain_type(
+        llm_azure,
+        retriever=vectordb.as_retriever(),
+        return_source_documents=True,
+        #chain_type_kwargs={"prompt": QA_CHAIN_PROMPT}
+    )
+    
+    result = qa_chain.invoke({"query": "Donne moi les parties les plus pertinentes de ce documents un peu difficiles à comprendre",
+                              "search_kwargs": {"k": 8}})
+    documents = " ".join([docs.page_content for docs in result['source_documents']])
+    return documents
+
+
+def chat_with_openai(number, difficulty, path):
+    
+    context= relevant_docs(path)
+ 
+    """Communicate with Azure OpenAI to generate questions and answers."""
+    
+    
+    
+    
+    prompt = f"""
+    Génère un quiz de {number} questions basé sur ce texte :
+    
+    {context}
+    
+    Niveau de difficulté : {difficulty}.
+    Le quiz doit etre en français.
+    Le format de sortie doit être :
+    {json.dumps(RESPONSE_JSON)}
+    
+    """
+   
+    
+    
+
+    chat_completion = open_client.chat.completions.create(
+            model="gpt-35-turbo",
+            messages=[
+                {"role": "system", "content": "You are an expert MCQ maker."},
+                {"role": "user", "content": prompt},
+            ]
+        )
+
+    response = chat_completion.choices[0].message.content
+    print("Reponse: ", response)
+    return response
+
+

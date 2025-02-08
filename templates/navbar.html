@@ -77,12 +77,13 @@
                     <!-- ***** Logo End ***** -->
                     <!-- ***** Menu Start ***** -->
                     <ul class="nav merriweather">
-                        <li class="scroll-to-section"><a href="{% url 'index' %}" class="active">Accueil</a></li>
+                      
+                        <li ><a href="{% url 'index' %}" class="active">Accueil</a></li>
                         <li><a href="{% url 'lescours' %}" class="merriweather">Cours</a></li>
-                        <li class="scroll-to-section"><a href="#apply">A propos</a></li>
+                        <li class="scroll-to-section" id="a_propos"><a href="#apply">A propos</a></li>
                        
                         <li class="scroll-to-section1"><a href="{% url 'faquestion' %}">FAQ</a></li> 
-                        <li class="scroll-to-section"><a href="#contact">Contactez-nous</a></li> 
+                        <li class="scroll-to-section" id="contactez-nous"><a href="#contact">Contactez-nous</a></li> 
                         <li class="has-sub">
                           <a href="javascript:void(0)">Compte</a>
                           <ul class="sub-menu">
@@ -100,7 +101,7 @@
                             </li>
                             {% endif %}
                               <li><a  href="{% url 'dash' %}">Tableau de Bord</a></li>
-                              <li><a  href="#mescours">Mes Cours</a></li>
+                              <li><a  href="{% url 'lescours' %}">Mes Cours</a></li>
                               
                               <li><a href="{% url 'profile' %}">Edit Profile </a></li>
                               
@@ -242,6 +243,10 @@
             const userInput = document.getElementById('user-input');
             userInput.addEventListener('keypress', handleUserInput);
         });
+    </script>
+
+    <script>
+     
     </script>
     
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
