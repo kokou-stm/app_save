@@ -1,13 +1,12 @@
-Django==5.1
+Django
 faiss-cpu
 langchain-community
 langchain-openai
 openai
-python-dotenv==1.0.1
+python-dotenv
 tiktoken
 pypdf
 djangorestframework
 PyPDF2
-python-dotenv==1.0.1
 gunicorn
 psycopg[binary]
