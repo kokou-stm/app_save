@@ -1433,8 +1433,6 @@ def relevant_doc(query, save_path):
 
 
 
-
-
 def emailsender(Subject, html, email_address,  user_email, contact = None):
     message = MIMEMultipart("alternative")
     # on ajoute un sujet
@@ -1457,9 +1455,6 @@ def emailsender(Subject, html, email_address,  user_email, contact = None):
         server.login(email_address, email_password)
         # envoi du mail
         server.sendmail(email_address, user_email, message.as_string())
-
-
-
 
 
 
