@@ -29,8 +29,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY')# 'django-insecure-3&f9adfe$a(6low^lki1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]#cae4-193-50-192-71.ngrok-free.app", 
-#CSRF_TRUSTED_ORIGINS =["http://*.127.0.0.1","http://*.localhost", "https://*.cae4-193-50-192-71.ngrok-free.app"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "chefquizapp.e8hsdyh2c8h6efa5.eastus.azurecontainer.io", "aivoicedubber.com"]#cae4-193-50-192-71.ngrok-free.app", 
+CSRF_TRUSTED_ORIGINS =["http://*.127.0.0.1","http://*.localhost", "http://*.chefquizapp.e8hsdyh2c8h6efa5.eastus.azurecontainer.io", "https://*.aivoicedubber.com"]
 
 # Application definition
 
@@ -88,7 +88,7 @@ DATABASES = {
 
 
 
-'''DATABASES = {
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'postgres',  # Nom de la base de données
@@ -100,7 +100,7 @@ DATABASES = {
            'sslmode': 'require',
         }
     }
-}'''
+}
 
 
 # Password validation
