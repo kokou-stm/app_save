@@ -1664,7 +1664,7 @@ def chat_with_openai(number, difficulty, path):
     Le quiz doit etre en français.
     Le format de sortie doit être :
     {json.dumps(RESPONSE_JSON)}
-    
+    Assurez vous que les options soient des phrases complètes, pas que des mots.
     """
    
     

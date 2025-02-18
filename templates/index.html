@@ -102,7 +102,6 @@
   </div>
 </section>
 
-
   <section class="upcoming-meetings " id="meetings">
     <div class="container">
       <div class="row">
@@ -111,7 +110,7 @@
             <h2>Fonctionnalités</h2>
           </div>
         </div>
-
+        {% if  is_staff %}
         <div class="col-lg-4 mb-3">
           <div class="card text-center h-100">
             <div class="card-header merriweather">
@@ -141,7 +140,37 @@
             </div>
           </div>
         </div>
-
+        {% else %}
+        <div class="col-lg-4 mb-3">
+          <div class="card text-center h-100">
+            <div class="card-header merriweather">
+              LeaderBoard 
+            </div>
+            <div class="card-body">
+            <div class="scores"  id="scores" style="display: none;"> {{scores}}</div>
+            <div  id="progress_percentage" style="display: none;"> {{progress_percentage}}</div>
+              <ol class="list-group list-group-numbered">
+                {% for key, val in percents_etud.items  %}
+                <li class="list-group-item d-flex justify-content-between align-items-start py-3">
+                  <div class="ms-2 me-auto merriweather ">
+                   
+                    <div class="fw-bold "><i class="fas fa-user mx-2"></i> </div>
+                   
+                  </div>
+                  <span class="badge bg-primary rounded-pill"> {{ val }}%</span>
+                </li>
+                {% endfor %}
+               
+              </ol>
+    
+    
+            </div>
+            <div class="card-footer text-muted">
+              Classification
+            </div>
+          </div>
+        </div>
+        {% endif  %}
         <div class="col-lg-8">
           <div class="row">
             <div class="col-lg-6">
@@ -303,9 +332,6 @@
       </div>
     </div>
   </section>
-  
-
-  
   
 
   <section class="our-courses" id="courses">
@@ -485,12 +511,6 @@
     </div>
   </section>
 
-
-  
-
-
-
-  
   <section class="contact-us redressed pb-3">
     <div class="container ">
     <div class="card bg-transparent" style="border: solid 1px white;">
@@ -586,8 +606,6 @@
     </form>
     </div>
   </section>
-
-  
 
 
   <section class="meetings-page p-1 ">
