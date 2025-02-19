@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')# 'django-insecure-3&f9adfe$a(6low^lki1
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "chefquizapp.e8hsdyh2c8h6efa5.eastus.azurecontainer.io", "aivoicedubber.com"]#cae4-193-50-192-71.ngrok-free.app", 
 CSRF_TRUSTED_ORIGINS =["http://*.127.0.0.1","http://*.localhost", "http://*.chefquizapp.e8hsdyh2c8h6efa5.eastus.azurecontainer.io", "https://*.aivoicedubber.com"]
@@ -42,7 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'lessons',
-    'rest_framework'
+    'backend',
+    'rest_framework',
+    'rest_framework_simplejwt'
 ]
 
 MIDDLEWARE = [
@@ -78,7 +80,7 @@ WSGI_APPLICATION = 'chefquiz.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -102,7 +104,7 @@ DATABASES = {
     }
 }
 
-
+'''
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 
@@ -175,3 +177,14 @@ AZURE_CHAT_ENDPOINT=os.environ.get('AZURE_CHAT_ENDPOINT')
 AZURE_CHAT_API_KEY=os.environ.get('AZURE_CHAT_API_KEY')
 AZURE_EMBEDDING_API_KEY=os.environ.get('AZURE_EMBEDDING_API_KEY')
 EMAIL_USE_SSL = False  # Assurez-vous que c'est désactivé si TLS est activé
+
+
+
+
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}

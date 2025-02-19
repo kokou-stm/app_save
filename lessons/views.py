@@ -605,7 +605,7 @@ def register(request):
         
         prenom= request.POST.get("firstname", None)
         nom= request.POST.get("lastname", None)
-        username = f"{nom} {prenom}"
+        username = ''.join(f"{nom}{prenom}".split())
         email = request.POST.get("email", None)
         pass1 = request.POST.get("password1", None)
         pass2 = request.POST.get("password2", None)
@@ -631,7 +631,7 @@ def register(request):
 
                     #try:
                     # Essayer de récupérer l'étudiant et de lui attribuer des scores
-                    etudiant = Etudiant.objects.get(username=user)
+                    etudiant, created = Etudiant.objects.get_or_create(username=user)
                     if etudiant.scores is None:
                         etudiant.scores = []
                     
