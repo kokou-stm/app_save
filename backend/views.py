@@ -23,7 +23,8 @@ from email.mime.multipart import MIMEMultipart
 import smtplib, ssl
 from django.conf import settings
 from lessons.models import *
- 
+from .serializers import *
+
 email_address = settings.EMAIL_HOST_USER
 email_password = settings.EMAIL_HOST_PASSWORD
 
@@ -291,7 +292,11 @@ def register(request):
     }, status=status.HTTP_201_CREATED)
 
 
-
+@api_view(['GET'])
+def cours(request):
+     courses = Cours.objects.all()
+     cours_serializer = Courseserializer(courses, many=True)
+     return Response(cours_serializer.data)
 
 
 
