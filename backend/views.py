@@ -292,12 +292,38 @@ def register(request):
     }, status=status.HTTP_201_CREATED)
 
 
-@api_view(['GET'])
+'''@api_view(['GET'])
 def cours(request):
      courses = Cours.objects.all()
      cours_serializer = Courseserializer(courses, many=True)
      return Response(cours_serializer.data)
+'''
 
+@api_view(['GET'])
+def cours(request):
+    courses = Cours.objects.all()
+    data = [
+        {
+            "id": course.id,
+            "title": course.title,
+            "description": course.description,
+            "professeur": {"nom": course.professeur.nom},
+            "file": course.file.url if course.file else None,
+            "quizzes": [
+                {"id": quiz.id, "quiz_title": quiz.quiz_title, "quiz_description": quiz.quiz_description}
+                for quiz in course.quizzes.all()
+            ],
+        }
+        for course in courses
+    ]
+    return Response(data)
+
+
+@api_view(['GET'])
+def quiz(request):
+     quizes = Quiz.objects.all()
+     quizes_serializer = Quizserializer(quizes, many=True)
+     return Response(quizes_serializer.data)
 
 
 
