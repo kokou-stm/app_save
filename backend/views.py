@@ -340,6 +340,58 @@ def quiz_questions(request):
     return JsonResponse(questions_serializer.data, safe=False)
 
 
+
+from django.contrib.auth.models import User
+
+@api_view(['POST'])
+def save_quiz_score(request):
+    user_id = request.user.id
+    quiz_id = request.data.get('quiz_id')
+    score = request.data.get('score')
+    max_score = request.data.get('max_score')
+
+    try:
+        etudiant = Etudiant.objects.get(username_id=user_id)
+    except Etudiant.DoesNotExist:
+        return JsonResponse({'error': 'Etudiant non trouvé'}, status=status.HTTP_404_NOT_FOUND)
+
+    if etudiant.scores is None:
+        etudiant.scores = []
+
+    # Mettre à jour ou ajouter le score pour le quiz donné
+    quiz_scores = etudiant.scores
+    for quiz_score in quiz_scores:
+        if quiz_score['quiz_id'] == quiz_id:
+            quiz_score['score'] = score
+            quiz_score['max_score'] = max_score
+            break
+    else:
+        quiz_scores.append({'quiz_id': quiz_id, 'score': score, 'max_score': max_score})
+
+    etudiant.save()
+    return JsonResponse({'message': 'Score enregistré avec succès'}, status=status.HTTP_200_OK)
+
+
+
+@api_view(['GET'])
+def get_total_score(request):
+    user_id = request.user.id
+
+    try:
+        etudiant = Etudiant.objects.get(username_id=user_id)
+    except Etudiant.DoesNotExist:
+        return JsonResponse({'error': 'Etudiant non trouvé'}, status=status.HTTP_404_NOT_FOUND)
+
+    if etudiant.scores:
+        total_score = sum(score['score'] for score in etudiant.scores)
+        max_score = sum(score['max_score'] for score in etudiant.scores)
+        progress = (total_score / max_score) * 100 if max_score > 0 else 0
+    else:
+        progress = 0
+
+    return JsonResponse({'progress': progress}, status=status.HTTP_200_OK)
+
+
 def emailsender(Subject, html, email_address,  user_email, contact = None):
     message = MIMEMultipart("alternative")
     # on ajoute un sujet
