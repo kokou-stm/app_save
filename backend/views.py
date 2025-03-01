@@ -14,6 +14,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.http import JsonResponse
 
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
@@ -326,6 +327,17 @@ def quiz(request):
      return Response(quizes_serializer.data)
 
 
+@api_view(['POST'])
+def quiz_questions(request):
+    quiz_id = request.data.get('quiz_id')
+    try:
+        quiz = Quiz.objects.get(id=quiz_id)
+    except Quiz.DoesNotExist:
+        return JsonResponse({'error': 'Quiz not found'}, status=404)
+
+    questions = QuestionAnswers.objects.filter(quiz=quiz)
+    questions_serializer = QuestionAnswersSerializer(questions, many=True)
+    return JsonResponse(questions_serializer.data, safe=False)
 
 
 def emailsender(Subject, html, email_address,  user_email, contact = None):
