@@ -351,7 +351,7 @@ def save_quiz_score(request):
     max_score = request.data.get('max_score')
 
     try:
-        etudiant = Etudiant.objects.get(username_id=user_id)
+        etudiant = Etudiant.objects.get(username=request.user)
     except Etudiant.DoesNotExist:
         return JsonResponse({'error': 'Etudiant non trouvé'}, status=status.HTTP_404_NOT_FOUND)
 
