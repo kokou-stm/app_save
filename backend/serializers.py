@@ -27,3 +27,11 @@ class QuestionAnswersSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestionAnswers
         fields = '__all__'
+
+    
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name']

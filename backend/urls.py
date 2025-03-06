@@ -20,5 +20,8 @@ urlpatterns = [
     path('edit_profile/', edit_profile, name='edit_profile'),
     path('logout/', deconnexion, name='logout'),
     path('cours_detail/<int:cours_id>/', cours_details, name='cours-details'),
+    path('api/profile/', get_user_profile, name='get_user_profile'),
+    path('api/profile/update/', update_user_profile, name='update_user_profile'),
+    path('api/register/', register_user, name='register_user'),
 ]
 
