@@ -27,11 +27,11 @@ SECRET_KEY = os.environ.get('SECRET_KEY')# 'django-insecure-3&f9adfe$a(6low^lki1
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "chefquizapp.e8hsdyh2c8h6efa5.eastus.azurecontainer.io", "aivoicedubber.com"]#cae4-193-50-192-71.ngrok-free.app", 
-CSRF_TRUSTED_ORIGINS =["http://*.127.0.0.1","http://*.localhost", "http://*.chefquizapp.e8hsdyh2c8h6efa5.eastus.azurecontainer.io", "https://*.aivoicedubber.com"]
-
+ALLOWED_HOSTS = ["bd75-46-193-67-154.ngrok-free.app","4e74-193-50-192-71.ngrok-free.app","localhost", "127.0.0.1", "chefquizapp.e8hsdyh2c8h6efa5.eastus.azurecontainer.io", "aivoicedubber.com"]#cae4-193-50-192-71.ngrok-free.app", 
+CSRF_TRUSTED_ORIGINS =["https://*.bd75-46-193-67-154.ngrok-free.app","https://*.4e74-193-50-192-71.ngrok-free.app","http://*.127.0.0.1","http://*.localhost", "http://*.chefquizapp.e8hsdyh2c8h6efa5.eastus.azurecontainer.io", "https://*.aivoicedubber.com"]
+CORS_ORIGIN_ALLOW_ALL =True
 # Application definition
 
 INSTALLED_APPS = [
@@ -44,7 +44,10 @@ INSTALLED_APPS = [
     'lessons',
     'backend',
     'rest_framework',
-    'rest_framework_simplejwt'
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    'corsheaders',
+
 ]
 
 MIDDLEWARE = [
@@ -55,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'chefquiz.urls'
@@ -77,6 +81,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'chefquiz.wsgi.application'
 
+SIMPLE_JWT = {
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases

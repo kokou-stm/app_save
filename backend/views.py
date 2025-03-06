@@ -3,6 +3,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from rest_framework.exceptions import AuthenticationFailed
 from django.contrib.auth import authenticate
@@ -11,7 +13,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import AuthenticationFailed
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, logout
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import JsonResponse
@@ -57,42 +59,101 @@ def connexion(request):
         })
 
 
-"""{
-    "email": "nouvelutilisateur@example.com",
-    "first_name": "nouvelutilisateur",
-    "last_name": "kokou",
-    "password": "motdepasse123",
-    "password_confirm": "motdepasse123"
-}"""
+
+
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+'''@api_view(["POST"])
+def deconnexion(request):
+    if request.method=='POST':
+        if request.user.is_authenticated:
+            refresh_token = request.data.get("refresh")
+            print(request.data)
+            if not refresh_token:
+                return Response({"detail": "Token non fourni"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Blacklister le token
+            token = RefreshToken(refresh_token)
+            token.blacklist()  # Ajoute le token à la liste noire
+            print("Deconnexion reussie")
+            print('deonnexion reussie')
+            return Response(status=status.HTTP_200_OK)
+        
+
+    return Response({"error": "Utilisateur non authentifié"}, status=401)
+'''
+@api_view(['POST'])
+def deconnexion(request):
+    try:
+       if request.method=='POST':
+            print(request.headers)
+            # Récupérer le token d'actualisation (refresh token)
+            refresh_token = request.data.get("refresh")
+            #print(request.data)
+            if not refresh_token:
+                return Response({"detail": "Token non fourni"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Blacklister le token
+            token = RefreshToken(refresh_token)
+            token.blacklist()  # Ajoute le token à la liste noire
+            print("Deconnexion reussie")
+            return Response({"message": "Déconnexion réussie"})
+ 
+    except Exception as e:
+        return Response({"detail": "Erreur lors de la déconnexion"}, status=status.HTTP_400_BAD_REQUEST)
+        
+'''
+    
+'''
+'''
+@api_view
+def deconnexion(request):
+     logout(request)
+
+     return Response({})
+'''
 
 @api_view(['POST'])
 def register(request):
     # Récupère les informations d'inscription
     email = request.data.get("email")
-    first_name = request.data.get("first_name")
-    last_name = request.data.get("last_name")
+    first_name = request.data.get("firstName")
+    last_name = request.data.get("lastName")
     username = ''.join(f"{last_name}{first_name}".split())
     password = request.data.get("password")
-    password_confirm = request.data.get("password_confirm")
-
+    
+    print(email, first_name, last_name, username, password)
+    print(request.data)
     # Vérifie que l'email est valide
     try:
         validate_email(email)
     except ValidationError:
+        print('1')
         return Response({"detail": "L'email n'est pas valide."}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Vérifie si les mots de passe correspondent
-    if password != password_confirm:
-        return Response({"detail": "Les mots de passe doivent être identiques."}, status=status.HTTP_400_BAD_REQUEST)
-
+   
     # Vérifie si l'email est déjà utilisé
     if User.objects.filter(email=email).exists():
+        print(3)
         return Response({"detail": "Cet email est déjà utilisé."}, status=status.HTTP_400_BAD_REQUEST)
 
     # Vérifie si le nom d'utilisateur est déjà pris
     if User.objects.filter(username=username).exists():
         return Response({"detail": "Ce nom d'utilisateur est déjà pris."}, status=status.HTTP_400_BAD_REQUEST)
-
+    print(4)
     # Crée un nouvel utilisateur
     user = User.objects.create_user(username=username, first_name=first_name, last_name=last_name, email=email, password=password)
     etudiant, created = Etudiant.objects.get_or_create(username=user)
@@ -292,6 +353,28 @@ def register(request):
         'access': str(refresh.access_token),
     }, status=status.HTTP_201_CREATED)
 
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+@api_view(['POST'])
+def edit_profile(request):
+    # Récupère les informations d'inscription
+    if request.method =='POST':
+        email = request.data.get("email")
+        username = request.data.get("username")
+        cardNumber = request.data.get("cardNumber")
+        phoneNumber = request.data.get("phoneNumber")
+        print(email, username,cardNumber, phoneNumber )
+        
+        # Vérifie que l'email est valide
+        try:
+            validate_email(email)
+        except ValidationError:
+            print('1')
+            return Response({"detail": "L'email n'est pas valide."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({"detail":"Enregistré avec succes"})
+
 
 '''@api_view(['GET'])
 def cours(request):
@@ -308,7 +391,7 @@ def cours(request):
             "id": course.id,
             "title": course.title,
             "description": course.description,
-            "professeur": {"nom": course.professeur.nom},
+           "professeur": {"nom": course.professeur.username.username},
             "file": course.file.url if course.file else None,
             "quizzes": [
                 {"id": quiz.id, "quiz_title": quiz.quiz_title, "quiz_description": quiz.quiz_description}
@@ -341,15 +424,45 @@ def quiz_questions(request):
 
 
 
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib.auth.models import User
+
+@api_view(['POST'])
+def contact(request):
+    if request.method == "POST":
+        #subject = request.data.get("subject")
+        email = request.data.get("email")
+        username = request.data.get("name")
+        message = request.data.get('message')
+        message = f"Nom d'utilisateur: {request.user.username}\nAdresse mail: {email}\n{request.data.get('message')}"
+
+        try:
+            #send_mail(subject, message, settings.EMAIL_HOST_USER, [settings.EMAIL_HOST_USER], fail_silently=False)
+            return Response({"message": "Nous avons bien reçu votre message. Nous vous revenons très bientôt !!!"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response({"error": "Erreur lors de l'envoi du message. Veuillez réessayer plus tard."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return Response({"error": "Méthode non autorisée"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
 from django.contrib.auth.models import User
 
 @api_view(['POST'])
 def save_quiz_score(request):
-    user_id = request.user.id
+
     quiz_id = request.data.get('quiz_id')
     score = request.data.get('score')
     max_score = request.data.get('max_score')
+    if request.user.is_authenticated:
+         print(request.user.username)
 
+    else:
+         print("=="*5, "Not auth")
     try:
         etudiant = Etudiant.objects.get(username=request.user)
     except Etudiant.DoesNotExist:
@@ -415,3 +528,48 @@ def emailsender(Subject, html, email_address,  user_email, contact = None):
         # envoi du mail
         server.sendmail(email_address, user_email, message.as_string())
 
+
+
+from django.shortcuts import get_object_or_404
+
+@api_view(['GET'])
+def cours_details(request, cours_id):
+    """
+    Récupère les détails complets d'un cours avec ses quiz associés
+    """
+    try:
+        # Récupérer le cours ou renvoyer une 404
+        cours = get_object_or_404(Cours, id=cours_id)
+        
+        # Préparer les données du cours avec tous les détails
+        course_data = {
+            "id": cours.id,
+            "title": cours.title,
+            "description": cours.description,
+            "professeur": {
+                "id": cours.professeur.id,
+                "nom": cours.professeur.nom,
+                "email": cours.professeur.email  # Ajoutez d'autres détails si nécessaire
+            },
+            "file": cours.file.url if cours.file else None,
+            "quizzes": [
+                {
+                    "id": quiz.id, 
+                    "quiz_title": quiz.quiz_title, 
+                    "quiz_description": quiz.quiz_description,
+                    # Ajoutez d'autres détails du quiz si nécessaire
+                }
+                for quiz in cours.quizzes.all()
+            ]
+        }
+        
+        return Response(course_data, status=status.HTTP_200_OK)
+    
+    except Cours.DoesNotExist:
+        return Response({
+            "error": "Cours non trouvé"
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({
+            "error": str(e)
+        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
