@@ -11,3 +11,4 @@ PyPDF2
 gunicorn
 psycopg[binary]
 djangorestframework_simplejwt
+django-cors-headers
