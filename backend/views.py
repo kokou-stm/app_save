@@ -128,6 +128,7 @@ from .serializers import UserProfileSerializer
 @permission_classes([IsAuthenticated])
 def get_user_profile(request):
     user = request.user
+    print('User: ', user)
     serializer = UserProfileSerializer(user)
     return Response(serializer.data)
 

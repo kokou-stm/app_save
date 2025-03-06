@@ -1642,14 +1642,24 @@ def relevant_docs(path):
     
     result = qa_chain.invoke({"query": "Donne moi les parties les plus pertinentes de ce documents un peu difficiles à comprendre",
                               "search_kwargs": {"k": 8}})
+    
     documents = " ".join([docs.page_content for docs in result['source_documents']])
+    print(result)
     return documents
 
 
-def chat_with_openai(number, difficulty, path):
+def chat_with_openai1(number, difficulty, path):
+    
+    AZURE_CHAT_ENDPOINT="https://chatlearning.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview"
+    AZURE_CHAT_API_KEY="6xv3rz6Asc5Qq86B8vqjhKQzSTUZPmCcSuDm5CLEV5dj9m8gTHlNJQQJ99AKACYeBjFXJ3w3AAABACOGyHXT"
+    open_client = AzureOpenAI(
+            api_key=AZURE_CHAT_API_KEY,
+            api_version="2023-12-01-preview",
+            azure_endpoint=AZURE_CHAT_ENDPOINT
+        )
     
     context= relevant_docs(path)
- 
+    
     """Communicate with Azure OpenAI to generate questions and answers."""
     
     
@@ -1666,9 +1676,8 @@ def chat_with_openai(number, difficulty, path):
     {json.dumps(RESPONSE_JSON)}
     Assurez vous que les options soient des phrases complètes, pas que des mots.
     """
-   
-    
-    
+    print("Seconde step: ", "=="*5)
+    #print("intialisation: ", response)
 
     chat_completion = open_client.chat.completions.create(
             model="gpt-35-turbo",
@@ -1677,9 +1686,47 @@ def chat_with_openai(number, difficulty, path):
                 {"role": "user", "content": prompt},
             ]
         )
-
+    print("intialisation: ")
     response = chat_completion.choices[0].message.content
     print("Reponse: ", response)
     return response
 
 
+def chat_with_openai(number, difficulty, path):
+    AZURE_CHAT_ENDPOINT="https://realtimekokou.openai.azure.com/openai/deployments/gpt-4-0613/chat/completions?api-version=2024-10-21"
+    AZURE_CHAT_API_KEY="h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j"
+    client = AzureOpenAI(
+                api_key=AZURE_CHAT_API_KEY,
+                api_version="2024-10-21",
+                azure_endpoint=AZURE_CHAT_ENDPOINT
+            )
+
+    context= relevant_docs(path)
+    
+    """Communicate with Azure OpenAI to generate questions and answers."""
+    
+    prompt = f"""
+    Génère un quiz de {number} questions basé sur ce texte :
+    
+    {context}
+    
+    Niveau de difficulté : {difficulty}.
+    Le quiz doit etre en français.
+    Le format de sortie doit être :
+    {json.dumps(RESPONSE_JSON)}
+    Assurez vous que les options soient des phrases complètes, pas que des mots.
+    """
+    print("Seconde step: ", "=="*5)
+    #print("intialisation: ", response)
+
+    chat_completion = client.chat.completions.create(
+            model="gpt-4-0613",
+            messages=[
+                {"role": "system", "content": "You are an expert MCQ maker."},
+                {"role": "user", "content": prompt},
+            ]
+        )
+    print("intialisation: ")
+    response = chat_completion.choices[0].message.content
+    
+    return response
