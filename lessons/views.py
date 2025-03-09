@@ -1214,42 +1214,67 @@ def manage_user_role(sender, instance, created, **kwargs):
                     email=instance.email
                 )
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404, render
+import json
+import logging
+
+# Configurez le logger pour suivre les erreurs en production
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def ask_ia(request, course_id=None):
-    cours = Cours.objects.get(id = course_id)
-    print('Chemin: ', cours.file.url)
+    # Récupération du cours ou renvoi d'une erreur 404
+    cours = get_object_or_404(Cours, id=course_id)
+    print('Chemin :', cours.file.url)
+    
+    # Vérifie si la méthode est POST
     if request.method == 'POST':
-        print("Ok")
-        data = json.loads(request.body)
-        user_message = data.get('message', '')
-        # Remplacez ceci par l'appel réel à votre modèle RAG
-        
-        path = cours.file.path
-        #relevant_document =  parse_file(path)[:500]# from chat import process_message_with_rag relevant_document= process_message_with_rag(user_message, path)
-        #ia_response= chat(document_text=relevant_document, question= user_message, cours=cours)
-        ia_response = load_db_qa(f"{course_id}", embeddings,  user_message)
-        print("ia: ", ia_response)
-        #ia_response = f"Voici une réponse générée pour : {user_message}, {text}"
-        source_documents = []
-        for doc in ia_response.get("source_documents", []):
-            # Extraire les informations pertinentes de chaque document
-            doc_info = {
-                "source": cours.file.url, # doc.metadata.get('source', 'Non spécifié'),
-                "page_label": doc.metadata.get('page_label', 'Non spécifié'),
-                "page_content": doc.page_content[:500]+ "..."  # Limiter à 500 caractères pour éviter trop de texte
+        try:
+            # Lecture et validation des données entrantes
+            data = json.loads(request.body)
+            user_message = data.get('message', '').strip()
+            if not user_message:
+                return JsonResponse({'error': 'Le message utilisateur est vide.'}, status=400)
+
+            # Récupération du chemin du fichier associé au cours
+            path = cours.file.path
+            
+            # Appel au modèle IA ou à votre logique métier
+            try:
+                ia_response = load_db_qa(f"{course_id}", embeddings, user_message)
+            except Exception as e:
+                logger.error(f"Erreur lors de l'exécution de l'IA : {e}")
+                return JsonResponse({'error': 'Erreur lors du traitement par l\'IA.'}, status=500)
+            
+            # Extraction des documents sources
+            source_documents = []
+            for doc in ia_response.get("source_documents", []):
+                doc_info = {
+                    "source": cours.file.url,  # Remplacer si vous avez plusieurs sources
+                    "page_label": doc.metadata.get('page_label', 'Non spécifié'),
+                    "page_content": (doc.page_content[:500] + "...") if doc.page_content else "Non disponible"
+                }
+                source_documents.append(doc_info)
+
+            # Retourne la réponse sous forme de JSON
+            response_data = {
+                'response': ia_response.get("answer", "Aucune réponse disponible."),
+                'source_documents': source_documents
             }
-            source_documents.append(doc_info)
-        #print("Sources: ", source_documents)
-        # Renvoyer la réponse dans un format JSON sérialisable
-        return JsonResponse({
-            'response': ia_response["answer"],
-            'source_documents': source_documents
-        })
-       
-    return render(request, "chat.html", {"course_id":course_id, "cours":cours})
+            print("Réponse JSON : ", response_data)
+            return JsonResponse(response_data)
 
+        except json.JSONDecodeError:
+            logger.error("Erreur JSON : Impossible de lire les données du corps de la requête.")
+            return JsonResponse({'error': 'Les données envoyées sont invalides.'}, status=400)
+        except Exception as e:
+            logger.error(f"Erreur inattendue : {e}")
+            return JsonResponse({'error': 'Une erreur interne s\'est produite.'}, status=500)
 
+    # Si la requête est GET, retourner la page de chat
+    return render(request, "chat.html", {"course_id": course_id, "cours": cours})
 
 
 def parse_file(path):
