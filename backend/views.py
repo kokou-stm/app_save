@@ -157,7 +157,28 @@ def register_user(request):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+from django.db.models import Sum
 
+@api_view(['POST'])
+def progress(request):
+    progress_percentage=0
+    cours = Cours.objects.all()
+    max_score = QuestionAnswers.objects.aggregate(total=Sum('score'))['total']
+    print("Max_score: ", max_score)
+    if not max_score:
+        max_score = 1
+    percents_etud = {}
+    
+    list_etu = Etudiant.objects.all()
+    for etud in list_etu: 
+        total_score = sum(score['score'] for score in etud.scores)
+        progress_etud = round((total_score / max_score) * 100, 1) if max_score > 0 else 0
+        percents_etud[f"{etud.username.first_name} {etud.username.last_name}"]= progress_etud
+    percents_etud = dict(sorted(percents_etud.items(), key=lambda item: item[1], reverse=True))
+
+    print("Percent",percents_etud, progress_percentage)
+    return Response({'progress_percentage': round(progress_percentage, 2)})
+   
 
 
 '''
