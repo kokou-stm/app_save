@@ -159,26 +159,60 @@ def register_user(request):
 
 from django.db.models import Sum
 
-@api_view(['POST'])
+from django.db.models import Sum
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+@api_view(['GET', 'POST'])  # Permettre à la fois GET et POST pour plus de flexibilité
 def progress(request):
-    progress_percentage=0
-    cours = Cours.objects.all()
+    # Calcul du score maximum possible
     max_score = QuestionAnswers.objects.aggregate(total=Sum('score'))['total']
-    print("Max_score: ", max_score)
+    
+    # Vérifier si max_score est None ou 0 pour éviter la division par zéro
     if not max_score:
         max_score = 1
-    percents_etud = {}
     
+    # Dictionnaire pour stocker les pourcentages de progression des étudiants
+    students_progress = {}
+    
+    # Récupérer tous les étudiants
     list_etu = Etudiant.objects.all()
-    for etud in list_etu: 
+    total_progress = 0  # Pour calculer la moyenne de progression globale
+    
+    # Calculer la progression pour chaque étudiant
+    for etud in list_etu:
+        # Calculer le score total de l'étudiant
         total_score = sum(score['score'] for score in etud.scores)
+        
+        # Calculer le pourcentage de progression arrondi à une décimale
         progress_etud = round((total_score / max_score) * 100, 1) if max_score > 0 else 0
-        percents_etud[f"{etud.username.first_name} {etud.username.last_name}"]= progress_etud
-    percents_etud = dict(sorted(percents_etud.items(), key=lambda item: item[1], reverse=True))
-
-    print("Percent",percents_etud, progress_percentage)
-    return Response({'progress_percentage': round(progress_percentage, 2)})
-   
+        
+        # Ajouter au dictionnaire des progressions
+        full_name = f"{etud.username.first_name} {etud.username.last_name}"
+        students_progress[full_name] = progress_etud
+        
+        # Ajouter à la progression totale pour la moyenne
+        total_progress += progress_etud
+    
+    # Calculer la progression moyenne (pourcentage global)
+    if list_etu.count() > 0:
+        average_progress = total_progress / list_etu.count()
+    else:
+        average_progress = 0
+    
+    # Trier les étudiants par progression (du plus élevé au plus bas)
+    students_progress = dict(sorted(students_progress.items(), key=lambda item: item[1], reverse=True))
+    
+    # Logging pour le débogage
+    print("Max score:", max_score)
+    print("Students progress:", students_progress)
+    print("Average progress:", average_progress)
+    
+    # Réponse avec à la fois la progression moyenne et le détail par étudiant
+    return Response({
+        'progress_percentage': round(average_progress, 2),
+        'students_progress': students_progress
+    })  
 
 
 '''
