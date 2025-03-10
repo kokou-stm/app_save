@@ -1294,33 +1294,33 @@ def manage_user_role(sender, instance, created, **kwargs):
 def ask_ia(request, course_id=None):
     cours = Cours.objects.get(id = course_id)
     print('Chemin: ', cours.file.url)
-    #if request.method == 'POST':
-    print("Ok")
-    data = json.loads(request.body)
-    user_message = data.get('message', '')
-    # Remplacez ceci par l'appel réel à votre modèle RAG
-    
-    path = cours.file.path
-    #relevant_document =  parse_file(path)[:500]# from chat import process_message_with_rag relevant_document= process_message_with_rag(user_message, path)
-    #ia_response= chat(document_text=relevant_document, question= user_message, cours=cours)
-    ia_response = load_db_qa(f"{course_id}", embeddings,  user_message)
-    print("ia: ", ia_response)
-    #ia_response = f"Voici une réponse générée pour : {user_message}, {text}"
-    source_documents = []
-    for doc in ia_response.get("source_documents", []):
-        # Extraire les informations pertinentes de chaque document
-        doc_info = {
-            "source": cours.file.url, # doc.metadata.get('source', 'Non spécifié'),
-            "page_label": doc.metadata.get('page_label', 'Non spécifié'),
-            "page_content": doc.page_content[:500]+ "..."  # Limiter à 500 caractères pour éviter trop de texte
-        }
-        source_documents.append(doc_info)
-    #print("Sources: ", source_documents)
-    # Renvoyer la réponse dans un format JSON sérialisable
-    return JsonResponse({
-        'response': ia_response["answer"],
-        'source_documents': source_documents
-    })
+    if request.method == 'POST':
+        print("Ok")
+        data = json.loads(request.body)
+        user_message = data.get('message', '')
+        # Remplacez ceci par l'appel réel à votre modèle RAG
+        
+        path = cours.file.path
+        #relevant_document =  parse_file(path)[:500]# from chat import process_message_with_rag relevant_document= process_message_with_rag(user_message, path)
+        #ia_response= chat(document_text=relevant_document, question= user_message, cours=cours)
+        ia_response = load_db_qa(f"{course_id}", embeddings,  user_message)
+        print("ia: ", ia_response)
+        #ia_response = f"Voici une réponse générée pour : {user_message}, {text}"
+        source_documents = []
+        for doc in ia_response.get("source_documents", []):
+            # Extraire les informations pertinentes de chaque document
+            doc_info = {
+                "source": cours.file.url, # doc.metadata.get('source', 'Non spécifié'),
+                "page_label": doc.metadata.get('page_label', 'Non spécifié'),
+                "page_content": doc.page_content[:500]+ "..."  # Limiter à 500 caractères pour éviter trop de texte
+            }
+            source_documents.append(doc_info)
+        #print("Sources: ", source_documents)
+        # Renvoyer la réponse dans un format JSON sérialisable
+        return JsonResponse({
+            'response': ia_response["answer"],
+            'source_documents': source_documents
+        })
        
     return render(request, "chat.html", {"course_id":course_id, "cours":cours})
 
