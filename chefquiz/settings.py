@@ -27,7 +27,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')# 'django-insecure-3&f9adfe$a(6low^lki1
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["voicetovoice.fr","6df5-46-193-67-154.ngrok-free.app","4e74-193-50-192-71.ngrok-free.app","localhost", "127.0.0.1", "chefquizapp.e8hsdyh2c8h6efa5.eastus.azurecontainer.io", "aivoicedubber.com"]#cae4-193-50-192-71.ngrok-free.app", 
 CSRF_TRUSTED_ORIGINS =["https://*.voicetovoice.fr","https://*.6df5-46-193-67-154.ngrok-free.app","https://*.4e74-193-50-192-71.ngrok-free.app","http://*.127.0.0.1","http://*.localhost", "http://*.chefquizapp.e8hsdyh2c8h6efa5.eastus.azurecontainer.io", "https://*.aivoicedubber.com"]
