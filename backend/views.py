@@ -215,6 +215,72 @@ def progress(request):
     })  
 
 
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.exceptions import AuthenticationFailed
+from django.db.models import Sum
+import numpy as np
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])  # Assure que seul un utilisateur authentifié peut accéder à cette vue
+def dash(request):
+    try:
+        progress_percentage = 0
+        cours = Cours.objects.all()
+        quiz = Quiz.objects.all().count()
+        quiz_number = [i for i in range(1, 1 + quiz)]
+        max_score = QuestionAnswers.objects.aggregate(total=Sum('score'))['total']
+        max_score = max_score if max_score else 1  # Défaut à 1 pour éviter la division par zéro
+
+        percents_etud = {}
+        list_etu = Etudiant.objects.all()
+        for etud in list_etu:
+            total_score = sum(score['score'] for score in etud.scores)
+            progress_etud = round((total_score / max_score) * 100, 1) if max_score > 0 else 0
+            percents_etud[f"{etud.username.first_name} {etud.username.last_name}"] = progress_etud
+
+        percents_etud = dict(sorted(percents_etud.items(), key=lambda item: item[1], reverse=True))
+        moyenne = [[score['score'] for score in etudiant_i.scores] for etudiant_i in list_etu]
+
+        for i in range(len(moyenne)):
+            if len(moyenne[i]) < len(quiz_number):
+                moyenne[i].extend([0] * (len(quiz_number) - len(moyenne[i])))
+
+        best_calcul = [np.mean(np.array(value)) for value in moyenne]
+        context = {
+            'is_staff': request.user.is_staff,
+            'list_etud': [f"{etu.username.first_name} {etu.username.last_name}" for etu in list_etu],
+            'percents_etud': percents_etud,
+        }
+
+        try:
+            best_list = moyenne[best_calcul.index(max(best_calcul))]
+            moyenne = np.array(moyenne)
+            moyenne = list(np.mean(moyenne, axis=0, dtype=np.int32))
+            context['best_list'] = best_list
+            context['moyenne'] = [float(m) for m in moyenne]
+        except Exception as e:
+            print("Erreur lors du calcul des moyennes :", e)
+
+        if not request.user.is_staff:
+            etudiant = Etudiant.objects.get(username=request.user)
+            scores = [score['score'] for score in etudiant.scores]
+            total_score = sum(score['score'] for score in etudiant.scores)
+            progress_percentage = (total_score / max_score) * 100 if max_score > 0 else 0
+            context['progress_percentage'] = round(progress_percentage, 2)
+            context['scores'] = scores
+
+        context['quiz_number'] = quiz_number
+        context['nbre_quiz'] = len(quiz_number)
+
+        return Response(context)
+
+    except Exception as error:
+        print("Erreur :", error)
+        raise AuthenticationFailed("Problème avec l'authentification ou traitement des données.")
+
 '''
     
 '''
@@ -455,26 +521,57 @@ def register(request):
 
 from django.views.decorators.csrf import csrf_exempt
 
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.models import User
+
+#@permission_classes([IsAuthenticated])  # Nécessite une authentification
 @csrf_exempt
 @api_view(['POST'])
 def edit_profile(request):
-    # Récupère les informations d'inscription
-    if request.method =='POST':
-        email = request.data.get("email")
-        username = request.data.get("username")
-        cardNumber = request.data.get("cardNumber")
-        phoneNumber = request.data.get("phoneNumber")
-        print(email, username,cardNumber, phoneNumber )
+    """
+    Vue pour mettre à jour les informations de l'utilisateur connecté.
+    """
+    try:
+        # Récupérer l'utilisateur actuel
+        user = request.user
         
-        # Vérifie que l'email est valide
-        try:
-            validate_email(email)
-        except ValidationError:
-            print('1')
-            return Response({"detail": "L'email n'est pas valide."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        return Response({"detail":"Enregistré avec succes"})
+        # Extraire les données du corps de la requête
+        username = request.data.get('username', '').strip()
+        email = request.data.get('email', '').strip()
+        card_number = request.data.get('cardNumber', '').strip()
+        phone_number = request.data.get('phoneNumber', '').strip()
+        print(len(card_number), card_number)
+        # Vérifications de base
+        if not username:
+            return Response({'detail': "Le nom d'utilisateur est requis."}, status=status.HTTP_400_BAD_REQUEST)
+        if not email:
+            return Response({'detail': "L'email est requis."}, status=status.HTTP_400_BAD_REQUEST)
+        '''if len(card_number) != 19 or not card_number.isdigit():
+            return Response({'detail': "Le numéro de carte doit contenir 16 chiffres."}, status=status.HTTP_400_BAD_REQUEST)
+        if len(phone_number) < 8 or not phone_number.isdigit():
+            return Response({'detail': "Le numéro de téléphone est invalide."}, status=status.HTTP_400_BAD_REQUEST)'''
 
+        # Mettre à jour les champs utilisateur
+        user.username = username
+        user.email = email
+        user.save()
+
+        # Mettre à jour les champs additionnels (ex. cardNumber, phoneNumber)
+        # Si ces champs sont stockés dans un modèle séparé comme un profil
+        etudiant = Etudiant.objects.get(username = user)
+        etudiant.numero_de_carte = card_number
+        etudiant.phone = phone_number
+        etudiant.save()
+ 
+        return Response({'detail': "Profil mis à jour avec succès !"}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        print("Erreur lors de la mise à jour du profil :", e)
+        return Response({'detail': "Une erreur est survenue lors de la mise à jour du profil."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 '''@api_view(['GET'])
 def cours(request):

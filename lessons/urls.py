@@ -30,6 +30,8 @@ urlpatterns = [
     path('contact/', views.contact, name='contact'),
     path('boat/', views.boat, name='boat'),
     path('graph/', views.dash, name='dash'),
+    path('graph/<int:id>/', views.dash_add, name='dash_add'),
+    
     path('popupquiz/<str:add_val>/', views.popupquiz, name='popupquiz'),
     path('search/', views.search_courses, name='search_courses'),
       

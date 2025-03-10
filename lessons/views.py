@@ -213,6 +213,81 @@ def dash(request):
     print(context['nbre_quiz'])
     return render(request, "dash.html", context)
 
+from django.shortcuts import render
+from django.http import Http404
+from django.db.models import Sum
+import numpy as np
+
+def dash_add(request, id):
+    try:
+        # Récupérer l'utilisateur correspondant à l'ID
+        etudiant = Etudiant.objects.get(id=id)
+    except Etudiant.DoesNotExist:
+        raise Http404("Utilisateur non trouvé")
+
+    progress_percentage = 0
+    cours = Cours.objects.all()
+    quiz = Quiz.objects.all().count()
+    quiz_number = [i for i in range(1, 1 + quiz)]
+    print("Number: ", len(quiz_number))
+    
+    max_score = QuestionAnswers.objects.aggregate(total=Sum('score'))['total']
+    if max_score is None:
+        max_score = 1
+
+    percents_etud = {}
+    list_etu = Etudiant.objects.all()
+
+    # Calcul des pourcentages pour chaque étudiant
+    for n, etud in enumerate(list_etu):
+        total_score = sum(score['score'] for score in etud.scores)
+        progress_etud = round((total_score / max_score) * 100, 1) if max_score > 0 else 0
+        percents_etud[f"{etud.username.first_name} {etud.username.last_name}"] = progress_etud
+        if n == 2:
+            print("Etudiant: ", etud, len(etud.scores))
+
+    percents_etud = dict(sorted(percents_etud.items(), key=lambda item: item[1], reverse=True))
+    moyenne = [[score['score'] for score in etudiant_i.scores] for etudiant_i in list_etu]
+
+    # Compléter les listes si elles sont plus courtes que le nombre de quiz
+    for i in range(len(moyenne)):
+        if len(moyenne[i]) < len(quiz_number):
+            moyenne[i].extend([0] * (len(quiz_number) - len(moyenne[i])))
+
+    best_calcul = [np.mean(np.array(value)) for value in moyenne]
+    context = {
+        'is_staff': request.user.is_staff,
+        'list_etud': list_etu,
+        'percents_etud': percents_etud,
+    }
+
+    try:
+        best_list = moyenne[best_calcul.index(max(best_calcul))]
+        moyenne = np.array(moyenne)
+        moyenne = list(np.mean(moyenne, axis=0, dtype=np.int32))
+        moyenne = [float(m) for m in moyenne]
+        context['best_list'] = best_list
+        context['moyenne'] = moyenne
+    except Exception as e:
+        print("Erreur lors des calculs : ", e)
+
+    # Calculer les scores et progression pour l'étudiant actuel
+    scores = [score['score'] for score in etudiant.scores]
+    try:
+        total_score = sum(score['score'] for score in etudiant.scores)
+        progress_percentage = (total_score / max_score) * 100 if max_score > 0 else 0
+        context['progress_percentage'] = round(progress_percentage, 2)
+        context['scores'] = scores
+    except Exception as e:
+        print("Erreur pour l'étudiant : ", e)
+
+    context['quiz_number'] = quiz_number
+    context['nbre_quiz'] = len(quiz_number)
+    print(context['nbre_quiz'])
+
+    # Rendre la page HTML avec le contexte
+    return render(request, "dash.html", context)
+
 
 def profile(request):
     membre=""
