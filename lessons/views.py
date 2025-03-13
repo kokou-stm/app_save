@@ -996,7 +996,6 @@ def forgotpassword(request):
     return render(request, "account/forgot_password.html")
 
 
-
 def forgotpassword1(request):
      if request.method =="POST":
           username = request.user.username
@@ -1225,8 +1224,6 @@ def contact(request):
         #return HttpResponse("yours message is succesfull send")
     return redirect("index")
 
-
-
 def create_user_profile(user):
     """
     Crée un profil correspondant (Etudiant ou Professeur) en fonction du rôle de l'utilisateur.
@@ -1243,7 +1240,6 @@ def create_user_profile(user):
             nom=user.last_name,  # Utilisez les informations disponibles
             email=user.email
         )
-
 
 @receiver(post_save, sender=User)
 def manage_user_role(sender, instance, created, **kwargs):

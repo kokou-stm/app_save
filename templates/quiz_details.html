@@ -1,119 +1,11 @@
-
-<!doctype html>
+{% extends 'base.html' %}
 {% load static %}
 
-<head>
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="TemplateMo">
-    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet">
-
-    <title>ChiefQuiz</title>
-
-    <!-- Bootstrap core CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
-
-
-
-    <!-- Additional CSS Files -->
-    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/templatemo-edu-meeting.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/owl.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/lightbox.css' %}">
-<!--
-
-
-
-https://templatemo.com/tm-569-edu-meeting
-
--->
-</head>
-
-<style>
-    @import url("https://fonts.googleapis.com/css2?family=Redressed&family=Merriweather:wght@300;400;700&display=swap");
-    .redressed {
-        font-family: "Redressed", serif;
-    }
-    .merriweather {
-        font-family: "Merriweather", serif;
-    }
-</style>
+  {% block content %}
 
 <body>
-
-   
- <!-- Sub Header -->
- <div class="sub-header">
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-8 col-sm-8">
-        <div class="left-content">
-          <p>Apprenez la cuisine <em>Autrement</em> grace à l'intelligence Artificielle</p>
-        </div>
-      </div>
-      <div class="col-lg-4 col-sm-4">
-        <div class="right-icons">
-          <ul>
-            <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-            <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-            <li><a href="#"><i class="fa fa-behance"></i></a></li>
-            <li><a href="#"><i class="fa fa-linkedin"></i></a></li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
- <!-- ***** Header Area Start ***** -->
-<header class="header-area header-sticky">
-  <div class="container">
-      <div class="row">
-          <div class="col-12">
-              <nav class="main-nav">
-                  <!-- ***** Logo Start ***** -->
-                  <a href="{% url 'index' %}" class="logo merriweather">
-                     ChiefQuiz
-                  </a>
-                  <!-- ***** Logo End ***** -->
-                  <!-- ***** Menu Start ***** -->
-                  <ul class="nav merriweather">
-                      <li class="scroll-to-section"><a href="#top" class="active">Accueil</a></li>
-                      <li><a href="meetings.html" class="merriweather">Réunions</a></li>
-                      <li class="scroll-to-section"><a href="#apply">Postuler maintenant</a></li>
-                     
-                      <li class="scroll-to-section"><a href="#courses">Cours</a></li> 
-                      <li class="scroll-to-section"><a href="#contact">Contactez-nous</a></li> 
-                      <li class="has-sub">
-                        <a href="javascript:void(0)">Compte</a>
-                        <ul class="sub-menu">
-                          <li><p class="bg-dark text-light text-center" >{{user.username}}</p></li>
-                            <li><a href="meetings.html">Mes Cours</a></li>
-                            <li><a href="meeting-details.html">Détails de la réunion</a></li>
-                            <li><a href="{% url 'home' %}">Edit Profile </a></li>
-                            <li><a href="{% url 'home' %}">Mes Emprunts</a></li>
-                            <li><a href="{% url 'logout' %}">Deconnexion</a></li>
-                         
-                          </ul>
-                    </li>
-
-
-                  </ul>        
-                  <a class='menu-trigger'>
-                      <span>Menu</span>
-                  </a>
-                  <!-- ***** Menu End ***** -->
-              </nav>
-          </div>
-      </div>
-  </div>
-</header>
-<!-- ***** Header Area End ***** -->
+  
 
   <section class="heading-page header-text " id="top">
     <div class="container">
@@ -161,80 +53,76 @@ https://templatemo.com/tm-569-edu-meeting
       margin-top: 10px;
       color: #6c757d;
     }
+    #quiz-container {
+      display: none;
+    }
+    .start-screen {
+      text-align: center;
+      padding: 50px;
+    }
   </style>
 
-  {% if not  is_staff %}
+  {% if not is_staff %}
   <section class="meetings-page p-2" id="quiz_begin">
     <div class="container mt-5 redressed">
-      <div id="customCarousel" class="carousel slide" data-bs-ride="false" data-bs-keyboard="true" data-bs-interval="false" >
-        <!-- Diapositives -->
-        <div class="carousel-inner ">
-          <div class="carousel-item active ">
-            <div class="d-flex justify-content-center align-items-center" style="height: 300px;  background-color: #f8f9fa;">
-              <h2>Debut du Quiz</h2>
-            </div>
-          </div>
-          <form method="POST" action="{% url 'quiz_score' quiz.id %}" id="quiz-form1">
-            {% csrf_token %}
-            {% for question in questions %}
-
-        
-         
-          <div class="carousel-item ">
-            <div class="d-flex justify-content-center align-items-center" style="height: 300px; background-color: transparent">
-              <div class="container">
-                <div class="row">
-                  <div class="col-md-1"></div>
-                <div class="col-md-10">
-                  <div class="card mb-1">
-                    <div class="card-header">
-                        <h4>Question {{ forloop.counter }}: {{ question.question_text }}</h4>
-                        <div class="text-dark">Temps restant : <span class="text-dark" id="timer">60s</span></div> 
-                        <div class="timer text-dark" id="timer-{{ forloop.counter }}"></div>
+      <!-- Écran de démarrage -->
+      <div id="start-screen" class="start-screen">
+        <h2>Êtes-vous prêt à commencer le quiz?</h2>
+        <p>Vous aurez 60 secondes pour répondre à chaque question.</p>
+        <button id="start-quiz-btn" class="btn btn-primary btn-lg">Commencer le Quiz</button>
+      </div>
+      
+      <!-- Conteneur du quiz (caché au début) -->
+      <div id="quiz-container">
+        <div id="customCarousel" class="carousel slide" data-bs-ride="false" data-bs-keyboard="false" data-bs-interval="false" data-bs-wrap="false">
+          <!-- Diapositives -->
+          <div class="carousel-inner">
+            <form method="POST" action="{% url 'quiz_score' quiz.id %}" id="quiz-form1">
+              {% csrf_token %}
+              {% for question in questions %}
+              <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <div class="d-flex justify-content-center align-items-center" style="height: 300px; background-color: transparent">
+                  <div class="container">
+                    <div class="row">
+                      <div class="col-md-1"></div>
+                      <div class="col-md-10">
+                        <div class="card mb-1">
+                          <div class="card-header">
+                            <h4>Question {{ forloop.counter }}: {{ question.question_text }}</h4>
+                            <div class="text-dark">Temps restant : <span class="text-dark" id="timer-{{ forloop.counter }}">60</span>s</div>
+                          </div>
+                          <div class="card-body">
+                            <ul>
+                              {% for key, value in question.options.items %}
+                              <li class="mb-3">
+                                <label>
+                                  <input type="radio" name="question_{{ question.id }}" value="{{ key }}">
+                                  {{ key }}: {{ value }}
+                                </label>
+                              </li>
+                              {% endfor %}
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-1"></div>
                     </div>
-                    <div class="card-body">
-                        <ul>
-                            {% for key, value in question.options.items %}
-                                <li class="mb-3">
-                                    <label>
-                                        <input type="radio" name="question_{{ question.id }}" value="{{ key }}">
-                                        {{ key }}: {{ value }}
-                                    </label>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+                  </div>
                 </div>
-                </div>
-                <div class="col-md-1"></div>
-                </div>
-                
-                
               </div>
-            
-
-            </div>
+              {% endfor %}
+            </form>
           </div>
-         {% endfor %}
-          </form>
+        </div>
+
+        <!-- Boutons personnalisés (uniquement Suivant et Soumettre) -->
+        <div class="carousel-buttons">
+          <button id="next-btn" class="btn btn-primary" onclick="nextSlide()">Suivant →</button>
+          <button id="submit-btn" class="btn btn-success" style="display: none;" type="button" onclick="submitQuiz()">Soumettre</button>
         </div>
       </div>
-  
-      <!-- Boutons personnalisés -->
-   
-
-      <div class="carousel-buttons">
-        <button class="btn btn-primary me-2" onclick="prevSlide()">← Précédent</button>
-        <button id="next-btn" class="btn btn-primary" onclick="nextSlide()">Suivant →</button>
-        <button id="submit-btn" class="btn btn-success" style="display: none;" type="button" onclick="submitQuiz()">Soumettre</button>
-
-    </div>
-    
-
     </div>
   </section>
-
-
   {% else  %}
   <section class="meetings-page p-2" id="meetings">
     <div class="container redressed mb-5 ">
@@ -321,12 +209,8 @@ https://templatemo.com/tm-569-edu-meeting
               <a class="btn btn-primary me-3" href="{% url 'index' %}" > <-Retour</a>
               {% if not is_staff %}
              <button class="btn btn-primary" type="submit">Soumettre</button>
-            
-              
               {% endif%}
             </div>
-              
-              
           </form>
             
            {% endif %}
@@ -401,9 +285,7 @@ https://templatemo.com/tm-569-edu-meeting
           <br>
           XPERTIM GMBH 
           <br>
-         
-          
-           <a   title="Build Better UI, Faster">Torhausweg 71 , 66539 Neunkirchen, Allemagne</a>
+          <a title="Build Better UI, Faster">Torhausweg 71 , 66539 Neunkirchen, Allemagne</a>
         </p>
     </div>
   </section>
@@ -431,15 +313,53 @@ https://templatemo.com/tm-569-edu-meeting
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+          // Références aux éléments
+          const startScreen = document.getElementById("start-screen");
+          const quizContainer = document.getElementById("quiz-container");
+          const startQuizBtn = document.getElementById("start-quiz-btn");
           const nextButton = document.getElementById("next-btn");
           const submitButton = document.getElementById("submit-btn");
           const carousel = document.getElementById("customCarousel");
-          const items = carousel.querySelectorAll(".carousel-item");
-          const quizForm = document.getElementById("quiz-form"); // Récupère le formulaire
-  
-          function updateButtons() {
+          
+          // Si ces éléments existent (pour non-staff seulement)
+          if (startQuizBtn && quizContainer) {
+              // Événement pour démarrer le quiz
+              startQuizBtn.addEventListener("click", function() {
+                  startScreen.style.display = "none";
+                  quizContainer.style.display = "block";
+                  startQuizForCurrentSlide();
+              });
+          }
+          
+          // Obtenir l'instance carousel
+          let carouselInstance;
+          if (carousel) {
+              carouselInstance = new bootstrap.Carousel(carousel, {
+                  interval: false,
+                  keyboard: false,
+                  wrap: false
+              });
+          }
+          
+          // Gestion des slides
+          if (carousel) {
+              carousel.addEventListener("slid.bs.carousel", function(event) {
+                  updateButtonsVisibility();
+                  startQuizForCurrentSlide();
+              });
+              
+              // Initialisation initiale
+              updateButtonsVisibility();
+          }
+          
+          // Fonction pour mettre à jour les boutons
+          function updateButtonsVisibility() {
+              if (!carousel) return;
+              
+              const items = carousel.querySelectorAll(".carousel-item");
               let activeIndex = [...items].findIndex(item => item.classList.contains("active"));
-  
+              
+              // Masquer le bouton Précédent (toujours car on ne veut pas revenir en arrière)
               // Si c'est la dernière question, cacher "Suivant" et afficher "Soumettre"
               if (activeIndex === items.length - 1) {
                   nextButton.style.display = "none";
@@ -449,31 +369,69 @@ https://templatemo.com/tm-569-edu-meeting
                   submitButton.style.display = "none";
               }
           }
-  
-          // Mettre à jour les boutons au changement de slide
-          carousel.addEventListener("slid.bs.carousel", updateButtons);
-  
-          // Initialisation au chargement
-          updateButtons();
       });
-  
-      function prevSlide() {
-          const carousel = new bootstrap.Carousel(document.getElementById("customCarousel"));
-          carousel.prev();
-      }
-  
+      
+      // Variables globales pour le timer
+      let currentTimerId;
+      let timeRemaining;
+      
+      // Fonction pour passer à la diapositive suivante
       function nextSlide() {
+          clearInterval(currentTimerId);
           const carousel = new bootstrap.Carousel(document.getElementById("customCarousel"));
           carousel.next();
       }
-  
+      
       // Fonction pour soumettre le formulaire
       function submitQuiz() {
-        console.log("form: ",  document.getElementById("quiz-form1"))
-          document.getElementById("quiz-form1").submit(); // Soumet le formulaire
+          clearInterval(currentTimerId);
+          document.getElementById("quiz-form1").submit();
       }
-  </script>
-
+      
+      // Fonction pour démarrer le timer pour la diapositive actuelle
+      function startQuizForCurrentSlide() {
+          // Effacer tout timer précédent
+          if (currentTimerId) {
+              clearInterval(currentTimerId);
+          }
+          
+          // Trouver la question active
+          const carousel = document.getElementById("customCarousel");
+          const activeSlide = carousel.querySelector(".carousel-item.active");
+          if (!activeSlide) return;
+          
+          // Trouver l'index de la question active
+          const slides = carousel.querySelectorAll(".carousel-item");
+          const activeIndex = [...slides].indexOf(activeSlide);
+          
+          // Trouver l'élément timer pour cette question
+          const timerElement = document.getElementById(`timer-${activeIndex + 1}`);
+          if (!timerElement) return;
+          
+          // Démarrer le compte à rebours
+          timeRemaining = 60;
+          timerElement.textContent = timeRemaining;
+          
+          currentTimerId = setInterval(function() {
+              timeRemaining--;
+              if (timerElement) {
+                  timerElement.textContent = timeRemaining;
+              }
+              
+              // Si le temps est écoulé, passer à la question suivante ou soumettre
+              if (timeRemaining <= 0) {
+                  clearInterval(currentTimerId);
+                  
+                  // Vérifier si c'est la dernière question
+                  if (activeIndex === slides.length - 1) {
+                      submitQuiz();
+                  } else {
+                      nextSlide();
+                  }
+              }
+          }, 1000);
+      }
+    </script>
 
     <script>
         //according to loftblog tut
@@ -522,113 +480,6 @@ https://templatemo.com/tm-569-edu-meeting
         });
     </script>
 
-<script>
-  // Obtenir les éléments du carrousel
-const carousel = document.getElementById('customCarousel');
-const carouselInstance = bootstrap.Carousel.getOrCreateInstance(carousel);
-
-// Sélection des minuteries pour chaque slide
-let timerElements = document.querySelectorAll('.timer');
-let currentSlideIndex = 0;
-let countdown;
-let timeRemaining = 60; // 60 secondes pour chaque diapositive
-
-// Fonction pour mettre à jour la minuterie
-function updateTimer() {
-  timerElements.forEach((timer, index) => {
-    if (index === currentSlideIndex) {
-      timer.textContent = ""//`Temps restant : ${timeRemaining}s`;
-    } else {
-      timer.textContent =""// 'Temps restant : 60s'; // Réinitialisation des autres
-    }
-  });
-}
-
-// Fonction de décompte
-function startCountdown() {
-  clearInterval(countdown); // Arrête tout décompte précédent
-  timeRemaining = 60; // Réinitialise le temps à 60 secondes
-
-  countdown = setInterval(() => {
-    timeRemaining--;
-    updateTimer();
-
-    if (timeRemaining <= 0) {
-      carouselInstance.next(); // Passe à la diapositive suivante
-      resetCountdown(); // Réinitialise le décompte pour la diapositive suivante
-    }
-  }, 1000); // Mise à jour toutes les secondes
-}
-
-// Fonction pour réinitialiser le décompte après un changement manuel ou automatique
-function resetCountdown() {
-  clearInterval(countdown);
-  startCountdown();
-}
-
-// Fonction pour passer à la diapositive précédente
-function prevSlide() {
-  carouselInstance.prev();
-  resetCountdown();
-}
-
-// Fonction pour passer à la diapositive suivante
-function nextSlide() {
-  carouselInstance.next();
-  resetCountdown();
-}
-
-// Événement déclenché lorsque la diapositive change
-carousel.addEventListener('slid.bs.carousel', (event) => {
-  currentSlideIndex = event.to; // Met à jour l'index de la diapositive active
-  resetCountdown(); // Réinitialise le 
-  startTimer()
-});
-
-// Lancer le décompte initial
-startCountdown();
-
-</script>
-
-<script>
-       let timeLeft = 60; // Temps initial en secondes
-        const timerDisplay = document.getElementById("timer");
-
-        function startTimer() {
-            timeLeft = 60; 
-            const countdown = setInterval(() => {
-                if (timeLeft <= 0) {
-                    clearInterval(countdown); // Arrête le timer
-                    timerDisplay.textContent = "Temps écoulé !";
-                    //alert("Le temps est écoulé !");
-                } else {
-                    timeLeft--; // Décrémente le temps
-                    timerDisplay.textContent = timeLeft;
-                }
-            }, 1000); // Exécute toutes les 1 seconde
-        }
-
-</script>
 </body>
 
-</body>
-</html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+{% endblock content %}

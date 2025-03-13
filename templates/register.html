@@ -57,7 +57,7 @@
                 </li>
 
                 <li class="nav-item">
-                  <a class="nav-link active" aria-current="true" href="{% url 'register' %}" >Create New account</a>
+                  <a class="nav-link active" aria-current="true" href="{% url 'register_web' %}" >Create New account</a>
                 </li>
                 
                 
@@ -67,7 +67,7 @@
              
                   <h5 class="card-title"></h5>
     
-                  <form action="{% url 'register' %}" method="post">
+                  <form action="{% url 'register_web' %}" method="post">
                     {% csrf_token %}
 
                     <div class="input-group mb-3">
