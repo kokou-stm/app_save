@@ -29,8 +29,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY')# 'django-insecure-3&f9adfe$a(6low^lki1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["voicetovoice.fr","6df5-46-193-67-154.ngrok-free.app","4e74-193-50-192-71.ngrok-free.app","localhost", "127.0.0.1", "chefquizapp.e8hsdyh2c8h6efa5.eastus.azurecontainer.io", "aivoicedubber.com"]#cae4-193-50-192-71.ngrok-free.app", 
-CSRF_TRUSTED_ORIGINS =["https://*.voicetovoice.fr","https://*.6df5-46-193-67-154.ngrok-free.app","https://*.4e74-193-50-192-71.ngrok-free.app","http://*.127.0.0.1","http://*.localhost", "http://*.chefquizapp.e8hsdyh2c8h6efa5.eastus.azurecontainer.io", "https://*.aivoicedubber.com"]
+ALLOWED_HOSTS = ["f658-46-193-67-154.ngrok-free.app","voicetovoice.fr","6df5-46-193-67-154.ngrok-free.app","4e74-193-50-192-71.ngrok-free.app","localhost", "127.0.0.1", "chefquizapp.e8hsdyh2c8h6efa5.eastus.azurecontainer.io", "aivoicedubber.com"]#cae4-193-50-192-71.ngrok-free.app", 
+CSRF_TRUSTED_ORIGINS =["https://*.f658-46-193-67-154.ngrok-free.app","https://*.voicetovoice.fr","https://*.6df5-46-193-67-154.ngrok-free.app","https://*.4e74-193-50-192-71.ngrok-free.app","http://*.127.0.0.1","http://*.localhost", "http://*.chefquizapp.e8hsdyh2c8h6efa5.eastus.azurecontainer.io", "https://*.aivoicedubber.com"]
 CORS_ORIGIN_ALLOW_ALL =True
 # Application definition
 
@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
+    'storages',
 
 ]
 
@@ -184,6 +185,46 @@ AZURE_CHAT_API_KEY=os.environ.get('AZURE_CHAT_API_KEY')
 AZURE_EMBEDDING_API_KEY=os.environ.get('AZURE_EMBEDDING_API_KEY')
 EMAIL_USE_SSL = False  # Assurez-vous que c'est désactivé si TLS est activé
 
+
+
+
+#
+#DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
+AZURE_ACCOUNT_NAME = 'chefquizstockage'
+AZURE_ACCOUNT_KEY = 'N6V8qPO4CgJoS4ZBQZ7Cd3wl1vNXJBoviAGuQku1PpibTJ6xQaD+aa5L/LkhYDJum6cVDz8u7Kuk+AStiBOxSQ=='
+AZURE_CONTAINER = 'media'
+MEDIA_URL = f'https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/'
+STATIC_URL = f'https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/static/'
+AZURE_CONNECTION_STRING="DefaultEndpointsProtocol=https;AccountName=chefquizstockage;AccountKey=N6V8qPO4CgJoS4ZBQZ7Cd3wl1vNXJBoviAGuQku1PpibTJ6xQaD+aa5L/LkhYDJum6cVDz8u7Kuk+AStiBOxSQ==;EndpointSuffix=core.windows.net",
+                                                                  
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "connection_string": "DefaultEndpointsProtocol=https;AccountName=chefquizstockage;AccountKey=N6V8qPO4CgJoS4ZBQZ7Cd3wl1vNXJBoviAGuQku1PpibTJ6xQaD+aa5L/LkhYDJum6cVDz8u7Kuk+AStiBOxSQ==;EndpointSuffix=core.windows.net",
+            "azure_container": "media",
+        },
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "connection_string": "DefaultEndpointsProtocol=https;AccountName=chefquizstockage;AccountKey=N6V8qPO4CgJoS4ZBQZ7Cd3wl1vNXJBoviAGuQku1PpibTJ6xQaD+aa5L/LkhYDJum6cVDz8u7Kuk+AStiBOxSQ==;EndpointSuffix=core.windows.net",
+            "azure_container": "static",
+        },
+    },
+}
+
+# DEFAULT_FILE_STORAGE = 'chefquiz.custom_azure.AzureMediaStorage'
+# #STATICFILES_STORAGE = 'chefquiz.custom_azure.AzureStaticStorage'
+
+# STATIC_LOCATION = "static"
+# MEDIA_LOCATION = "media"
+
+# AZURE_ACCOUNT_NAME = "chefquizstorage"
+# AZURE_CUSTOM_DOMAIN = f'{AZURE_ACCOUNT_NAME}.blob.core.windows.net'
+# #STATIC_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
+# MEDIA_URL = f'https://{AZURE_CUSTOM_DOMAIN}/{MEDIA_LOCATION}/'
 
 
 

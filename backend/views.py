@@ -76,25 +76,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-'''@api_view(["POST"])
-def deconnexion(request):
-    if request.method=='POST':
-        if request.user.is_authenticated:
-            refresh_token = request.data.get("refresh")
-            print(request.data)
-            if not refresh_token:
-                return Response({"detail": "Token non fourni"}, status=status.HTTP_400_BAD_REQUEST)
 
-            # Blacklister le token
-            token = RefreshToken(refresh_token)
-            token.blacklist()  # Ajoute le token à la liste noire
-            print("Deconnexion reussie")
-            print('deonnexion reussie')
-            return Response(status=status.HTTP_200_OK)
-        
-
-    return Response({"error": "Utilisateur non authentifié"}, status=401)
-'''
 @api_view(['POST'])
 def deconnexion(request):
     try:
@@ -281,16 +263,6 @@ def dash(request):
         print("Erreur :", error)
         raise AuthenticationFailed("Problème avec l'authentification ou traitement des données.")
 
-'''
-    
-'''
-'''
-@api_view
-def deconnexion(request):
-     logout(request)
-
-     return Response({})
-'''
 
 @api_view(['POST'])
 def register(request):
@@ -573,12 +545,7 @@ def edit_profile(request):
         print("Erreur lors de la mise à jour du profil :", e)
         return Response({'detail': "Une erreur est survenue lors de la mise à jour du profil."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-'''@api_view(['GET'])
-def cours(request):
-     courses = Cours.objects.all()
-     cours_serializer = Courseserializer(courses, many=True)
-     return Response(cours_serializer.data)
-'''
+
 
 @api_view(['GET'])
 def cours(request):

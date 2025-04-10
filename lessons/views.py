@@ -27,7 +27,6 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA,  ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from langchain_community.vectorstores import FAISS
-from langchain.chains import RetrievalQA
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.memory import ConversationBufferMemory
@@ -378,9 +377,9 @@ def upload_cours(request):
         save_path  = f"{course.id}"
         folder_path = os.path.join(settings.MEDIA_ROOT, save_path)
         print("folderpath: ", folder_path)
-        cours_path = course.file.path
+        cours_path = course.file.url
         
-        save_db(cours_path, folder_path, embeddings)
+        save_db(cours_path, folder_path, embeddings, course_id=f"{course.id}")
         #process_message_with_rag(cours)
         messages.info(request, f"Cours {title} a été bien ajouté.")
         redirect_url = reverse('quiz_creator', args=[course.id])
@@ -410,7 +409,7 @@ def quiz(request, course_id=None):
 
         # Générer le quiz (logique existante)
         cours = Cours.objects.get(id=course.id)
-        path = cours.file.path
+        path = cours.file.url
         '''text = parse_file(path)
         grade = 5
         data = chat_with_openai(text[:1000], number, grade, tone, response_json)
@@ -527,7 +526,7 @@ def course_details(request, course_id):
     # Récupération du cours
     course = get_object_or_404(Cours, id=course_id)
    
-    print('Chemin: ', course.file.path)
+    print('Chemin: ', course.file.url)
     quizzes = Quiz.objects.filter(course=course)
     context = {'course': course, 'is_staff': request.user.is_staff, 'quizzes': quizzes}
     # Récupération du quiz associé
@@ -1286,40 +1285,55 @@ def manage_user_role(sender, instance, created, **kwargs):
                 )
 
 
+import shutil
+
 @csrf_exempt
 def ask_ia(request, course_id=None):
-    cours = Cours.objects.get(id = course_id)
+    cours = Cours.objects.get(id=course_id)
     print('Chemin: ', cours.file.url)
+
     if request.method == 'POST':
         print("Ok")
         data = json.loads(request.body)
         user_message = data.get('message', '')
-        # Remplacez ceci par l'appel réel à votre modèle RAG
         
-        path = cours.file.path
-        #relevant_document =  parse_file(path)[:500]# from chat import process_message_with_rag relevant_document= process_message_with_rag(user_message, path)
-        #ia_response= chat(document_text=relevant_document, question= user_message, cours=cours)
-        ia_response = load_db_qa(f"{course_id}", embeddings,  user_message)
+        path = cours.file.url
+        
+        # Appel à la fonction pour obtenir la réponse de l'IA
+        ia_response = load_db_qa(f"{course_id}", embeddings, user_message)
         print("ia: ", ia_response)
-        #ia_response = f"Voici une réponse générée pour : {user_message}, {text}"
+        
+        # Extraire les documents sources
         source_documents = []
         for doc in ia_response.get("source_documents", []):
-            # Extraire les informations pertinentes de chaque document
             doc_info = {
-                "source": cours.file.url, # doc.metadata.get('source', 'Non spécifié'),
+                "source": cours.file.url,
                 "page_label": doc.metadata.get('page_label', 'Non spécifié'),
-                "page_content": doc.page_content[:500]+ "..."  # Limiter à 500 caractères pour éviter trop de texte
+                "page_content": doc.page_content[:500] + "..."
             }
             source_documents.append(doc_info)
-        #print("Sources: ", source_documents)
-        # Renvoyer la réponse dans un format JSON sérialisable
+        
+        # Renvoyer la réponse
         return JsonResponse({
             'response': ia_response["answer"],
             'source_documents': source_documents
         })
-       
-    return render(request, "chat.html", {"course_id":course_id, "cours":cours})
+    
+    # Supprimer les fichiers temporaires à la fin de la session
+    folder_path = os.path.join(settings.MEDIA_ROOT, f"{course_id}")
+    temp_file_path_faiss = os.path.join(folder_path, "index.faiss")
+    temp_file_path_pickle = os.path.join(folder_path, "index.pkl")
 
+    # Supprimer les fichiers après la fin de la session ou lorsque l'utilisateur quitte
+    if os.path.exists(temp_file_path_faiss):
+        os.remove(temp_file_path_faiss)
+        print(f"Fichier local temporaire {temp_file_path_faiss} supprimé.")
+
+    if os.path.exists(temp_file_path_pickle):
+        os.remove(temp_file_path_pickle)
+        print(f"Fichier local temporaire {temp_file_path_pickle} supprimé.")
+    
+    return render(request, "chat.html", {"course_id": course_id, "cours": cours})
 
 
 
@@ -1364,10 +1378,10 @@ def chat(document_text, question,cours):
     )
 
     response = chat_completion.choices[0].message.content
-    """path = cours.file.path
+    """path = cours.file.url
     save_path='_'.join(path.split("/")[-1].split(".")[:-1]) 
     # Save the vector store
-    dir = os.path.join(settings.MEDIA_ROOT, f"{save_path}")
+    dir = os.path.join(settings.MEDIA_URL, f"{save_path}")
     relevants_docs = relevant_doc(question, dir)
     response = f"{response} \n\n Références du cours qui en parlent: {relevants_docs}"
     """
@@ -1392,7 +1406,6 @@ ai_msg = llm_api.invoke(messages)
 print(ai_msg["content"])
 """
 def boat(request):
-
 
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -1462,7 +1475,7 @@ def process_message_with_rag(cours):
         dict: A dictionary containing the AI's response and the relevant paragraph.
     """
     # Step 1: Load and split the PDF
-    path = cours.file.path
+    path = cours.file.url
     
     loader = PyPDFLoader(path)
     pages = loader.load()
@@ -1478,7 +1491,7 @@ def process_message_with_rag(cours):
     vectordb = FAISS.from_documents(docs, huggingface_embeddings)
     save_path='_'.join(path.split("/")[-1].split(".")[:-1]) 
     # Save the vector store
-    dir = os.path.join(settings.MEDIA_ROOT, f"{save_path}")
+    dir = os.path.join(settings.MEDIA_URL, f"{save_path}")
     if not os.path.exists(dir):
         os.mkdir(dir)
     print("Dir: ", dir)
@@ -1488,7 +1501,7 @@ def process_message_with_rag(cours):
     
 def relevant_doc(query, save_path):
     if Cours.Object.get().vector_db_file:
-        vector_db_path = quiz.vector_db_file.path
+        vector_db_path = quiz.vector_db_file.url
         
     # Load the vector store
     vectordb = FAISS.load_local(
@@ -1527,25 +1540,104 @@ def emailsender(Subject, html, email_address,  user_email, contact = None):
         # envoi du mail
         server.sendmail(email_address, user_email, message.as_string())
 
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+import os
+
+# def save_db(doc_path, folder_path, embeddings):
+#     azure_container_name= "media"
+#     azure_connection_string= settings.AZURE_CONNECTION_STRING
+#     # Connexion au service Azure Blob Storage
+#     blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=chefquizstockage;AccountKey=N6V8qPO4CgJoS4ZBQZ7Cd3wl1vNXJBoviAGuQku1PpibTJ6xQaD+aa5L/LkhYDJum6cVDz8u7Kuk+AStiBOxSQ==;EndpointSuffix=core.windows.net")
+#     container_client = blob_service_client.get_container_client(azure_container_name)
+#     loader = PyPDFLoader(doc_path)
+#     pages = loader.load()
+#     print(f'This document have {len(pages)} pages')
+#     print(pages[0].metadata)
+
+#     r_splitter = RecursiveCharacterTextSplitter(chunk_size= 500, chunk_overlap= 10)
+#     docs = r_splitter.split_documents(pages)
+#     print(len(docs))
+
+#     vectordb = FAISS.from_documents(docs, embeddings)
+#     if not os.path.exists(folder_path):
+#         os.makedirs(folder_path)
+#     # Sauvegarder l'index FAISS
+#     vectordb.save_local(folder_path)
+#     return 
 
 
-def save_db(doc_path, folder_path, embeddings):
 
+def save_db(doc_path, folder_path, embeddings, course_id):
+
+    azure_container_name= "media"
+    azure_connection_string= settings.AZURE_CONNECTION_STRING
+    #
+    # Charger le document PDF
     loader = PyPDFLoader(doc_path)
     pages = loader.load()
-    print(f'This document have {len(pages)} pages')
+    print(f"This document has {len(pages)} pages")
     print(pages[0].metadata)
 
-    r_splitter = RecursiveCharacterTextSplitter(chunk_size= 500, chunk_overlap= 10)
+    # Diviser le document en chunks
+    r_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=10)
     docs = r_splitter.split_documents(pages)
     print(len(docs))
 
+    # Créer l'index FAISS
     vectordb = FAISS.from_documents(docs, embeddings)
+
+    # Créer un dossier local pour enregistrer les fichiers FAISS et .pkl
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
-    # Sauvegarder l'index FAISS
+
+    # Définir les chemins de sauvegarde pour FAISS et .pkl
+    faiss_file_path = os.path.join(folder_path, "index.faiss")
+    pkl_file_path = os.path.join(folder_path, "index.pkl")
+
+    # Sauvegarder FAISS et .pkl localement
     vectordb.save_local(folder_path)
-    return 
+
+    # Upload des fichiers vers Azure Blob Storage
+    upload_to_azure(azure_connection_string, azure_container_name, faiss_file_path, course_id)
+    upload_to_azure(azure_connection_string, azure_container_name, pkl_file_path, course_id)
+
+    # Supprimer les fichiers locaux après l'upload
+    if os.path.exists(faiss_file_path):
+        os.remove(faiss_file_path)
+        print(f"Fichier local {faiss_file_path} supprimé.")
+
+    if os.path.exists(pkl_file_path):
+        os.remove(pkl_file_path)
+        print(f"Fichier local {pkl_file_path} supprimé.")
+
+from azure.storage.blob import BlobServiceClient
+import os
+
+def upload_to_azure(azure_connection_string, container_name, file_path, course_id):
+    """
+    Fonction qui upload un fichier vers Azure Blob Storage dans un dossier spécifique basé sur course_id.
+    """
+    # Vérifier si le fichier existe localement
+    if not os.path.exists(file_path):
+        print(f"Fichier {file_path} introuvable.")
+        return
+
+    # Connexion au service Azure Blob Storage
+    blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=chefquizstockage;AccountKey=N6V8qPO4CgJoS4ZBQZ7Cd3wl1vNXJBoviAGuQku1PpibTJ6xQaD+aa5L/LkhYDJum6cVDz8u7Kuk+AStiBOxSQ==;EndpointSuffix=core.windows.net")
+    container_client = blob_service_client.get_container_client("media")
+    
+    # Extraire le nom du fichier et créer le chemin du fichier dans le dossier basé sur course_id
+    blob_name = os.path.basename(file_path)
+    blob_path = f"{course_id}/{blob_name}"  # Créer le chemin dans le "dossier" course_id
+    
+    # Créer un client blob avec le chemin complet
+    blob_client = container_client.get_blob_client(blob_path)
+
+    # Upload du fichier
+    with open(file_path, "rb") as file:
+        blob_client.upload_blob(file, overwrite=True)
+        print(f"Fichier {file_path} téléchargé sur Azure Blob Storage sous le nom {blob_path}.")
+
 
 prompt_template = """
 Vous êtes un assistant intelligent spécialisé en cuisine. Utilisez les informations suivantes pour répondre à la question de manière claire et concise.
@@ -1568,7 +1660,7 @@ def load_db_qa1(path, embeddings,  question):
     #llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 
     #llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
-    folder_path = os.path.join(settings.MEDIA_ROOT, path)
+    folder_path = os.path.join(settings.MEDIA_URL, path)
     vectordb =FAISS.load_local(folder_path, embeddings , allow_dangerous_deserialization=True )
     memory = ConversationBufferMemory(
     memory_key="chat_history",
@@ -1593,17 +1685,37 @@ def load_db_qa1(path, embeddings,  question):
 
 
 
+import os
+import shutil
+
 def load_db_qa(path, embeddings, question):
     folder_path = os.path.join(settings.MEDIA_ROOT, path)
+
+    # URL du fichier FAISS dans Azure Blob Storage
+    faiss_url = f"https://chefquizstockage.blob.core.windows.net/media/{path}/index.faiss"
+    pickle_url = f"https://chefquizstockage.blob.core.windows.net/media/{path}/index.pkl"
+
+    # Chemins temporaires locaux pour les fichiers téléchargés
+    temp_file_path_faiss = os.path.join(folder_path, "index.faiss")
+    temp_file_path_pickle = os.path.join(folder_path, "index.pkl")
+
+    # Si les fichiers n'existent pas localement, les télécharger
+    if not os.path.exists(temp_file_path_faiss) or not os.path.exists(temp_file_path_pickle):
+        print("Téléchargement des fichiers depuis Azure Blob Storage...")
+        download_file_from_url(faiss_url, temp_file_path_faiss)
+        download_file_from_url(pickle_url, temp_file_path_pickle)
+
+    # Charger l'index FAISS localement
     vectordb = FAISS.load_local(folder_path, embeddings, allow_dangerous_deserialization=True)
 
+    # Création du mécanisme de mémoire pour la conversation
     memory = ConversationBufferMemory(
         memory_key="chat_history",
         output_key="answer",
         return_messages=True
     )
 
-    # Définition du Prompt personnalisé
+    # Définir le prompt personnalisé
     custom_prompt = PromptTemplate(
         input_variables=["context", "question", "chat_history"],
         template="""Tu es un assistant intelligent qui répond aux questions en fonction du contexte donné.
@@ -1616,7 +1728,7 @@ def load_db_qa(path, embeddings, question):
         """
     )
 
-    # Création de la chaîne de récupération conversationnelle avec le prompt personnalisé
+    # Chaîne de récupération conversationnelle avec le prompt personnalisé
     qa = ConversationalRetrievalChain.from_llm(
         llm_azure,
         retriever=vectordb.as_retriever(),
@@ -1626,6 +1738,7 @@ def load_db_qa(path, embeddings, question):
         combine_docs_chain_kwargs={"prompt": custom_prompt},  # Ajout du prompt ici
     )
 
+    # Répondre à la question posée
     result = qa.invoke({"question": question})
     return result
 
@@ -1689,78 +1802,36 @@ RESPONSE_JSON = {
 }
 
 
-def relevant_docs(path):
+# def relevant_docs(path):
     
-    llm_azure = AzureChatOpenAI(
-                #openai_api_base="https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
-                openai_api_version="2024-07-01-preview",
-                deployment_name="gpt-35-turbo-chefquiz",
-                openai_api_key=settings.AZURE_EMBEDDING_API_KEY,
-                openai_api_type='azure',
-                azure_endpoint= "https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
-            )
-    folder_path = os.path.join(settings.MEDIA_ROOT,path)
-    print("Folder: ", folder_path)
-    vectordb =FAISS.load_local(folder_path, embeddings , allow_dangerous_deserialization=True )
+#     llm_azure = AzureChatOpenAI(
+#                 #openai_api_base="https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
+#                 openai_api_version="2024-07-01-preview",
+#                 deployment_name="gpt-35-turbo-chefquiz",
+#                 openai_api_key=settings.AZURE_EMBEDDING_API_KEY,
+#                 openai_api_type='azure',
+#                 azure_endpoint= "https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
+#             )
+#     folder_path = os.path.join(settings.MEDIA_URL ,path)
+#     print("Folder: ", folder_path)
+#     vectordb =FAISS.load_local(folder_path, embeddings , allow_dangerous_deserialization=True )
 
-    # Run chain
-    qa_chain = RetrievalQA.from_chain_type(
-        llm_azure,
-        retriever=vectordb.as_retriever(),
-        return_source_documents=True,
-        #chain_type_kwargs={"prompt": QA_CHAIN_PROMPT}
-    )
+#     # Run chain
+#     qa_chain = RetrievalQA.from_chain_type(
+#         llm_azure,
+#         retriever=vectordb.as_retriever(),
+#         return_source_documents=True,
+#         #chain_type_kwargs={"prompt": QA_CHAIN_PROMPT}
+#     )
     
-    result = qa_chain.invoke({"query": "Donne moi les parties les plus pertinentes de ce documents un peu difficiles à comprendre",
-                              "search_kwargs": {"k": 8}})
+#     result = qa_chain.invoke({"query": "Donne moi les parties les plus pertinentes de ce documents un peu difficiles à comprendre",
+#                               "search_kwargs": {"k": 8}})
     
-    documents = " ".join([docs.page_content for docs in result['source_documents']])
-    print(result)
-    return documents
+#     documents = " ".join([docs.page_content for docs in result['source_documents']])
+#     print(result)
+#     return documents
 
 
-def chat_with_openai1(number, difficulty, path):
-    
-    AZURE_CHAT_ENDPOINT="https://chatlearning.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview"
-    AZURE_CHAT_API_KEY="6xv3rz6Asc5Qq86B8vqjhKQzSTUZPmCcSuDm5CLEV5dj9m8gTHlNJQQJ99AKACYeBjFXJ3w3AAABACOGyHXT"
-    open_client = AzureOpenAI(
-            api_key=AZURE_CHAT_API_KEY,
-            api_version="2023-12-01-preview",
-            azure_endpoint=AZURE_CHAT_ENDPOINT
-        )
-    
-    context= relevant_docs(path)
-    
-    """Communicate with Azure OpenAI to generate questions and answers."""
-    
-    
-    
-    
-    prompt = f"""
-    Génère un quiz de {number} questions basé sur ce texte :
-    
-    {context}
-    
-    Niveau de difficulté : {difficulty}.
-    Le quiz doit etre en français.
-    Le format de sortie doit être :
-    {json.dumps(RESPONSE_JSON)}
-    Assurez vous que les options soient des phrases complètes, pas que des mots.
-    """
-    print("Seconde step: ", "=="*5)
-    #print("intialisation: ", response)
-
-    chat_completion = open_client.chat.completions.create(
-            model="gpt-35-turbo",
-            messages=[
-                {"role": "system", "content": "You are an expert MCQ maker."},
-                {"role": "user", "content": prompt},
-            ]
-        )
-    print("intialisation: ")
-    response = chat_completion.choices[0].message.content
-    print("Reponse: ", response)
-    return response
 
 
 def chat_with_openai(number, difficulty, path):
@@ -1771,7 +1842,7 @@ def chat_with_openai(number, difficulty, path):
                 api_version="2024-10-21",
                 azure_endpoint=AZURE_CHAT_ENDPOINT
             )
-
+    print('path: ', path)
     context= relevant_docs(path)
     
     """Communicate with Azure OpenAI to generate questions and answers."""
@@ -1801,3 +1872,86 @@ def chat_with_openai(number, difficulty, path):
     response = chat_completion.choices[0].message.content
     print("Response: ", response)
     return response
+
+
+
+
+
+import os
+from azure.storage.blob import BlobServiceClient
+import tempfile
+from azure.storage.blob import BlobServiceClient
+
+from azure.storage.blob import BlobServiceClient
+
+import requests
+
+def download_file_from_url(url, local_path):
+    try:
+        # Télécharger le fichier depuis l'URL
+        response = requests.get(url)
+        response.raise_for_status()  # Vérifie si la requête a échoué
+
+        # Sauvegarder le contenu dans un fichier local
+        with open(local_path, 'wb') as file:
+            file.write(response.content)
+        print(f"Fichier téléchargé depuis {url} vers {local_path}")
+    except requests.exceptions.RequestException as e:
+        print(f"Erreur lors du téléchargement du fichier : {str(e)}")
+
+
+def relevant_docs(path):
+    llm_azure = AzureChatOpenAI(
+        openai_api_version="2024-07-01-preview",
+        deployment_name="gpt-35-turbo-chefquiz",
+        openai_api_key=settings.AZURE_EMBEDDING_API_KEY,
+        openai_api_type='azure',
+        azure_endpoint="https://realtimekokou.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview",
+    )
+
+    # URL du fichier FAISS dans Azure Blob Storage
+    faiss_url = f"https://chefquizstockage.blob.core.windows.net/media/{path}/index.faiss"
+    pickle_url = f"https://chefquizstockage.blob.core.windows.net/media/{path}/index.pkl"
+
+    # Créer un chemin temporaire local pour les fichiers téléchargés
+    folder_path = os.path.join(settings.MEDIA_ROOT, path)
+    temp_file_path_faiss = os.path.join(folder_path, "index.faiss")
+    temp_file_path_pickle = os.path.join(folder_path, "index.pkl")
+
+    # Télécharger les fichiers depuis Azure Blob Storage
+    download_file_from_url(faiss_url, temp_file_path_faiss)
+    download_file_from_url(pickle_url, temp_file_path_pickle)
+
+    # Charger l'index FAISS localement depuis le fichier téléchargé
+    vectordb = FAISS.load_local(folder_path, embeddings, allow_dangerous_deserialization=True)
+
+    # Supprimer les fichiers locaux temporaires après utilisation
+    if os.path.exists(temp_file_path_faiss):
+        os.remove(temp_file_path_faiss)
+        print(f"Fichier local temporaire {temp_file_path_faiss} supprimé.")
+
+    if os.path.exists(temp_file_path_pickle):
+        os.remove(temp_file_path_pickle)
+        print(f"Fichier local temporaire {temp_file_path_pickle} supprimé.")
+
+    # Exécuter la chaîne de questions-réponses
+    qa_chain = RetrievalQA.from_chain_type(
+        llm_azure,
+        retriever=vectordb.as_retriever(),
+        return_source_documents=True,
+    )
+
+    result = qa_chain.invoke({
+        "query": "Donne moi les parties les plus pertinentes de ce document un peu difficiles à comprendre",
+        "search_kwargs": {"k": 8}
+    })
+
+    documents = " ".join([docs.page_content for docs in result['source_documents']])
+    print(result)
+    return documents
+
+
+
+"""doc_path = os.path.join(settings.BASE_DIR, "lessons", "formation_cuisine_rag.pdf")
+folder_path = os.path.join(settings.MEDIA_URL, "chat_boat_azure_deploy")
+save_db_azure(doc_path, folder_path)"""

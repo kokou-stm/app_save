@@ -12,3 +12,6 @@ gunicorn
 psycopg[binary]
 djangorestframework_simplejwt
 django-cors-headers
+django-storages[azure]
+azure-storage-blob
+

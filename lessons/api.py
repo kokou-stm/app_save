@@ -126,3 +126,63 @@ def extract_text_from_pdf(pdf_path):
             extracted_text += page.extract_text() + "\n"
     
     return extracted_text
+
+
+def chat_with_openai1(number, difficulty, path):
+    
+    AZURE_CHAT_ENDPOINT="https://chatlearning.openai.azure.com/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-08-01-preview"
+    AZURE_CHAT_API_KEY="6xv3rz6Asc5Qq86B8vqjhKQzSTUZPmCcSuDm5CLEV5dj9m8gTHlNJQQJ99AKACYeBjFXJ3w3AAABACOGyHXT"
+    open_client = AzureOpenAI(
+            api_key=AZURE_CHAT_API_KEY,
+            api_version="2023-12-01-preview",
+            azure_endpoint=AZURE_CHAT_ENDPOINT
+        )
+    
+    context= relevant_docs(path)
+    
+    """Communicate with Azure OpenAI to generate questions and answers."""
+    
+    
+    
+    
+    prompt = f"""
+    Génère un quiz de {number} questions basé sur ce texte :
+    
+    {context}
+    
+    Niveau de difficulté : {difficulty}.
+    Le quiz doit etre en français.
+    Le format de sortie doit être :
+    {json.dumps(RESPONSE_JSON)}
+    Assurez vous que les options soient des phrases complètes, pas que des mots.
+    """
+    print("Seconde step: ", "=="*5)
+    #print("intialisation: ", response)
+
+    chat_completion = open_client.chat.completions.create(
+            model="gpt-35-turbo",
+            messages=[
+                {"role": "system", "content": "You are an expert MCQ maker."},
+                {"role": "user", "content": prompt},
+            ]
+        )
+    print("intialisation: ")
+    response = chat_completion.choices[0].message.content
+    print("Reponse: ", response)
+    return response
+
+# from .models import Professeur, Cours
+# from django.core.files import File
+
+# # suppose que tu as un professeur
+# prof = Professeur.objects.first()
+
+# # ouvrir un fichier en local pour test
+# with open(r"C:\Users\pret\Documents\Projets\A_rendre\chefquiz\lessons\cuisine.pdf", "rb") as f:
+#     cours = Cours.objects.create(
+#         title="Test Azure",
+#         description="test upload azure",
+#         professeur=prof,
+#         file=File(f, name="cuisine.pdf")
+#     )
+#     print("Fichier Azure : ", cours.file.url)
