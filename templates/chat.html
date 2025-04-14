@@ -1,278 +1,1324 @@
 
-
-
-
-<!DOCTYPE html>
 {% load static %}
+<!DOCTYPE html>
 
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ChefQuiz</title>
-
-   <!-- Ajoutez ces liens Bootstrap si ce n'est pas déjà fait dans votre fichier HTML -->
-  <!-- CSS Bootstrap -->
-<!-- Bootstrap core CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
-integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
-
-
-
+  <title>ChefQuiz - Assistant IA pour la formation culinaire</title>
   
-  <!-- JavaScript Bootstrap -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Additional CSS Files -->
-    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+  <!-- Liens CSS externes -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'assets/css/fontawesome.css' %}">
+ <style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap");
 
-<style>
-  @import url("https://fonts.googleapis.com/css2?family=Redressed&family=Merriweather:wght@300;400;700&display=swap");
-  .redressed {
-      font-family: "Redressed", serif;
-  }
-  .merriweather {
-      font-family: "Merriweather", serif;
-  }
-  .message {
-    display: flex;
-    justify-content: flex-start;
-    margin-bottom: 10px;
+:root {
+  --primary-color: #eeedec;
+  --primary-dark: #0069d3;
+  --accent-color: #2e2b2b;
+  --dark-bg: #1a1a1a;
+  --medium-bg: #2d2d2d;
+  --light-bg: #3a3a3a;
+  --text-light: #ffffff;
+  --text-muted: #b3b3b3;
+  --text-dark: #333333;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --border-radius: 12px;
+  --transition: all 0.3s ease;
+  --sidebar-width: 320px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--dark-bg);
+  color: var(--text-light);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+}
+
+.main-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar Styles */
+.sidebar {
+  width: var(--sidebar-width);
+  background: linear-gradient(135deg, var(--medium-bg), var(--dark-bg));
+  border-right: 1px solid var(--light-bg);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+  z-index: 100;
+}
+
+.sidebar-header {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--light-bg);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--primary-color);
+}
+
+.logo i {
+  font-size: 24px;
+}
+
+.logo h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+#sidebar-toggle {
+  background: transparent;
+  border: none;
+  color: var(--text-light);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 20px;
+  padding-bottom: 0px;
+  overflow-y: auto;
+}
+
+.course-info {
+  margin-bottom: 5px;
+}
+
+.course-info h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.course-info p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.sidebar-divider {
+  height: 1px;
+  background-color: var(--light-bg);
+  margin: 15px 0;
+}
+
+.chat-modes h4, .ai-settings h4 {
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+.mode-btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  background-color: var(--light-bg);
+  border: none;
+  border-radius: var(--border-radius);
+  color: var(--text-light);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.mode-btn i {
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+.mode-btn.active {
+  background-color: var(--primary-color);
+  color: rgb(42, 42, 44)
+}
+
+.mode-btn:hover:not(.active) {
+  background-color: var(--medium-bg);
+}
+
+.setting-group {
+  margin-bottom: 20px;
+}
+
+.setting-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.setting-group input[type="text"] {
+  width: 100%;
+  padding: 10px 15px;
+  background-color: var(--light-bg);
+  border: 1px solid var(--medium-bg);
+  border-radius: var(--border-radius);
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+.avatar-options {
+  display: flex;
+  gap: 15px;
+}
+
+.avatar-option {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--light-bg);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.avatar-option i {
+  font-size: 20px;
+}
+
+.avatar-option.active {
+  background-color: var(--primary-color);
+}
+
+.toggle-switch {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.toggle-switch input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-switch label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin: 0;
+  font-size: 14px;
+}
+
+.toggle-switch label::before {
+  content: '';
+  width: 40px;
+  height: 20px;
+  margin-right: 10px;
+  background-color: var(--light-bg);
+  border-radius: 10px;
+  position: relative;
+  transition: var(--transition);
+}
+
+.toggle-switch label::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--text-light);
+  transform: translateX(2px);
+  transition: var(--transition);
+}
+
+.toggle-switch input:checked + label::before {
+  background-color: var(--primary-color);
+}
+
+.toggle-switch input:checked + label::after {
+  transform: translateX(22px);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  transition: var(--transition);
+}
+
+.back-btn i {
+  margin-right: 8px;
+}
+
+.back-btn:hover {
+  color: var(--text-light);
+}
+
+/* Main Content Styles */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--dark-bg);
+}
+
+.content-header {
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--light-bg);
+}
+
+.content-header h1 {
+  font-size: 24px;
+  margin: 0;
+}
+
+.mode-indicator {
+  background-color: var(--light-bg);
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+
+.mode-indicator i {
+  margin-right: 5px;
+  color: var(--primary-color);
+}
+
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.message {
+  display: flex;
+  gap: 15px;
+  max-width: 85%;
+  animation: fadeIn 0.3s ease;
+  font-family: 'Playfair Display', serif;
 }
 
 .message.user {
-    justify-content: flex-end; /* Aligne les messages de l'utilisateur à droite */
-}
-#chat-box {
-    max-height: 400px;    /* Hauteur maximale du chat */
-    overflow-y: auto;     /* Active le défilement vertical */
-    padding-right: 10px;  /* Ajoute un peu d'espace pour que le défilement soit visible */
-}
-.message .content {
-    border: solid 0.5px white;
-    padding: 10px;
-    border-radius: 5px;
-    max-width: 60%;
-    word-wrap: break-word;
-    font-size: small;
+  align-self: flex-end;
+  flex-direction: row-reverse;
 }
 
-</style>
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--medium-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.message.user .message-avatar {
+  background-color:  #3a3734;
+}
+
+.message.ai .message-avatar {
+  background-color: var(--accent-color);
+}
+
+.message-content {
+  background-color: var(--light-bg);
+  border-radius: var(--border-radius);
+  padding: 15px;
+  position: relative;
+}
+
+.message.user .message-content {
+  background-color: #3a3734;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.message-sender {
+  font-weight: 600;
+  font-size: 14px;
+  font-family: 'Playfair Display', serif;
+}
+
+.message-time {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.message-text {
+  font-size: 15px;
+}
+
+.message-text p {
+  margin-bottom: 10px;
+}
+
+.message-text p:last-child {
+  margin-bottom: 0;
+}
+
+.source-documents {
+font-family: 'Playfair Display', serif;
+  margin-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 10px;
+}
+
+.source-documents h5 {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.source-documents ul {
+  list-style: none;
+  padding: 0;
+}
+
+.source-documents li {
+  margin-bottom: 10px;
+}
+
+.source-card {
+  background-color: var(--medium-bg);
+  border-radius: var(--border-radius);
+  padding: 10px;
+}
+
+.source-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.source-card-header a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.source-content {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.view-more-btn {
+  margin-top: 10px;
+  background-color: transparent;
+  border: 1px solid var(--accent-color);
+  color: var(--accent-color);
+  border-radius: var(--border-radius);
+  padding: 5px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.view-more-btn:hover {
+  background-color: var(--accent-color);
+  color: var(--text-light);
+}
+
+.chat-input-container {
+  margin-top: 20px;
+}
+
+.input-wrapper {
+  display: flex;
+  position: relative;
+  border-radius: var(--border-radius);
+  background-color: var(--light-bg);
+  padding: 5px;
+}
+
+#user-input {
+  flex: 1;
+  padding: 15px;
+  background-color: transparent;
+  border: none;
+  color: var(--text-light);
+  font-size: 15px;
+  outline: none;
+}
+
+.input-btn {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* background-color: rgb(46, 46, 50); */
+  border: none;
+  border-radius: 50%;
+  color: var(--text-light);
+  background-color: #24211e;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.input-btn:hover {
+  color: var(--text-light);
+  background-color: var(--medium-bg);
+}
+
+.input-btn.primary {
+  background-color: #2b2927;
+  color: var(--text-light);
+}
+
+.input-btn.primary:hover {
+  background-color: var(--primary-dark);
+}
+
+.voice-feedback {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 15px;
+  padding: 10px;
+  border-radius: var(--border-radius);
+  background-color: var(--light-bg);
+}
+
+.voice-feedback.active {
+  display: flex;
+  animation: fadeIn 0.3s ease;
+}
+
+.voice-indicator {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.voice-wave {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.8);
+  animation: pulse 1.5s infinite;
+}
+
+.voice-stop-btn {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background-color: var(--primary-dark);
+  color: var(--text-light);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100%;
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.active {
+    transform: translateX(0);
+  }
+  
+  .content {
+    margin-left: 0;
+  }
+  
+  .content-header {
+    padding: 15px 20px;
+  }
+  
+  .content-header h1 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .message {
+    max-width: 95%;
+  }
+  
+  .input-wrapper {
+    padding: 3px;
+  }
+  
+  #user-input {
+    padding: 12px;
+    font-size: 14px;
+  }
+  
+  .input-btn {
+    width: 40px;
+    height: 40px;
+  }
+}
+ </style>
 </head>
-<body style="background: linear-gradient(rgba(0,0,0, 0.8), rgba(0,0,0, 0.8));">
-  
-  
-  <!-- Section FAQ -->
-<section id="faq" class="bg-transparent py-5" style="margin-top: 20vh;">
-  <div class="container redressed text-light" >
-   
-<div class="row">
-    <div class="col-lg-3"></div>
-    <div class="col-12 col-lg-6 ">
-        <div class="row">
-            <div class="card bg-transparent">
-                <div class="card-header text-center ">
-                    <div class="row">
-                        <div class="col"><i class="fas fa-graduation-cap"></i> Cours: {{cours.title}}</div>
-                        <div class="col"><i class="fas fa-user"></i> Prof: {{cours.professeur}}</div>
-                    </div>
-                 
-                    
-                  </div>
-            </div>
-          
+<body>
+  <div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <i class="fas fa-utensils"></i>
+          <h2>ChefQuiz</h2>
         </div>
-        <div class="row">
-            <div class="card bg-transparent " style="border-bottom: none; border: solid 1px white; ">
-           
-                <div class="card-header text-center">
-                  
-                  <h2 class=" my-4 text-light"  style="font-size: clamp(1rem, 5vw, 1rem);"><a class="btn btn-outline-primary me-3" href="{% url 'index' %}" ><strong> <-Retour</strong></a> Comment puis-je vous aider ?</h2>
-                </div>
-              
-              
-                <div class="container my-5">
-                 
-                  <div class="chat-container" id="chat-container" data-course-id="{{ course_id }}" style="">
-                  
-                      <div id="chat-box" class="mb-4" style="max-height: 400px; overflow-y: auto;">
-                          <!-- Messages will be dynamically added here -->
-                      </div>
-                      <form id="chat-form">
-                          <div class="input-group" >
-                              <input type="text" id="user-input" class="form-control"  placeholder="Posez votre question..." required>
-                              <button type="submit" class="btn btn-primary">Envoyer</button>
-                          </div>
-                      </form>
-                  </div>
-              </div>
-            
-             
-              
-            </div>
+        <button id="sidebar-toggle" class="d-md-none">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+      
+      <div class="sidebar-content">
+        <div class="course-info">
+          <h3><i class="fas fa-graduation-cap"></i> Cours: <span id="course-title">{{cours.title}}</span></h3>
+          <p><i class="fas fa-user"></i> Prof: <span id="course-professor">{{cours.professeur}}</span></p>
         </div>
         
-    </div>
-    <div class="col-lg-3"></div>
-</div>
+        <div class="sidebar-divider"></div>
+        
+        <div class="chat-modes">
+          <h4>Modes d'interaction</h4>
+          <button id="chat-mode" class="mode-btn active"><i class="fas fa-comments"></i> Discussion</button>
+          <button id="quiz-mode" class="mode-btn"><i class="fas fa-question-circle"></i> Quiz / Révision</button>
+          <button id="explanation-mode" class="mode-btn"><i class="fas fa-book-open"></i> Explication</button>
+        </div>
+        
+        <div class="sidebar-divider"></div>
+        
+        <div class="ai-settings">
+          <h4>Personnalisation IA</h4>
+          <div class="setting-group">
+            <label for="ai-name">Nom de l'assistant</label>
+            <input type="text" id="ai-name" value="ChefAI" placeholder="Nom de l'IA">
+          </div>
+          
+          <!-- <div class="setting-group">
+            <label>Avatar de l'assistant</label>
+            <div class="avatar-options">
+              <div class="avatar-option active" data-avatar="chef">
+                <i class="fas fa-user-chef"></i>
+              </div>
+              <div class="avatar-option" data-avatar="robot">
+                <i class="fas fa-robot"></i>
+              </div>
+              <div class="avatar-option" data-avatar="brain">
+                <i class="fas fa-brain"></i>
+              </div>
+            </div>
+          </div> -->
+          
+          <div class="setting-group">
+            <label>Options vocales</label>
+            <div class="toggle-switch">
+              <input type="checkbox" id="voice-output" checked>
+              <label for="voice-output">Synthèse vocale</label>
+            </div>
+            <div class="toggle-switch">
+              <input type="checkbox" id="voice-input">
+              <label for="voice-input">Reconnaissance vocale</label>
+            </div>
+          </div>
+        </div>
+        
+        <div class="sidebar-footer">
+          <a href="{% url 'index' %}" class="back-btn"><i class="fas fa-arrow-left"></i> Retour à l'accueil</a>
+        </div>
+      </div>
+    </aside>
 
-    
+    <!-- Main Content -->
+    <main class="content">
+      <header class="content-header">
+        <div class="course-title">
+          <h1>Assistant IA - <span id="header-course-title">{{cours.title}}</span></h1>
+        </div>
+        <div class="mode-indicator">
+          <span id="current-mode"><i class="fas fa-comments"></i> Mode Discussion</span>
+        </div>
+      </header>
+     
+
+      <div class="" style="overflow-y: auto; height: 90vh;">
+        <div class="chat-container" id="chat-container" style="height: 100%;" data-course-id="{{ course_id }}">
+            <div id="chat-box" class="chat-messages">
+              <!-- Messages will be dynamically added here -->
+              <div class="message ai welcome-message">
+                <div class="message-avatar">
+                  <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                  <div class="message-header">
+                    <span class="message-sender">ChefAI</span>
+                    <span class="message-time">Maintenant</span>
+                  </div>
+                  <div class="message-text">
+                    <p>Bonjour! Je suis votre assistant pour le cours <strong>{{cours.title}}</strong>. Comment puis-je vous aider aujourd'hui?</p>
+                    <p>Vous pouvez me poser des questions sur le contenu du cours, demander des explications, ou passer en mode quiz pour tester vos connaissances.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="chat-input-container">
+              <form id="chat-form">
+                <div class="input-wrapper">
+                  <input type="text" id="user-input" placeholder="Posez votre question..." required>
+                  <button type="button" id="voice-input-btn" class="input-btn">
+                    <i class="fas fa-microphone"></i>
+                  </button>
+                  <button type="submit" id="send-btn" class="input-btn primary">
+                    <i class="fas fa-paper-plane"></i>
+                  </button>
+                </div>
+              </form>
+              <div id="voice-feedback" class="voice-feedback">
+                <div class="voice-indicator">
+                  <div class="voice-wave"></div>
+                </div>
+                <span>À l'écoute...</span>
+                <button id="stop-voice" class="voice-stop-btn">
+                  <i class="fas fa-stop"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+      </div>
+      
+    </main>
   </div>
-</section>
 
-
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
     const chatContainer = document.getElementById('chat-container');
     const courseId = chatContainer.getAttribute('data-course-id');
-    
+    const chatBox = document.getElementById('chat-box');
+    const userInput = document.getElementById('user-input');
+    const chatForm = document.getElementById('chat-form');
+    const voiceInputBtn = document.getElementById('voice-input-btn');
+    const voiceFeedback = document.getElementById('voice-feedback');
+    const stopVoiceBtn = document.getElementById('stop-voice');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const modeButtons = document.querySelectorAll('.mode-btn');
+    const currentModeDisplay = document.getElementById('current-mode');
+    const voiceOutputToggle = document.getElementById('voice-output');
+    const voiceInputToggle = document.getElementById('voice-input');
+    const aiNameInput = document.getElementById('ai-name');
+    const avatarOptions = document.querySelectorAll('.avatar-option');
 
-    async function send_message_to_ai(){
-            const userInput = document.getElementById('user-input');
-        const userMessage = userInput.value.trim();
-        if (!userMessage) return;
+    // Initializing variables
+    let currentMode = 'chat'; // Default mode
+    let aiName = 'ChefAI'; // Default AI name
+    let aiAvatar = 'robot'; // Default AI avatar
+    let useVoiceOutput = true; // Default voice output setting
+    let useVoiceInput = false; // Default voice input setting
+    let recognition = null; // Speech recognition object
+    let speechSynthesis = window.speechSynthesis; // Speech synthesis object
+    let voices = []; // Available voices
+    let selectedVoice = null; // Selected voice
+    let quizInProgress = false; // Flag for quiz mode
+    let quizQuestions = []; // Store questions for quiz mode
+    let currentQuestionIndex = 0; // Current question index for quiz mode
+    let explanationInProgress = false; // Flag for explanation mode
 
-        // Add the user's message to the chat
-        addMessage(userMessage, 'user');
-
-        // Clear the input field
-        userInput.value = '';
+    // Initialize Speech Synthesis
+    function initSpeechSynthesis() {
+        // Get available voices
+        voices = speechSynthesis.getVoices();
         
-        // Send the user's message to the server via AJAX
-        try {
-            const response = await fetch(`/ask_ai/${courseId}/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCsrfToken() // Get CSRF token if using Django
-                },
-                body: JSON.stringify({ message: userMessage })
+        // If voices are not loaded yet, wait for voiceschanged event
+        if (voices.length === 0) {
+            speechSynthesis.addEventListener('voiceschanged', function() {
+                voices = speechSynthesis.getVoices();
+                // Select a French voice if available, otherwise use the first available voice
+                selectedVoice = voices.find(voice => voice.lang.includes('fr')) || voices[0];
             });
-
-            const data = await response.json();
-            const aiMessage = data.response || "Je ne peux pas répondre pour le moment.";
-            const sourceDocuments = data.source_documents || []; // Ensure source documents are included in the response
-            console.log("Source: ", sourceDocuments)
-            // Add the AI's response to the chat
-            addMessage(aiMessage, 'ai', sourceDocuments);
-        } catch (error) {
-            console.error(error);
-            addMessage("Une erreur est survenue. Réessayez plus tard.", 'ai');
-        }
-        }
-       
-    document.getElementById('chat-form').addEventListener('submit', async function (e) {
-        e.preventDefault(); // Prevent form submission
-       
-       await send_message_to_ai()
-    });
-
-    document.getElementById('user-input').addEventListener('keypress', async function (e) {
-    if (e.key === 'Enter') {
-        e.preventDefault(); // Empêche l'ajout d'un saut de ligne dans le champ
-        await send_message_to_ai()
-        //document.getElementById('chat-form').dispatchEvent(new Event('submit')); // Déclenche la soumission
-    }
-   });
-
-    // Function to add a message to the chat
-    function addMessage(text, sender, sourceDocuments = []) {
-        const chatBox = document.getElementById('chat-box');
-        const messageElement = document.createElement('div');
-        
-        let dropdownHtml = document.createElement('div');
-        messageElement.className = `message ${sender}`;
-        
-        // Create the main content (response from AI)
-        if (sender === 'user') {
-            messageElement.innerHTML = `<div class="content merriweather card-header px-3 py-3 " style="background: linear-gradient(rgba(0,0,0, 0.5), rgba(0,0,0, 0.5)); border : solid 1px white;">
-                <button class="btn btn-outline-light" style="border-radius: 100%;"><i class="fas fa-user"></i> </button>
-              ${text} </div>`;
         } else {
-            messageElement.innerHTML = `<div class="content card-header px-3 py-3 merriweather" style="background: linear-gradient(rgba(0,0,0, 0.5), rgba(0,0,0, 0.5)); border : solid 1px white;">
-                <button class="btn btn-outline-light" style="border-radius: 100%;"><i class="fas fa-brain"></i> </button>
-               ${text}</div>`;
+            // Select a French voice if available, otherwise use the first available voice
+            selectedVoice = voices.find(voice => voice.lang.includes('fr')) || voices[0];
         }
+    }
+
+    // Initialize Speech Recognition
+    function initSpeechRecognition() {
+        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.lang = 'fr-FR';
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                userInput.value = transcript;
+            };
+            
+            recognition.onend = function() {
+                voiceFeedback.classList.remove('active');
+                voiceInputBtn.style.display = 'flex';
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error:', event.error);
+                voiceFeedback.classList.remove('active');
+                voiceInputBtn.style.display = 'flex';
+            };
+        } else {
+            console.warn('Speech recognition not supported in this browser.');
+            voiceInputToggle.disabled = true;
+            voiceInputBtn.style.display = 'none';
+        }
+    }
+
+    // Text to Speech function
+    function speakText(text) {
+        if (!useVoiceOutput || !speechSynthesis) return;
         
-        // If source documents exist, add a "View More" dropdown
-        if (sourceDocuments.length > 0) {
-          let  temporhtml  = `
-                <div class="source-documents" style="display: none;">
-                    <h5>Sources:</h5>
-                    <ul>
-            `;
-            sourceDocuments.forEach(doc => {
-              temporhtml += `<li>
-                
-                    <div class="card bg-transparent text-light my-2" style="border: solid 1px white">
-                        <div class="card-header">
-                           <a href="${doc.source}#page=${doc.page_label}" target="_blank">Document de réference </a>
-                           <h5 class='text_light merriweather'> Page ${doc.page_label} </h5>
-                           <h6 class='text_light'> Contenu: ${doc.page_content}</h6>
+        // Cancel any ongoing speech
+        speechSynthesis.cancel();
+        
+        // Remove any HTML tags from the text
+        const cleanText = text.replace(/<[^>]*>/g, '');
+        
+        // Create utterance
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.voice = selectedVoice;
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+        
+        // Speak the text
+        speechSynthesis.speak(utterance);
+    }
+
+    // Format timestamp
+    function formatTime() {
+        const now = new Date();
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        return `${hours}:${minutes}`;
+    }
+
+    function addMessage(text, sender, sourceDocuments = [], quizHtml = null) {
+    const messageElement = document.createElement('div');
+    messageElement.className = `message ${sender}`;
+    
+    // Avatar et nom de l'expéditeur
+    const avatarIcon = sender === 'user' ? 'fa-user' : `fa-${aiAvatar}`;
+    const senderName = sender === 'user' ? 'Vous' : aiName;
+    
+    // Début du bloc message
+    let messageHTML = `
+        <div class="message-avatar">
+            <i class="fas ${avatarIcon}"></i>
+        </div>
+        <div class="message-content">
+            <div class="message-header">
+                <span class="message-sender">${senderName}</span>
+                <span class="message-time">${formatTime()}</span>
+            </div>
+            <div class="message-text">
+                ${text}
+            </div>
+    `;
+
+    // Si on a un quiz, on l’insère dans le message
+    if (quizHtml) {
+        messageHTML += `
+            <div class="quiz-container">
+                ${quizHtml}
+            </div>
+        `;
+    }
+
+    // Si des sources sont disponibles, on les ajoute
+    if (sourceDocuments && sourceDocuments.length > 0) {
+        let sourcesHtml = `
+            <div class="source-documents" style="display: none;">
+                <h5>Sources :</h5>
+                <ul>
+        `;
+        sourceDocuments.forEach(doc => {
+            sourcesHtml += `
+                <li>
+                    <div class="source-card">
+                        <div class="source-card-header">
+                            <a href="${doc.source}#page=${doc.page_label}" target="_blank">Document - Page ${doc.page_label}</a>
+                        </div>
+                        <div class="source-content">
+                            ${doc.page_content}
                         </div>
                     </div>
-
-                </li>`;
-             
-            });
-            temporhtml += `</ul></div>
-            <button class="btn btn-info view-more-btn" onclick="toggleSourceDocuments(this)">View More</button>`;
-
-            dropdownHtml.innerHTML = temporhtml;
-        }
-        
-        chatBox.appendChild(messageElement);
-        chatBox.appendChild(dropdownHtml) ;
-
-        // Scroll to the bottom of the chat box
-        chatBox.scrollTop = chatBox.scrollHeight;
+                </li>
+            `;
+        });
+        sourcesHtml += `
+                </ul>
+            </div>
+            <button class="view-more-btn btn btn-outline-primary text-light">Ressources</button>
+        `;
+        messageHTML += sourcesHtml;
     }
 
-    // Function to toggle the visibility of the source documents
-    function toggleSourceDocuments(button) {
-        const sourceDocs = button.previousElementSibling;
-        if (sourceDocs.style.display === 'none') {
-            sourceDocs.style.display = 'block';
-            button.innerText = 'View Less';
-        } else {
-            sourceDocs.style.display = 'none';
-            button.innerText = 'View More';
-        }
+    messageHTML += `</div>`; // Fermeture message-content
+    messageElement.innerHTML = messageHTML;
+
+    // Bouton "Voir les sources"
+    const viewMoreBtn = messageElement.querySelector('.view-more-btn');
+    if (viewMoreBtn) {
+        viewMoreBtn.addEventListener('click', function () {
+            const sourceDocs = messageElement.querySelector('.source-documents');
+            const isVisible = sourceDocs.style.display === 'block';
+            sourceDocs.style.display = isVisible ? 'none' : 'block';
+            viewMoreBtn.textContent = isVisible ? 'Voir les sources' : 'Masquer les sources';
+        });
     }
 
-    // Function to get CSRF token (if using Django)
-    function getCsrfToken() {
-            let cookieValue = null;
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.startsWith('csrftoken=')) {
-                    cookieValue = cookie.substring('csrftoken='.length);
-                    break;
-                }
-            }
-            return cookieValue;
-        }
-</script>
-
-</body>
-</html>
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    // Ajout dans le chat
+    chatBox.appendChild(messageElement);
+    chatBox.scrollTop = chatBox.scrollHeight;
     
 
+    // Lecture vocale si activée
+    if (sender === 'ai' && useVoiceOutput) {
+        speakText(text);
+    }
+}
+// Gère la soumission du quiz
 
+// Dans ton JS principal après chargement DOM
+document.addEventListener('submit', function (event) {
+    if (event.target.matches('.quiz-form')) {
+        event.preventDefault();
+
+        const form = event.target;
+
+        const quizData = [];
+        form.querySelectorAll('.quiz-question').forEach((questionBlock) => {
+            const question = questionBlock.querySelector('p')?.innerText.trim();
+            const selected = questionBlock.querySelector('input[type="radio"]:checked');
+
+            quizData.push({
+                question: question,
+                selectedAnswer: selected ? selected.value : null
+            });
+        });
+
+        const incomplete = quizData.some(q => q.selectedAnswer === null);
+        if (incomplete) {
+            alert("Veuillez répondre à toutes les questions !");
+            return;
+        }
+
+        const userFormattedAnswer = quizData
+            .map(q => `Question : ${q.question}\nMa réponse : ${q.selectedAnswer}`)
+            .join('\n\n');
+
+        sendMessageToAI(
+            `Voici mes réponses au quiz :\n\n${userFormattedAnswer}\n\nCorrige-les et donne-moi un feedback sur chaque réponse.`,
+            'chat'
+        );
+
+        form.querySelectorAll('input, button').forEach(el => el.disabled = true);
+    }
+});
+
+// Send message to AI
+// Envoi d’un message à l’IA
+async function sendMessageToAI(message, mode = currentMode) {
+    let loadingElement;
+
+    try {
+        // Affiche un message de chargement
+        loadingElement = document.createElement('div');
+        loadingElement.className = 'message ai loading';
+        loadingElement.innerHTML = `
+            <div class="message-avatar" style="background-color: #3a3734;">
+                <i class="fas fa-${aiAvatar}"></i>
+            </div>
+            <div class="message-content" style="background-color: #3a3734;">
+                <div class="message-header">
+                    <span class="message-sender">${aiName}</span>
+                    <span class="message-time">${formatTime()}</span>
+                </div>
+                <div class="message-text">
+                    <button class="btn btn-light text-dark" type="button" disabled>
+                        <span class="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
+                        <span role="status">un instant...</span>
+                    </button>
+                </div>
+            </div>
+        `;
+        chatBox.appendChild(loadingElement);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Préparation de la requête
+        const response = await fetch(`/ask_ai/${courseId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfToken()
+            },
+            body: JSON.stringify({ message, mode })
+        });
+
+        // Supprime le message de chargement
+        if (loadingElement) chatBox.removeChild(loadingElement);
+
+        if (!response.ok) throw new Error('Erreur réseau');
+
+        const data = await response.json();
+        const aiMessage = data.response || "Je n’ai pas pu répondre pour le moment.";
+        const sourceDocuments = data.source_documents || [];
+        const quizHtml = data.quiz_html || null;
+
+        // Affiche le message de l’IA (et éventuellement le quiz HTML)
+        addMessage(aiMessage, 'ai', sourceDocuments, quizHtml);
+
+        return data;
+
+    } catch (error) {
+        console.error('Erreur :', error);
+
+        if (loadingElement && chatBox.contains(loadingElement)) {
+            chatBox.removeChild(loadingElement);
+        }
+
+        addMessage("Désolé, une erreur s'est produite. Veuillez réessayer plus tard.", 'ai');
+        return null;
+    }
+}
+
+    // Get CSRF token
+    function getCsrfToken() {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith('csrftoken=')) {
+                return cookie.substring('csrftoken='.length);
+            }
+        }
+        return "";
+    }
+
+    // Show next quiz question
+    function showNextQuizQuestion() {
+        if (!quizInProgress || currentQuestionIndex >= quizQuestions.length) {
+            // Quiz is finished
+            quizInProgress = false;
+            addMessage("<p>Le quiz est terminé! Merci d'avoir participé.</p>", 'ai');
+            return;
+        }
+        
+        const question = quizQuestions[currentQuestionIndex];
+        addMessage(`<p><strong>Question ${currentQuestionIndex + 1}/${quizQuestions.length}:</strong> ${question.question}</p>`, 'ai');
+    }
+
+    // Process user answer in quiz mode
+    async function processQuizAnswer(userAnswer) {
+        if (!quizInProgress || currentQuestionIndex >= quizQuestions.length) return;
+        
+        const currentQuestion = quizQuestions[currentQuestionIndex];
+        const correctAnswer = currentQuestion.answer;
+        
+        // Send the answer to the server for evaluation
+        const responseData = await sendMessageToAI(`QUIZ_ANSWER: ${userAnswer}`, 'quiz_answer');
+        
+        // Move to the next question
+        currentQuestionIndex++;
+        
+        // Show next question after a short delay
+        if (currentQuestionIndex < quizQuestions.length) {
+            setTimeout(() => {
+                showNextQuizQuestion();
+            }, 2000);
+        } else {
+            quizInProgress = false;
+        }
+    }
+
+    // Start explanation mode
+    function startExplanationMode(topic) {
+        explanationInProgress = true;
+        sendMessageToAI(`EXPLANATION: ${topic}`, 'explanation');
+    }
+
+    // Event listeners
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const message = userInput.value.trim();
+        if (!message) return;
+        
+        // Add user message to chat
+        addMessage(`<p>${message}</p>`, 'user');
+        
+        // Clear input field
+        userInput.value = '';
+        
+        // Process message based on current mode
+        if (quizInProgress) {
+            processQuizAnswer(message);
+        } else if (explanationInProgress) {
+            explanationInProgress = false;
+            sendMessageToAI(message);
+        } else {
+            sendMessageToAI(message);
+        }
+    });
+
+    // Voice input button
+    voiceInputBtn.addEventListener('click', function() {
+        if (recognition) {
+            // Start speech recognition
+            recognition.start();
+            voiceFeedback.classList.add('active');
+            voiceInputBtn.style.display = 'none';
+        }
+    });
+
+    // Stop voice input button
+    stopVoiceBtn.addEventListener('click', function() {
+        if (recognition) {
+            recognition.stop();
+            voiceFeedback.classList.remove('active');
+            voiceInputBtn.style.display = 'flex';
+        }
+    });
+
+    // Toggle sidebar on mobile
+    sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('active');
+    });
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(e) {
+        if (window.innerWidth <= 992 && sidebar.classList.contains('active')) {
+            if (!sidebar.contains(e.target) && e.target !== sidebarToggle) {
+                sidebar.classList.remove('active');
+            }
+        }
+    });
+
+    // Mode buttons
+    modeButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            modeButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Update current mode
+            const newMode = this.id.replace('-mode', '');
+            currentMode = newMode;
+            
+            // Update mode indicator
+            let modeIcon, modeName;
+            switch (newMode) {
+                case 'chat':
+                    modeIcon = 'comments';
+                    modeName = 'Discussion';
+                    break;
+                case 'quiz':
+                    modeIcon = 'question-circle';
+                    modeName = 'Quiz / Révision';
+                    // Start quiz mode
+                    if (!quizInProgress) {
+                        sendMessageToAI('START_QUIZ', 'quiz');
+                    }
+                    break;
+                case 'explanation':
+                    modeIcon = 'book-open';
+                    modeName = 'Explication';
+                    // Prompt user for explanation topic
+                    addMessage("<p>Quel concept aimeriez-vous que j'explique ou approfondisse?</p>", 'ai');
+                    explanationInProgress = true;
+                    break;
+            }
+            
+            currentModeDisplay.innerHTML = `<i class="fas fa-${modeIcon}"></i> Mode ${modeName}`;
+        });
+    });
+
+    // AI Name input
+    aiNameInput.addEventListener('change', function() {
+        aiName = this.value || 'ChefAI';
+    });
+
+    // Avatar options
+    avatarOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            // Remove active class from all options
+            avatarOptions.forEach(opt => opt.classList.remove('active'));
+            
+            // Add active class to clicked option
+            this.classList.add('active');
+            
+            // Update AI avatar
+            aiAvatar = this.getAttribute('data-avatar');
+        });
+    });
+
+    // Voice output toggle
+    voiceOutputToggle.addEventListener('change', function() {
+        useVoiceOutput = this.checked;
+        
+        if (useVoiceOutput && !speechSynthesis) {
+            alert("La synthèse vocale n'est pas prise en charge par votre navigateur.");
+            this.checked = false;
+            useVoiceOutput = false;
+        }
+    });
+
+    // Voice input toggle
+    voiceInputToggle.addEventListener('change', function() {
+        useVoiceInput = this.checked;
+        
+        if (useVoiceInput) {
+            if (!recognition) {
+                initSpeechRecognition();
+            }
+            
+            if (!recognition) {
+                alert("La reconnaissance vocale n'est pas prise en charge par votre navigateur.");
+                this.checked = false;
+                useVoiceInput = false;
+            } else {
+                voiceInputBtn.style.display = 'flex';
+            }
+        } else {
+            voiceInputBtn.style.display = 'none';
+        }
+    });
+
+    // Enter key in user input
+    userInput.addEventListener('keypress', function(e) {
+        console.log('Key pressed:', e.key);
+        if (e.key === 'Enter') {
+           
+            // chatForm.dispatchEvent(new Event('submit'));
+             // Event listeners
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const message = userInput.value.trim();
+        if (!message) return;
+        
+        // Add user message to chat
+        addMessage(`<p>${message}</p>`, 'user');
+        
+        // Clear input field
+        userInput.value = '';
+        
+        // Process message based on current mode
+        if (quizInProgress) {
+            processQuizAnswer(message);
+        } else if (explanationInProgress) {
+            explanationInProgress = false;
+            sendMessageToAI(message);
+        } else {
+            sendMessageToAI(message);
+        }
+    });
+
+        }
+    });
+
+    // Initialize
+    initSpeechSynthesis();
+    
+    // Welcome message is already in HTML
+});
+  </script>
+  
+</body>
+</html>

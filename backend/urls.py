@@ -24,6 +24,7 @@ urlpatterns = [
     path('profile/update/', update_user_profile, name='update_user_profile'),
     path('progress/', progress, name='progress'),
     path('graph/', dash, name='dash'),
+   
     
     
     #path('api/register/', register_user, name='register_user'),

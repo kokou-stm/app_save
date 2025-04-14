@@ -487,6 +487,7 @@ def update_quiz(request, quiz_id=None):
     return render(request, 'quiz_form.html', {'quiz': quiz})
 
 
+
 def generate_quiz(path_quiz):
    return
 
@@ -499,6 +500,10 @@ def upload_file(request):
     else:
         form = CourseForm()
     return render(request, 'upload_file.html', {'form': form})
+
+
+def prof_dash(request):
+    return render(request, 'prof_dash.html')
 
 @login_required
 def listecours(request):
@@ -1287,23 +1292,35 @@ def manage_user_role(sender, instance, created, **kwargs):
 
 import shutil
 
+
+
 @csrf_exempt
 def ask_ia(request, course_id=None):
     cours = Cours.objects.get(id=course_id)
     print('Chemin: ', cours.file.url)
+    print('body: ', request.body)
 
     if request.method == 'POST':
         print("Ok")
         data = json.loads(request.body)
         user_message = data.get('message', '')
-        
+        print('La question: ', user_message)
         path = cours.file.url
-        
-        # Appel à la fonction pour obtenir la réponse de l'IA
+
+        # CAS 1 : Démarrer le quiz
+        if user_message.strip().upper() == "START_QUIZ":
+            quiz_html = generate_quiz_from_course(cours)
+            return JsonResponse({
+                'response': "Voici un petit quiz basé sur le cours. Bonne chance !",
+                'quiz_html': quiz_html,
+                'source_documents': []
+            })
+
+
+        # CAS 2 : Requête normale à l'IA
         ia_response = load_db_qa(f"{course_id}", embeddings, user_message)
         print("ia: ", ia_response)
-        
-        # Extraire les documents sources
+
         source_documents = []
         for doc in ia_response.get("source_documents", []):
             doc_info = {
@@ -1312,28 +1329,83 @@ def ask_ia(request, course_id=None):
                 "page_content": doc.page_content[:500] + "..."
             }
             source_documents.append(doc_info)
-        
-        # Renvoyer la réponse
+
         return JsonResponse({
             'response': ia_response["answer"],
             'source_documents': source_documents
         })
-    
-    # Supprimer les fichiers temporaires à la fin de la session
+
+    # Nettoyage des fichiers temporaires
     folder_path = os.path.join(settings.MEDIA_ROOT, f"{course_id}")
     temp_file_path_faiss = os.path.join(folder_path, "index.faiss")
     temp_file_path_pickle = os.path.join(folder_path, "index.pkl")
 
-    # Supprimer les fichiers après la fin de la session ou lorsque l'utilisateur quitte
     if os.path.exists(temp_file_path_faiss):
         os.remove(temp_file_path_faiss)
-        print(f"Fichier local temporaire {temp_file_path_faiss} supprimé.")
+        print(f"Fichier temporaire {temp_file_path_faiss} supprimé.")
 
     if os.path.exists(temp_file_path_pickle):
         os.remove(temp_file_path_pickle)
-        print(f"Fichier local temporaire {temp_file_path_pickle} supprimé.")
-    
+        print(f"Fichier temporaire {temp_file_path_pickle} supprimé.")
+
     return render(request, "chat.html", {"course_id": course_id, "cours": cours})
+
+
+import json, ast
+
+import re
+import json
+
+def generate_quiz_from_course(cours, num_questions=3):
+    import time
+
+    form_id = f"quiz-form-{int(time.time())}"
+    prompt = f"""
+    Génère un quiz de {num_questions} questions sur ce cours.
+    Formate la réponse strictement en JSON comme dans cet exemple :
+    [
+        {{
+            "question": "Quel est le rôle des protéines dans l'alimentation ?",
+            "options": ["Fournir de l'énergie", "Aider à la croissance", "Réguler le métabolisme", "Autre"],
+            "answer": 1
+        }}
+    ]
+    Pas de texte en dehors du JSON.
+    """
+
+    try:
+        # Appel à l'IA pour obtenir une réponse
+        ia_response = load_db_qa(str(cours.id), embeddings, prompt)
+        raw_answer = ia_response.get("answer", "")
+
+        # Extraction de JSON strictement valide
+        json_like = raw_answer[raw_answer.find("["):raw_answer.rfind("]") + 1]
+
+        # Validation JSON sans manipulation complexe
+        quiz = json.loads(json_like)
+
+        # Génération du HTML pour affichage
+        quiz_html = '<form class="quiz-form" id="{form_id}">'
+        for idx, q in enumerate(quiz):
+            quiz_html += f'<div class="quiz-question"><p><strong>Q{idx+1}: {q["question"]}</strong></p>'
+            for opt_idx, option in enumerate(q["options"]):
+                quiz_html += f'''
+                    <label>
+                        <input type="radio" name="q{idx}" value="{opt_idx}">
+                        {option}
+                    </label><br>
+                '''
+            quiz_html += '</div><br>'
+        quiz_html += '<div style="text-align: right;"><button type="submit" class="submit-quiz-btn btn btn-primary">Soumettre</button></div></form>'
+
+        return quiz_html
+
+    except json.JSONDecodeError:
+        print("Erreur : Problème de format JSON.")
+        return "<p>Erreur : Le format JSON est invalide. Veuillez réessayer.</p>"
+    except Exception as e:
+        print("Erreur lors de la génération du quiz :", str(e))
+        return "<p>Erreur lors de la génération du quiz. Veuillez réessayer.</p>"
 
 
 

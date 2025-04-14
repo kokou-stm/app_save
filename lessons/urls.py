@@ -34,6 +34,7 @@ urlpatterns = [
     
     path('popupquiz/<str:add_val>/', views.popupquiz, name='popupquiz'),
     path('search/', views.search_courses, name='search_courses'),
+     path('prof_dash/', views.prof_dash, name='prof_dash'),
       
 ] 
 urlpatterns+= [re_path(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
