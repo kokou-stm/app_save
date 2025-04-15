@@ -1437,7 +1437,7 @@ def chat(document_text, question,cours):
         f"{document_text}\n\n"
         f"L'étudiant pose la question suivante : {question}\n\n"
         f"Fournissez une réponse résumée, pratique et facile à comprendre, comme si vous étiez un instructeur en cuisine. "
-        f"Répondez en français."
+        f"Répondez dans la langue dans laquelle la question est posée."
     )
 
     # Appel à l'API GPT
