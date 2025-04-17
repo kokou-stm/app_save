@@ -110,6 +110,7 @@ DATABASES = {
         'PORT': 5432,  # Le port, par défaut 5432 pour PostgreSQL
         "OPTIONS": {
            'sslmode': 'require',
+           
         }
     }
 }
