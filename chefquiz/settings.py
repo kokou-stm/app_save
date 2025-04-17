@@ -91,19 +91,19 @@ SIMPLE_JWT = {
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
-"""
+
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',  # Nom de la base de données
+        'NAME': 'postgresql',  # Nom de la base de données
         'USER': 'chefquizdb',  # Nom d'utilisateur de votre base de données
         'PASSWORD': "Validation1@1221",  # Mot de passe (utilisez l'environnement pour plus de sécurité)
         'HOST': "chefquizdb.postgres.database.azure.com",  # L'hôte de la base de données
@@ -114,7 +114,7 @@ DATABASES = {
         }
     }
 }
-"""
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
