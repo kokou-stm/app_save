@@ -85,10 +85,13 @@ def index(request):
     percents_etud = {}
     
     list_etu = Etudiant.objects.all()
-    for etud in list_etu: 
-        total_score = sum(score['score'] for score in etud.scores)
-        progress_etud = round((total_score / max_score) * 100, 1) if max_score > 0 else 0
-        percents_etud[f"{etud.username.first_name} {etud.username.last_name}"]= progress_etud
+    try:
+        for etud in list_etu: 
+            total_score = sum(score['score'] for score in etud.scores)
+            progress_etud = round((total_score / max_score) * 100, 1) if max_score > 0 else 0
+            percents_etud[f"{etud.username.first_name} {etud.username.last_name}"]= progress_etud
+    except:
+        pass
     percents_etud = dict(sorted(percents_etud.items(), key=lambda item: item[1], reverse=True))
 
     print("Percent",percents_etud)
