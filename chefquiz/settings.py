@@ -103,7 +103,7 @@ SIMPLE_JWT = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgresql',  # Nom de la base de données
+        'NAME': 'postgres',  # Nom de la base de données
         'USER': 'chefquizdb',  # Nom d'utilisateur de votre base de données
         'PASSWORD': "Validation1@1221",  # Mot de passe (utilisez l'environnement pour plus de sécurité)
         'HOST': "chefquizdb.postgres.database.azure.com",  # L'hôte de la base de données
