@@ -394,6 +394,14 @@ def upload_cours(request):
     return render(request, 'upload_cours.html')
 
 
+
+def delete_course(request, course_id):
+    course = get_object_or_404(Cours, id=course_id)
+    course.delete()
+    messages.info(request, f"Cours {course.title} a été supprimé avec succès.")
+    return JsonResponse({'message': 'Cours supprimé avec succès'})
+
+
 def quiz(request, course_id=None):
     courses = Cours.objects.all()
     if request.method == 'POST':

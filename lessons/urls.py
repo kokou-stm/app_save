@@ -32,6 +32,7 @@ urlpatterns = [
     path('graph/', views.dash, name='dash_web'),
     path('graph/<int:id>/', views.dash_add, name='dash_add'),
     
+    path('delete_course/<int:course_id>/', views.delete_course, name='delete_course'),
     path('popupquiz/<str:add_val>/', views.popupquiz, name='popupquiz'),
     path('search/', views.search_courses, name='search_courses'),
      path('prof_dash/', views.prof_dash, name='prof_dash'),

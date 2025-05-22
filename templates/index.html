@@ -91,6 +91,9 @@
                      <p><strong>Enseignant : </strong> {{cour.professeur}}</p>
                      <div class="card-footer mt-3">
                        <a href="{% url 'course_details' cour.id %}" class="btn btn-outline-light redressed">View Details</a>
+                         {% if is_staff %}
+                       <a href="#" class=" mx-2 btn btn-outline-light redressed delete-course-btn" data-course-id="{{cour.id}}">Delete</a>
+                       {% endif %}
                      </div>
                    </div>
                  </div>
@@ -99,6 +102,10 @@
           </div>
       </div>
   </div>
+  
+
+
+
 </section>
 
   <section class="upcoming-meetings " id="meetings">
@@ -729,6 +736,30 @@
   initOwlCarousel();
 });
   </script>
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".delete-course-btn").forEach(button => {
+      button.addEventListener("click", function () {
+        let courseId = this.getAttribute("data-course-id");
+        
+        fetch(`/delete_course/${courseId}/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": "{{ csrf_token }}", 
+            "Content-Type": "application/json",
+          },
+        })
+        .then(response => response.json())
+        .then(data => {
+          alert(data.message);
+          location.reload(); // Rafraîchir la page après suppression
+        })
+        .catch(error => console.error("Erreur :", error));
+      });
+    });
+  });
+</script>
+
 
 </body>
   {% endblock content %}
