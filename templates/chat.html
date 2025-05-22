@@ -1,4 +1,8 @@
 
+
+
+
+
 {% load static %}
 <!DOCTYPE html>
 
@@ -638,6 +642,16 @@ font-family: 'Playfair Display', serif;
   }
 }
  </style>
+ <style>
+    @import url("https://fonts.googleapis.com/css2?family=Redressed&family=Merriweather:wght@300;400;700&display=swap");
+    .redressed {
+        font-family: "Redressed", serif;
+    }
+    .merriweather {
+        font-family: "Merriweather", serif;
+    }
+</style>
+
 </head>
 <body>
   <div class="main-container">
@@ -756,6 +770,14 @@ font-family: 'Playfair Display', serif;
                   </button>
                 </div>
               </form>
+              <div>
+                <div class="d-flex justify-content-end " >
+                    <a class="btn btn-primary redressed text-light"    style="margin-top: 10px; display: none; text-decoration: none; " id="new-quiz-btn" >
+                  New Quiz
+                    </a>
+                </div>
+               
+              </div>
               <div id="voice-feedback" class="voice-feedback">
                 <div class="voice-indicator">
                   <div class="voice-wave"></div>
@@ -1207,10 +1229,16 @@ async function sendMessageToAI(message, mode = currentMode) {
                 case 'chat':
                     modeIcon = 'comments';
                     modeName = 'Discussion';
+                    document.getElementById('chat-form').style.display = 'block';
+                     document.getElementById('new-quiz-btn').style.display = 'none';
                     break;
                 case 'quiz':
                     modeIcon = 'question-circle';
                     modeName = 'Quiz / Révision';
+                    console.log(document.getElementById('chat-form'))
+                    document.getElementById('chat-form').style.display = 'none';
+                    document.getElementById('new-quiz-btn').style.display = 'block';
+                    
                     // Start quiz mode
                     if (!quizInProgress) {
                         sendMessageToAI('START_QUIZ', 'quiz');
@@ -1219,6 +1247,8 @@ async function sendMessageToAI(message, mode = currentMode) {
                 case 'explanation':
                     modeIcon = 'book-open';
                     modeName = 'Explication';
+                    document.getElementById('chat-input-container').style.display = 'block';
+                     document.getElementById('new-quiz-btn').style.display = 'none';
                     // Prompt user for explanation topic
                     addMessage("<p>Quel concept aimeriez-vous que j'explique ou approfondisse?</p>", 'ai');
                     explanationInProgress = true;
@@ -1233,7 +1263,14 @@ async function sendMessageToAI(message, mode = currentMode) {
     aiNameInput.addEventListener('change', function() {
         aiName = this.value || 'ChefAI';
     });
-
+    
+    document.getElementById('new-quiz-btn').addEventListener('click', function() {
+        // Start a new quiz
+        quizInProgress = true;
+        currentQuestionIndex = 0;
+        quizQuestions = []; // Reset questions
+        sendMessageToAI('START_QUIZ', 'quiz');
+    });
     // Avatar options
     avatarOptions.forEach(option => {
         option.addEventListener('click', function() {

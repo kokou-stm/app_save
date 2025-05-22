@@ -385,7 +385,7 @@ def upload_cours(request):
         
         save_db(cours_path, folder_path, embeddings, course_id=f"{course.id}")
         #process_message_with_rag(cours)
-        messages.info(request, f"Cours {title} a été bien ajouté.")
+        messages.info(request, f"{title} a été bien ajouté.")
         redirect_url = reverse('quiz_creator', args=[course.id])
         return JsonResponse({'redirect_url': redirect_url})
         
@@ -398,8 +398,8 @@ def upload_cours(request):
 def delete_course(request, course_id):
     course = get_object_or_404(Cours, id=course_id)
     course.delete()
-    messages.info(request, f"Cours {course.title} a été supprimé avec succès.")
-    return JsonResponse({'message': 'Cours supprimé avec succès'})
+    messages.info(request, f"{course.title} a été supprimé .")
+    return JsonResponse({'message': 'Cours supprimé'})
 
 
 def quiz(request, course_id=None):
@@ -1327,7 +1327,7 @@ def ask_ia(request, course_id=None):
         if user_message.strip().upper() == "START_QUIZ":
             quiz_html = generate_quiz_from_course(cours)
             return JsonResponse({
-                'response': "Voici un petit quiz basé sur le cours. Bonne chance !",
+                'response': "Contenu du Quiz: ",
                 'quiz_html': quiz_html,
                 'source_documents': []
             })
@@ -1378,7 +1378,7 @@ def generate_quiz_from_course(cours, num_questions=3):
 
     form_id = f"quiz-form-{int(time.time())}"
     prompt = f"""
-    Génère un quiz de {num_questions} questions sur ce cours.
+    Génère un quiz de {num_questions} questions au minimum  sur ce cours.
     Formate la réponse strictement en JSON comme dans cet exemple :
     [
         {{
