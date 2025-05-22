@@ -1247,7 +1247,7 @@ async function sendMessageToAI(message, mode = currentMode) {
                 case 'explanation':
                     modeIcon = 'book-open';
                     modeName = 'Explication';
-                    document.getElementById('chat-input-container').style.display = 'block';
+                    document.getElementById('chat-form').style.display = 'block';
                      document.getElementById('new-quiz-btn').style.display = 'none';
                     // Prompt user for explanation topic
                     addMessage("<p>Quel concept aimeriez-vous que j'explique ou approfondisse?</p>", 'ai');
