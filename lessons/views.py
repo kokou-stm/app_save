@@ -75,7 +75,8 @@ llm_azure = AzureChatOpenAI(
 
 @login_required
 def index(request):
-    
+    etudiants = Etudiant.objects.all()
+    print("Etudiants: ", etudiants)
     progress_percentage=0
     cours = Cours.objects.all()
     max_score = QuestionAnswers.objects.aggregate(total=Sum('score'))['total']
@@ -435,7 +436,11 @@ def quiz(request, course_id=None):
         quiz.max_score = 10*int(len(data.items()))
         quiz.save()
         etudiants = Etudiant.objects.all()
+        print("Etudiants: ", etudiants)
         for etudiant in etudiants:
+            if etudiant.scores is None:
+                etudiant.scores = []
+            print(etudiant.scores,10*int(len(data.items())) )
             etudiant.scores.append({
                 'quiz_id': quiz.id,
                 'score': 0,
@@ -1358,9 +1363,10 @@ import json, ast
 
 import re
 import json
+import time
+
 
 def generate_quiz_from_course(cours, num_questions=3):
-    import time
 
     form_id = f"quiz-form-{int(time.time())}"
     prompt = f"""

@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')# 'django-insecure-3&f9adfe$a(6low^lki1ytj-xk9%u*p$+)d@*ieytn-@dk73*n'
 
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# SECURITY WARNING: don't run with dan j'aimerais que ebug turned on in production!
 DEBUG = False
 
 ALLOWED_HOSTS = ["f658-46-193-67-154.ngrok-free.app","voicetovoice.fr","6df5-46-193-67-154.ngrok-free.app","4e74-193-50-192-71.ngrok-free.app","localhost", "127.0.0.1", "chefquizapp.e8hsdyh2c8h6efa5.eastus.azurecontainer.io", "aivoicedubber.com"]#cae4-193-50-192-71.ngrok-free.app", 
