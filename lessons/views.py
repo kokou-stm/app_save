@@ -428,7 +428,9 @@ def quiz(request, course_id=None):
         data = json.loads(data)
         '''
         data = chat_with_openai(number, difficulty, f"{course_id}")
+        print("==="*4)
         data = json.loads(data)
+        print("===="*4)
         
 
         for key, value in data.items():
@@ -1931,8 +1933,9 @@ def chat_with_openai(number, difficulty, path):
                 api_version="2024-10-21",
                 azure_endpoint=AZURE_CHAT_ENDPOINT
             )
-    print('path: ', path)
+    print('path: ', path, "=="*4)
     context= relevant_docs(path)
+    print("Context: ", context)
     
     """Communicate with Azure OpenAI to generate questions and answers."""
     
@@ -1976,20 +1979,21 @@ from azure.storage.blob import BlobServiceClient
 import requests
 
 def download_file_from_url(url, local_path):
-    try:
-        # Télécharger le fichier depuis l'URL
-        response = requests.get(url)
-        response.raise_for_status()  # Vérifie si la requête a échoué
+    #try:
+    # Télécharger le fichier depuis l'URL
+    response = requests.get(url)
+    response.raise_for_status()  # Vérifie si la requête a échoué
 
-        # Sauvegarder le contenu dans un fichier local
-        with open(local_path, 'wb') as file:
-            file.write(response.content)
-        print(f"Fichier téléchargé depuis {url} vers {local_path}")
-    except requests.exceptions.RequestException as e:
-        print(f"Erreur lors du téléchargement du fichier : {str(e)}")
+    # Sauvegarder le contenu dans un fichier local
+    with open(local_path, 'wb') as file:
+        file.write(response.content)
+    print(f"Fichier téléchargé depuis {url} vers {local_path}")
+    # except requests.exceptions.RequestException as e:
+    #     print(f"Erreur lors du téléchargement du fichier : {str(e)}")
 
 
 def relevant_docs(path):
+    print("__"*10)
     llm_azure = AzureChatOpenAI(
         openai_api_version="2024-07-01-preview",
         deployment_name="gpt-35-turbo-chefquiz",
@@ -2007,13 +2011,14 @@ def relevant_docs(path):
     temp_file_path_faiss = os.path.join(folder_path, "index.faiss")
     temp_file_path_pickle = os.path.join(folder_path, "index.pkl")
 
+    print(folder_path, )
     # Télécharger les fichiers depuis Azure Blob Storage
     download_file_from_url(faiss_url, temp_file_path_faiss)
     download_file_from_url(pickle_url, temp_file_path_pickle)
-
+    print("=="*10, "downlad")
     # Charger l'index FAISS localement depuis le fichier téléchargé
     vectordb = FAISS.load_local(folder_path, embeddings, allow_dangerous_deserialization=True)
-
+    
     # Supprimer les fichiers locaux temporaires après utilisation
     if os.path.exists(temp_file_path_faiss):
         os.remove(temp_file_path_faiss)
@@ -2029,7 +2034,7 @@ def relevant_docs(path):
         retriever=vectordb.as_retriever(),
         return_source_documents=True,
     )
-
+    print("="*4, qa_chain, "="*4)
     result = qa_chain.invoke({
         "query": "Donne moi les parties les plus pertinentes de ce document un peu difficiles à comprendre",
         "search_kwargs": {"k": 8}
