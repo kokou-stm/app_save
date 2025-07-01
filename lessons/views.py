@@ -402,69 +402,92 @@ def delete_course(request, course_id):
     return JsonResponse({'message': 'Cours supprimé'})
 
 
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+import traceback
+
+@csrf_exempt
 def quiz(request, course_id=None):
-    courses = Cours.objects.all()
-    if request.method == 'POST':
+    
+    try:
+        courses = Cours.objects.all()
+
+        if request.method != 'POST':
+            if course_id:
+                courses = Cours.objects.filter(id=course_id)
+
+                return render(request, "quiz.html", {'courses': courses, 'is_staff': request.user.is_staff})
+
+        # Récupération des données du formulaire
         quiz_title = request.POST.get('quiz_title')
         quiz_description = request.POST.get('quiz_description')
-        course_id = request.POST.get('course_id')
+        course_id = request.POST.get('course_id') or course_id
         number = request.POST.get('number')
-        difficulty = request.POST.get('tone')
-        course = Cours.objects.get(id=course_id)
-       
+        difficulty = request.POST.get('tone')  # tone = difficulté
+
+        # Vérification des champs requis
+        if not all([quiz_title, quiz_description, course_id, number, difficulty]):
+            return JsonResponse({'error': 'Champs manquants.'}, status=400)
+
+        # Récupération du cours
+        course = get_object_or_404(Cours, id=course_id)
+
+        # Création ou récupération du quiz
         quiz, created = Quiz.objects.get_or_create(
             quiz_title=quiz_title,
             quiz_description=quiz_description,
-            course=course, 
-            
+            course=course
         )
 
-        # Générer le quiz (logique existante)
-        cours = Cours.objects.get(id=course.id)
-        path = cours.file.url
-        '''text = parse_file(path)
-        grade = 5
-        data = chat_with_openai(text[:1000], number, grade, tone, response_json)
-        data = json.loads(data)
-        '''
-        data = chat_with_openai(number, difficulty, f"{course_id}")
-        print("==="*4)
-        data = json.loads(data)
-        print("===="*4)
+        # Appel à la génération du quiz (via IA)
+        raw_response = chat_with_openai(number, difficulty, str(course_id))
+        data = raw_response
+        # try:
+        #     data = json.loads(raw_response)
+        # except json.JSONDecodeError:
+        #     return JsonResponse({'error': 'Réponse JSON invalide du modèle IA.', 'raw': raw_response}, status=500)
         
-
+        print("==", "save begin", "==")
+        # Création des questions
         for key, value in data.items():
             QuestionAnswers.objects.create(
                 quiz=quiz,
-                question_text=value['mcq'],
-                numero=int(value["no"]),
-                options=value["options"],
-                great_answer=value['correct'],
+                question_text=value.get('mcq', ''),
+                numero=int(value.get("no", 0)),
+                options=value.get("options", []),
+                great_answer=value.get('correct', ''),
                 required_time=60,
                 score=10,
             )
-        quiz.max_score = 10*int(len(data.items()))
+        print("==", "save begin1", "==")
+        quiz.max_score = 10 * len(data)
         quiz.save()
+        print("==", "save begin2", "==")
+
+        # Mise à jour des scores des étudiants
         etudiants = Etudiant.objects.all()
-        print("Etudiants: ", etudiants)
+        print("==", "etudiants", "==")
         for etudiant in etudiants:
             if etudiant.scores is None:
                 etudiant.scores = []
-            print(etudiant.scores,10*int(len(data.items())) )
             etudiant.scores.append({
                 'quiz_id': quiz.id,
                 'score': 0,
-                'max_score': 10*int(len(data.items())),
+                'max_score': quiz.max_score,
             })
-        # Retourne l'URL de redirection
-        
+            etudiant.save()
+
+        # Redirection vers les détails du quiz
         redirect_url = reverse('quiz_details', args=[quiz.id])
         return JsonResponse({'redirect_url': redirect_url})
 
-    if course_id:
-        courses = Cours.objects.filter(id=course_id)
+    except Exception as e:
+        traceback_str = traceback.format_exc()
+        return JsonResponse({'error': str(e), 'trace': traceback_str}, status=500)
 
-    return render(request, "quiz.html", {'courses': courses, 'is_staff': request.user.is_staff})
+    
 
 
 def update_quiz(request, quiz_id=None):
@@ -1855,43 +1878,41 @@ def save_db_azure(doc_path, folder_path):
     return 
 
 
-
 RESPONSE_JSON = {
     "1": {
         "no": "1",
-        "mcq": "multiple choice question",
+        "mcq": "Quelle est la capitale de la France ?",
         "options": {
-            "a": "choice here",
-            "b": "choice here",
-            "c": "choice here",
-            "d": "choice here",
+            "a": "Paris",
+            "b": "Lyon",
+            "c": "Marseille",
+            "d": "Toulouse"
         },
-        "correct": "correct answer",
+        "correct": "a"
     },
     "2": {
         "no": "2",
-        "mcq": "multiple choice question",
+        "mcq": "Quel est le symbole chimique de l'eau ?",
         "options": {
-            "a": "choice here",
-            "b": "choice here",
-            "c": "choice here",
-            "d": "choice here",
+            "a": "H2",
+            "b": "O2",
+            "c": "CO2",
+            "d": "H2O"
         },
-        "correct": "correct answer",
+        "correct": "d"
     },
     "3": {
         "no": "3",
-        "mcq": "multiple choice question",
+        "mcq": "Qui a écrit Les Misérables ?",
         "options": {
-            "a": "choice here",
-            "b": "choice here",
-            "c": "choice here",
-            "d": "choice here",
+            "a": "Victor Hugo",
+            "b": "Émile Zola",
+            "c": "Gustave Flaubert",
+            "d": "Albert Camus"
         },
-        "correct": "correct answer",
-    },
+        "correct": "a"
+    }
 }
-
 
 # def relevant_docs(path):
     
@@ -1924,47 +1945,81 @@ RESPONSE_JSON = {
 
 
 
+import json
+import re
+from openai import AzureOpenAI
+
+def extract_json(text):
+    """
+    Extrait un objet JSON valide depuis un texte potentiellement bruité.
+    """
+    try:
+        # Essai direct
+        print("$$", "debut transformation")
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+
+    # Recherche d'un bloc JSON avec des accolades
+    match = re.search(r"\{[\s\S]+\}", text)
+    if match:
+        try:
+            return json.loads(match.group(0))
+        except json.JSONDecodeError:
+            pass
+
+    # Si rien ne marche
+    print("Impossible d'extraire du JSON valide depuis le texte renvoyé.")
+    raise ValueError("Impossible d'extraire du JSON valide depuis le texte renvoyé.")
 
 def chat_with_openai(number, difficulty, path):
-    AZURE_CHAT_ENDPOINT="https://realtimekokou.openai.azure.com/openai/deployments/gpt-4-0613/chat/completions?api-version=2024-10-21"
-    AZURE_CHAT_API_KEY="h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j"
+    AZURE_CHAT_ENDPOINT = "https://realtimekokou.openai.azure.com/openai/deployments/gpt-4-0613/chat/completions?api-version=2024-10-21"
+    AZURE_CHAT_API_KEY = "h5R1YOBt2Q5WU56488stKWc7GiO9nEG3Z344ITLK3mTb6uGkdlKLJQQJ99BAACYeBjFXJ3w3AAABACOGLM5j"
+
     client = AzureOpenAI(
-                api_key=AZURE_CHAT_API_KEY,
-                api_version="2024-10-21",
-                azure_endpoint=AZURE_CHAT_ENDPOINT
-            )
-    print('path: ', path, "=="*4)
-    context= relevant_docs(path)
+        api_key=AZURE_CHAT_API_KEY,
+        api_version="2024-10-21",
+        azure_endpoint=AZURE_CHAT_ENDPOINT
+    )
+
+    print('path: ', path, "==" * 4)
+    context = relevant_docs(path)
     print("Context: ", context)
-    
-    """Communicate with Azure OpenAI to generate questions and answers."""
-    
+
     prompt = f"""
     Génère un quiz de {number} questions basé sur ce texte :
-    
+
     {context}
-    
+
     Niveau de difficulté : {difficulty}.
-    Le quiz doit etre en français.
-    Le format de sortie doit être :
-    {json.dumps(RESPONSE_JSON)}
-    Assurez vous que les options soient des phrases complètes, pas que des mots.
+    Le quiz doit être en français.
+    Le format de sortie doit être exactement :
+    {json.dumps(RESPONSE_JSON, ensure_ascii=False, indent=2)}
+
+    Ne mets **rien d’autre** autour du JSON.
+    Les options doivent être des phrases complètes, pas juste des mots.
     """
-    print("Seconde step: ", "=="*5)
-    #print("intialisation: ", response)
+
+    print("Seconde step: ", "==" * 5)
 
     chat_completion = client.chat.completions.create(
-            model="gpt-4-0613",
-            messages=[
-                {"role": "system", "content": "You are an expert MCQ maker."},
-                {"role": "user", "content": prompt},
-            ]
-        )
-    print("intialisation: ")
-    response = chat_completion.choices[0].message.content
-    print("Response: ", response)
-    return response
+        model="gpt-4-0613",
+        messages=[
+            {"role": "system", "content": "Tu es un expert en création de QCM."},
+            {"role": "user", "content": prompt},
+        ]
+    )
 
+    print("Initialisation terminée.")
+    response_text = chat_completion.choices[0].message.content
+    print("Réponse OpenAI :\n", response_text)
+
+    json_data = extract_json(response_text)
+    # except ValueError as e:
+    #     print("Erreur d'extraction JSON :", e)
+    #     json_data = None
+    print("=="*10)
+    return json_data
 
 
 
